@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}404 - Página no encontrada{% endblock %}
+
+{% block content %}
+<div class="container-xxl container-p-y">
+    <div class="misc-wrapper text-center">
+        <h2 class="mb-2 mx-2">Página no encontrada :(</h2>
+        <p class="mb-4 mx-2">¡Oops! La URL solicitada no fue encontrada en el servidor</p>
+        <a href="{{ url_for('index') }}" class="btn btn-primary">Volver al inicio</a>
+        <div class="mt-4">
+            <img src="{{ url_for('static', filename='assets/img/404.png') }}" 
+                 alt="404" class="img-fluid" style="max-width: 500px;">
+        </div>
+    </div>
+</div>
+{% endblock %} 

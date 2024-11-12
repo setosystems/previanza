@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="list-header">
+        <h1>Lista de Pólizas</h1>
+        
+        <form class="search-form" method="GET" action="{{ url_for('policies.list_policies') }}">
+            <input type="text" 
+                   class="search-input" 
+                   name="policy_number" 
+                   placeholder="Número de póliza" 
+                   value="{{ request.args.get('policy_number', '') }}">
+            
+            <input type="text" 
+                   class="search-input" 
+                   name="client_name" 
+                   placeholder="Nombre del cliente" 
+                   value="{{ request.args.get('client_name', '') }}">
+            
+            <input type="text" 
+                   class="search-input" 
+                   name="product_name" 
+                   placeholder="Nombre del producto" 
+                   value="{{ request.args.get('product_name', '') }}">
+            
+            <button type="submit" class="search-button">
+                <i class="fas fa-search"></i>
+                Buscar
+            </button>
+        </form>
+
+        <div class="action-buttons">
+            {% if current_user.role != UserRole.AGENTE %}
+            <a href="{{ url_for('policies.create_policy') }}" class="btn-new">
+                <i class="fas fa-plus"></i>
+                Nueva Póliza
+            </a>
+            <a href="{{ url_for('policies.bulk_upload_policies') }}" class="btn-upload">
+                <i class="fas fa-upload"></i>
+                Carga Masiva
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>NÚMERO DE PÓLIZA</th>
+                    <th>CLIENTE</th>
+                    <th>PRODUCTO</th>
+                    <th>FECHA DE INICIO</th>
+                    <th>FECHA DE FIN</th>
+                    <th>PRIMA</th>
+                    <th>AGENTE</th>
+                    <th>ACCIONES</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for policy in policies %}
+                    <tr>
+                        <td>{{ policy.policy_number }}</td>
+                        <td>{{ policy.client.name }}</td>
+                        <td>{{ policy.product.name }}</td>
+                        <td>{{ policy.start_date.strftime('%Y-%m-%d') }}</td>
+                        <td>{{ policy.end_date.strftime('%Y-%m-%d') }}</td>
+                        <td>${{ "%.2f"|format(policy.premium) }}</td>
+                        <td>{{ policy.agent.name }}</td>
+                        <td class="action-buttons">
+                            <a href="{{ url_for('policies.policy_detail', id=policy.id) }}" 
+                               class="action-button view-button" 
+                               title="Ver detalles">
+                                <i class="fas fa-file-invoice-dollar"></i>
+                            </a>
+                            {% if current_user.role != UserRole.AGENTE %}
+                            <a href="{{ url_for('policies.edit_policy', id=policy.id) }}" 
+                               class="action-button edit-button"
+                               title="Editar póliza">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{{ url_for('policies.delete_policy', id=policy.id) }}" 
+                               class="action-button delete-button"
+                               onclick="return confirm('¿Está seguro de que desea eliminar esta póliza?')"
+                               title="Eliminar póliza">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if pagination %}
+    <div class="pagination">
+        {% if pagination.has_prev %}
+            <a href="{{ url_for('policies.list_policies', page=pagination.prev_num) }}">&laquo; Anterior</a>
+        {% endif %}
+        
+        <span>Página {{ pagination.page }} de {{ pagination.pages }}</span>
+        
+        {% if pagination.has_next %}
+            <a href="{{ url_for('policies.list_policies', page=pagination.next_num) }}">Siguiente &raquo;</a>
+        {% endif %}
+    </div>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="detail-page">
+    <h1>Detalles del Cliente</h1>
+    <h2>{{ client.name }}</h2>
+
+    <div class="client-details">
+        <div class="detail-row">
+            <strong>Email:</strong>
+            <span>{{ client.email }}</span>
+        </div>
+        <div class="detail-row">
+            <strong>Teléfono:</strong>
+            <span>{{ client.phone }}</span>
+        </div>
+        <div class="detail-row">
+            <strong>Dirección:</strong>
+            <span>{{ client.address }}</span>
+        </div>
+        <div class="detail-row">
+            <strong>Ciudad:</strong>
+            <span>{{ client.city }}</span>
+        </div>
+        <div class="detail-row">
+            <strong>Tipo de Documento:</strong>
+            <span>{{ client.document_type.value if client.document_type else 'No especificado' }}</span>
+        </div>
+        <div class="detail-row">
+            <strong>Número de Documento:</strong>
+            <span>{{ client.document_number }}</span>
+        </div>
+        <div class="detail-row">
+            <strong>Fecha de Nacimiento:</strong>
+            <span>{{ client.birthdate.strftime('%Y-%m-%d') if client.birthdate else 'No especificada' }}</span>
+        </div>
+    </div>
+
+    <h2>Pólizas Asociadas</h2>
+    {% if policies %}
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>NÚMERO DE PÓLIZA</th>
+                        <th>PRODUCTO</th>
+                        <th>FECHA DE INICIO</th>
+                        <th>FECHA DE FIN</th>
+                        <th>PRIMA</th>
+                        <th>AGENTE</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for policy in policies %}
+                        <tr>
+                            <td>{{ policy.policy_number }}</td>
+                            <td>{{ policy.product.name }}</td>
+                            <td>{{ policy.start_date.strftime('%Y-%m-%d') }}</td>
+                            <td>{{ policy.end_date.strftime('%Y-%m-%d') }}</td>
+                            <td>${{ "{:,.2f}".format(policy.premium) }}</td>
+                            <td>{{ policy.agent.username }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p>Este cliente no tiene pólizas asociadas.</p>
+    {% endif %}
+
+    <a href="{{ url_for('clients.list_clients') }}" class="btn-back">Volver a la Lista de Clientes</a>
+</div>
+{% endblock %}

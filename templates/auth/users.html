@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="list-header">
+        <h1>Gestión de Usuarios</h1>
+
+        <form class="search-form" method="GET" action="{{ url_for('auth.list_users') }}">
+            <input type="text" 
+                   class="search-input" 
+                   name="username" 
+                   placeholder="Buscar por nombre de usuario" 
+                   value="{{ request.args.get('username', '') }}">
+            
+            <input type="email" 
+                   class="search-input" 
+                   name="email" 
+                   placeholder="Buscar por email" 
+                   value="{{ request.args.get('email', '') }}">
+            
+            <button type="submit" class="search-button">
+                <i class="fas fa-search"></i>
+                Buscar
+            </button>
+        </form>
+
+        <div class="action-buttons">
+            <a href="{{ url_for('auth.register') }}" class="btn-new">
+                <i class="fas fa-user-plus"></i>
+                Crear Nuevo Usuario
+            </a>
+        </div>
+    </div>
+    
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>NOMBRE DE USUARIO</th>
+                    <th>EMAIL</th>
+                    <th>ROL</th>
+                    <th>NOMBRE COMPLETO</th>
+                    <th>TELÉFONO</th>
+                    <th>FECHA DE CONTRATACIÓN</th>
+                    <th>ACCIONES</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>{{ user.role.value }}</td>
+                        <td>{{ user.name }}</td>
+                        <td>{{ user.phone }}</td>
+                        <td>{{ user.hire_date.strftime('%Y-%m-%d') if user.hire_date else 'N/A' }}</td>
+                        <td class="action-buttons">
+                            <a href="{{ url_for('auth.edit_user', user_id=user.id) }}" 
+                               class="action-button edit-button"
+                               title="Editar usuario">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{{ url_for('auth.delete_user', user_id=user.id) }}" 
+                               class="action-button delete-button"
+                               onclick="return confirm('¿Estás seguro de que quieres eliminar este usuario?')"
+                               title="Eliminar usuario">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

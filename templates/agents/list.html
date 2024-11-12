@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="list-header">
+        <h1>Lista de Agentes</h1>
+        
+        <form class="search-form" method="GET" action="{{ url_for('agents.list_agents') }}">
+            <input type="text" 
+                   class="search-input" 
+                   name="username" 
+                   placeholder="Nombre de usuario" 
+                   value="{{ request.args.get('username', '') }}">
+            
+            <input type="email" 
+                   class="search-input" 
+                   name="email" 
+                   placeholder="Email" 
+                   value="{{ request.args.get('email', '') }}">
+            
+            <button type="submit" class="search-button">
+                <i class="fas fa-search"></i>
+                Buscar
+            </button>
+        </form>
+
+        <div class="action-buttons">
+            <a href="{{ url_for('agents.create_agent') }}" class="btn-new">
+                <i class="fas fa-plus"></i>
+                Nuevo Agente
+            </a>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>NOMBRE DE USUARIO</th>
+                    <th>EMAIL</th>
+                    <th>NOMBRE COMPLETO</th>
+                    <th>TELÉFONO</th>
+                    <th>ACCIONES</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for agent in agents %}
+                    <tr>
+                        <td>{{ agent.username }}</td>
+                        <td>{{ agent.email }}</td>
+                        <td>{{ agent.name }}</td>
+                        <td>{{ agent.phone }}</td>
+                        <td class="action-buttons">
+                            <a href="{{ url_for('agents.edit_agent', id=agent.id) }}" 
+                               class="action-button edit-button"
+                               title="Editar agente">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{{ url_for('agents.delete_agent', id=agent.id) }}" 
+                               class="action-button delete-button"
+                               onclick="return confirm('¿Está seguro de que desea eliminar este agente?')"
+                               title="Eliminar agente">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

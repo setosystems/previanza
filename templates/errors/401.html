@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>401 Unauthorized</h1>
+    <p>Lo sentimos, no tienes permiso para acceder a esta página. Por favor, inicia sesión o contacta al administrador si crees que esto es un error.</p>
+    <p><a href="{{ url_for('index') }}">Volver a la página de inicio</a></p>
+{% endblock %}

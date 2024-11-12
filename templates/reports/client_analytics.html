@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Análisis de Clientes</h1>
+    
+    <h2>Top 10 Clientes por Prima</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Cliente</th>
+                <th>Número de Pólizas</th>
+                <th>Prima Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for client in top_clients %}
+                <tr>
+                    <td>{{ client.name }}</td>
+                    <td>{{ client.policy_count }}</td>
+                    <td>${{ "{:,.2f}".format(client.total_premium) }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h2>Distribución de Clientes por Número de Pólizas</h2>
+    <canvas id="client-distribution-chart"></canvas>
+{% endblock %}
+
+{% block scripts %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Client Distribution Chart
+        new Chart(document.getElementById('client-distribution-chart'), {
+            type: 'bar',
+            data: {
+                labels: {{ top_clients|map(attribute='name')|list|tojson }},
+                datasets: [{
+                    label: 'Número de Pólizas',
+                    data: {{ top_clients|map(attribute='policy_count')|list|tojson }},
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)'
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Número de Pólizas'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Cliente'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+{% endblock %}

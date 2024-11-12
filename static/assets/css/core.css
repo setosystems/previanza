@@ -1,0 +1,1041 @@
+:root {
+    --bs-blue: #696cff;
+    --bs-primary: #696cff;
+    --bs-secondary: #8592a3;
+    --bs-success: #71dd37;
+    --bs-info: #03c3ec;
+    --bs-warning: #ffab00;
+    --bs-danger: #ff3e1d;
+    --bs-light: #fcfdfd;
+    --bs-dark: #233446;
+    --bs-gray: rgba(67, 89, 113, 0.1);
+    --bs-gray-dark: rgba(67, 89, 113, 0.8);
+    --dark-theme: #202940;
+    --dark-theme-lighter: #2c3c58;
+    --menu-item-hover: rgba(255, 255, 255, 0.1);
+    --menu-item-active: #fff;
+    --menu-text: #ffffff;
+    --menu-text-muted: #8a8f98;
+}
+
+/* Layout principal */
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+.layout-wrapper {
+    min-height: 100vh;
+    width: 100%;
+}
+
+.layout-container {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+}
+
+/* Sidebar */
+.menu-vertical {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 280px;
+    min-width: 280px;
+    max-width: 280px;
+    height: 100vh;
+    overflow-y: auto;
+    z-index: 1000;
+    background-color: var(--dark-theme);
+    margin: 1rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    height: calc(100vh - 2rem);
+}
+
+/* Contenido principal */
+.layout-page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin-left: calc(280px + 2rem);
+    width: calc(100% - (280px + 2rem));
+}
+
+.content-wrapper {
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 64px); /* Altura del header */
+}
+
+.container-xxl {
+    flex: 1 0 auto;
+    padding: 1.5rem;
+}
+
+/* Footer */
+.footer {
+    flex-shrink: 0;
+    margin-top: auto;
+    background-color: var(--footer-bg);
+    padding: 1rem 0;
+}
+
+/* Ajustes responsive */
+@media (max-width: 991.98px) {
+    .menu-vertical {
+        left: -280px;
+        margin: 0;
+        border-radius: 0;
+        height: 100vh;
+    }
+
+    .layout-menu-expanded .menu-vertical {
+        left: 0;
+    }
+
+    .layout-page {
+        margin-left: 0;
+        width: 100%;
+    }
+}
+
+/* Scrollbar personalizado para el sidebar */
+.menu-vertical::-webkit-scrollbar {
+    width: 5px;
+}
+
+.menu-vertical::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.menu-vertical::-webkit-scrollbar-thumb {
+    background: var(--dark-theme-lighter);
+    border-radius: 5px;
+}
+
+.menu-vertical::-webkit-scrollbar-thumb:hover {
+    background: var(--menu-text-muted);
+}
+
+/* Resto de los estilos existentes... */
+
+/* Estilos del menú oscuro */
+.bg-dark-theme {
+    background-color: var(--dark-theme) !important;
+    color: var(--menu-text);
+}
+
+.menu-vertical {
+    width: 280px;
+    min-width: 280px;
+    max-width: 280px;
+}
+
+.menu-inner {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.menu-item {
+    position: relative;
+}
+
+.menu-link {
+    display: flex;
+    align-items: center;
+    padding: 0.625rem 1.5rem;
+    color: var(--menu-text) !important;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.menu-link:hover {
+    background-color: var(--menu-item-hover);
+    border-radius: 0.375rem;
+    margin: 0 0.5rem;
+}
+
+.menu-icon {
+    width: 1.5rem;
+    margin-right: 0.5rem;
+    font-size: 1.15rem;
+    color: var(--menu-text-muted);
+}
+
+.menu-header {
+    padding: 1.5rem 1.5rem 0.5rem;
+    color: var(--menu-text-muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.menu-sub {
+    padding: 0;
+    margin: 0.5rem;
+    list-style: none;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 0.375rem;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out;
+}
+
+.menu-item.active > .menu-link {
+    background-color: var(--menu-item-hover);
+    border-radius: 0.375rem;
+    margin: 0 0.5rem;
+}
+
+.menu-item.active > .menu-sub {
+    max-height: 1000px;
+    padding: 0.5rem;
+}
+
+.menu-arrow {
+    transition: transform 0.3s ease;
+}
+
+.menu-item.active > .menu-link .menu-arrow {
+    transform: rotate(180deg);
+}
+
+.bullet {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background-color: var(--menu-text-muted);
+    display: inline-block;
+    margin-right: 0.5rem;
+}
+
+.user-profile {
+    padding: 1rem;
+    border-bottom: 1px solid var(--dark-theme-lighter);
+}
+
+/* Estilos para el dropdown del menú */
+.menu-toggle {
+    position: relative;
+    cursor: pointer;
+}
+
+.menu-arrow {
+    transition: transform 0.3s ease;
+}
+
+.menu-item.active > .menu-link .menu-arrow {
+    transform: rotate(180deg);
+}
+
+.menu-sub {
+    padding-left: 3.25rem;
+    list-style: none;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.menu-item.active > .menu-sub {
+    max-height: 1000px;
+}
+
+.menu-sub .menu-link {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+}
+
+.menu-bullet {
+    display: inline-flex;
+    align-items: center;
+    margin-right: 0.5rem;
+}
+
+.bullet {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background-color: var(--menu-text-muted);
+}
+
+/* Hover estados para submenús */
+.menu-sub .menu-link:hover {
+    background-color: var(--menu-item-hover);
+    border-radius: 0.375rem;
+}
+
+.menu-sub .menu-item.active > .menu-link {
+    color: var(--menu-item-active) !important;
+    background-color: var(--menu-item-hover);
+    border-radius: 0.375rem;
+}
+
+/* Estilos específicos para el dropdown de Informes */
+.menu-sub {
+    background-color: rgba(255, 255, 255, 0.05);
+    margin: 0.5rem;
+    border-radius: 0.375rem;
+    overflow: hidden;
+}
+
+.menu-sub .menu-link {
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+}
+
+.menu-sub .menu-icon {
+    font-size: 1rem;
+    width: 1.25rem;
+    margin-right: 0.5rem;
+    color: var(--menu-text-muted);
+}
+
+.menu-sub .menu-item.active .menu-icon,
+.menu-sub .menu-item:hover .menu-icon {
+    color: var(--menu-text);
+}
+
+/* Animación del dropdown */
+.menu-toggle .menu-arrow {
+    transition: transform 0.3s ease;
+}
+
+.menu-item.active > .menu-link .menu-arrow {
+    transform: rotate(-180deg);
+}
+
+/* Efecto hover mejorado */
+.menu-sub .menu-link:hover {
+    background-color: var(--menu-item-hover);
+    transform: translateX(5px);
+    transition: all 0.3s ease;
+}
+
+/* Estilo activo mejorado */
+.menu-sub .menu-item.active > .menu-link {
+    background-color: var(--bs-primary);
+    color: white !important;
+}
+
+.menu-sub .menu-item.active > .menu-link .menu-icon {
+    color: white;
+}
+
+/* Transición suave del submenu */
+.menu-sub {
+    max-height: 0;
+    transition: max-height 0.3s ease-in-out;
+}
+
+.menu-item.active > .menu-sub {
+    max-height: 500px;
+}
+
+/* Estilos específicos para el submenu de Informes */
+.menu-sub {
+    background-color: rgba(255, 255, 255, 0.05);
+    margin: 0.5rem;
+    border-radius: 0.375rem;
+    padding: 0.5rem;
+    list-style: none;
+}
+
+.menu-sub .menu-link {
+    padding: 0.625rem 1rem;
+    color: var(--menu-text) !important;
+    opacity: 0.8;
+    font-size: 0.875rem;
+    border-radius: 0.375rem;
+    margin: 0.125rem 0;
+}
+
+.menu-sub .menu-link:hover {
+    opacity: 1;
+    background-color: var(--menu-item-hover);
+    margin: 0.125rem 0;
+    transform: translateX(5px);
+}
+
+.menu-sub .menu-icon {
+    font-size: 1rem;
+    width: 1.5rem;
+    margin-right: 0.75rem;
+    color: var(--menu-text-muted);
+}
+
+.menu-item.active > .menu-link {
+    background-color: var(--bs-primary);
+    opacity: 1;
+}
+
+.menu-item.active > .menu-link .menu-icon {
+    color: var(--menu-text);
+}
+
+/* Animación del dropdown */
+.menu-toggle .menu-arrow {
+    transition: transform 0.3s ease;
+}
+
+.menu-item.active > .menu-link .menu-arrow {
+    transform: rotate(180deg);
+}
+
+/* Transición del submenu */
+.menu-sub {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out;
+}
+
+.menu-item.active > .menu-sub {
+    max-height: 500px;
+}
+
+/* Ajuste del padding para los items del submenu */
+.menu-sub .menu-item {
+    padding: 0;
+    margin: 0;
+}
+
+.menu-sub .menu-link {
+    padding-left: 1rem;
+}
+
+/* Estilos para el menú de Informes */
+.menu-toggle {
+    position: relative;
+    padding: 0.625rem 1.5rem;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    color: var(--menu-text) !important;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.menu-toggle:hover {
+    background-color: var(--menu-item-hover);
+    border-radius: 0.375rem;
+    margin: 0 0.5rem;
+}
+
+.menu-toggle .menu-icon {
+    width: 1.5rem;
+    margin-right: 0.5rem;
+    font-size: 1.15rem;
+    color: var(--menu-text-muted);
+}
+
+.menu-toggle div {
+    flex: 1;
+}
+
+.menu-arrow {
+    font-size: 0.85rem;
+    margin-left: 0.5rem;
+}
+
+/* Ajustes para el submenu */
+.menu-sub {
+    background-color: rgba(255, 255, 255, 0.05);
+    margin: 0.5rem;
+    border-radius: 0.375rem;
+    padding: 0.5rem;
+    list-style: none;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out;
+}
+
+.menu-item.active > .menu-sub {
+    max-height: 1000px;
+}
+
+.menu-sub .menu-link {
+    padding: 0.625rem 1rem;
+    margin: 0.125rem 0;
+    display: flex;
+    align-items: center;
+    color: var(--menu-text) !important;
+    opacity: 0.8;
+}
+
+.menu-sub .menu-link:hover {
+    opacity: 1;
+    background-color: var(--menu-item-hover);
+    transform: translateX(5px);
+}
+
+/* Estilo activo */
+.menu-item.active > .menu-toggle {
+    background-color: var(--menu-item-hover);
+    border-radius: 0.375rem;
+    margin: 0 0.5rem;
+}
+
+.menu-sub .menu-item.active > .menu-link {
+    background-color: var(--bs-primary);
+    color: white !important;
+    opacity: 1;
+}
+
+/* Estilos para el menú principal y submenús */
+.menu-link.menu-toggle {
+    padding: 0.625rem 1.5rem;
+    display: flex;
+    align-items: center;
+    color: var(--menu-text) !important;
+    background: transparent;
+    cursor: pointer;
+    width: 100%;
+    text-decoration: none;
+}
+
+.menu-link.menu-toggle:hover {
+    background-color: var(--menu-item-hover);
+    border-radius: 0.375rem;
+    margin: 0 0.5rem;
+}
+
+/* Estilos específicos para el ítem Informes */
+.menu-item > .menu-link.menu-toggle {
+    position: relative;
+    margin: 0.25rem 0;
+}
+
+.menu-item > .menu-link.menu-toggle .menu-arrow {
+    transition: transform 0.3s ease;
+}
+
+.menu-item.active > .menu-link.menu-toggle {
+    background-color: var(--menu-item-hover);
+    border-radius: 0.375rem;
+    margin: 0 0.5rem;
+}
+
+/* Ajustes para el submenu */
+.menu-sub {
+    padding: 0;
+    margin: 0.5rem;
+    list-style: none;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 0.375rem;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out;
+}
+
+.menu-item.active > .menu-sub {
+    max-height: 1000px;
+    padding: 0.5rem;
+}
+
+/* Estilos para los subitems */
+.menu-sub .menu-item .menu-link {
+    padding: 0.625rem 1rem;
+    margin: 0.125rem 0;
+    opacity: 0.8;
+}
+
+.menu-sub .menu-item .menu-link:hover {
+    opacity: 1;
+    background-color: var(--menu-item-hover);
+    transform: translateX(5px);
+}
+
+/* Animación del dropdown */
+.menu-item.active > .menu-link.menu-toggle .menu-arrow {
+    transform: rotate(180deg);
+}
+
+/* Estilos para el menú principal */
+.menu-link {
+    display: flex;
+    align-items: center;
+    padding: 0.625rem 1.5rem;
+    color: var(--menu-text) !important;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.menu-link:hover {
+    background-color: var(--menu-item-hover);
+    border-radius: 0.375rem;
+    margin: 0 0.5rem;
+}
+
+/* Ajustes específicos para el ítem Informes */
+.menu-item > .menu-link .menu-arrow {
+    font-size: 0.85rem;
+    transition: transform 0.3s ease;
+}
+
+.menu-item.active.open > .menu-link .menu-arrow {
+    transform: rotate(180deg);
+}
+
+/* Submenu ajustado */
+.menu-sub {
+    padding: 0;
+    margin: 0.5rem;
+    list-style: none;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 0.375rem;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out;
+}
+
+.menu-item.active.open > .menu-sub {
+    max-height: 1000px;
+    padding: 0.5rem;
+}
+
+/* Estilos para el logo */
+.app-brand {
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    flex-grow: 0;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.app-brand-logo {
+    display: flex;
+    align-items: center;
+    line-height: 1;
+}
+
+.app-brand-logo img {
+    filter: brightness(0) invert(1); /* Esto hará que el logo negro se vea blanco */
+}
+
+.app-brand-text {
+    font-size: 1.5rem;
+    letter-spacing: -0.5px;
+    margin-left: 0.75rem;
+}
+
+.app-brand-link {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+/* Estilos para el footer del menú */
+.menu-footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1rem;
+    border-top: 1px solid var(--dark-theme-lighter);
+}
+
+.menu-footer .logout-link {
+    display: flex;
+    align-items: center;
+    padding: 0.625rem 1.5rem;
+    color: var(--menu-text) !important;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.menu-footer .logout-link:hover {
+    background-color: var(--menu-item-hover);
+    border-radius: 0.375rem;
+    margin: 0 0.5rem;
+}
+
+/* Ajustar el contenido principal para que no se solape con el botón de cerrar sesión */
+.menu-inner {
+    padding-bottom: 80px; /* Altura del footer + padding extra */
+}
+
+/* Asegurar que el scrollbar funcione correctamente */
+.menu-vertical {
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+}
+
+.menu-inner {
+    flex: 1;
+    overflow-y: auto;
+}
+
+/* Estilos para el botón de colapso */
+.collapse-trigger {
+    padding: 0.5rem;
+    color: var(--menu-text-muted) !important;
+    transition: all 0.3s ease;
+    border-radius: 0.375rem;
+    margin-right: 1rem;
+}
+
+.collapse-trigger:hover {
+    background-color: var(--menu-item-hover);
+    color: var(--menu-text) !important;
+}
+
+/* Estado colapsado del sidebar */
+.layout-wrapper.collapsed .menu-vertical {
+    width: 80px;
+    min-width: 80px;
+}
+
+.layout-wrapper.collapsed .layout-page {
+    margin-left: 80px;
+    width: calc(100% - 80px);
+}
+
+.layout-wrapper.collapsed .app-brand-text,
+.layout-wrapper.collapsed .menu-link div,
+.layout-wrapper.collapsed .user-profile h6,
+.layout-wrapper.collapsed .user-profile small {
+    display: none;
+}
+
+.layout-wrapper.collapsed .menu-sub {
+    position: absolute;
+    left: 80px;
+    top: 0;
+    width: 200px;
+    background-color: var(--dark-theme);
+    margin: 0;
+    padding: 0.5rem;
+    border-radius: 0 0.375rem 0.375rem 0;
+    box-shadow: 4px 0 8px rgba(0, 0, 0, 0.2);
+}
+
+.layout-wrapper.collapsed .menu-item:hover .menu-sub {
+    max-height: 1000px;
+    display: block;
+}
+
+.layout-wrapper.collapsed .menu-footer {
+    padding: 0.5rem;
+    display: flex;
+    justify-content: center;
+}
+
+.layout-wrapper.collapsed .menu-footer .logout-link div {
+    display: none;
+}
+
+.layout-wrapper.collapsed .menu-footer .menu-icon {
+    margin: 0;
+}
+
+.layout-wrapper.collapsed .menu-link:hover {
+    margin: 0 0.25rem;
+}
+
+/* Transición suave para el colapso */
+.menu-vertical,
+.layout-page,
+.app-brand-text,
+.menu-link div {
+    transition: all 0.3s ease;
+}
+
+/* Ajustes para los íconos en modo colapsado */
+.layout-wrapper.collapsed .menu-icon {
+    margin-right: 0;
+    width: 1.75rem;
+    font-size: 1.25rem;
+    display: flex;
+    justify-content: center;
+}
+
+/* Ajustes para el logo en modo colapsado */
+.layout-wrapper.collapsed .app-brand {
+    padding: 1rem 0.5rem;
+    justify-content: center;
+}
+
+.layout-wrapper.collapsed .app-brand-logo img {
+    height: 35px;
+}
+
+/* Ajustes para el perfil de usuario en modo colapsado */
+.layout-wrapper.collapsed .user-profile {
+    padding: 0.75rem;
+}
+
+.layout-wrapper.collapsed .user-profile img {
+    width: 40px;
+    height: 40px;
+}
+
+/* Ajustes para los items del menú en modo colapsado */
+.layout-wrapper.collapsed .menu-link {
+    padding: 0.75rem;
+    justify-content: center;
+}
+
+/* Ajustes para el submenú en modo colapsado */
+.layout-wrapper.collapsed .menu-sub {
+    position: absolute;
+    left: 80px;
+    top: 0;
+    width: 200px;
+    background-color: var(--dark-theme);
+    margin: 0;
+    padding: 0.5rem;
+    border-radius: 0 0.375rem 0.375rem 0;
+    box-shadow: 4px 0 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Ajustes para el botón de cerrar sesión en modo colapsado */
+.layout-wrapper.collapsed .menu-footer {
+    padding: 0.5rem;
+    display: flex;
+    justify-content: center;
+}
+
+.layout-wrapper.collapsed .menu-footer .logout-link {
+    padding: 0.75rem;
+    justify-content: center;
+}
+
+.layout-wrapper.collapsed .menu-footer .menu-icon {
+    margin: 0;
+}
+
+/* Ajustes para el hover en modo colapsado */
+.layout-wrapper.collapsed .menu-link:hover {
+    margin: 0 0.25rem;
+}
+
+/* Ajustes para mantener espaciado vertical consistente */
+.app-brand {
+    height: 70px; /* Altura fija para el logo */
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    transition: all 0.3s ease;
+}
+
+.layout-wrapper.collapsed .app-brand {
+    justify-content: center;
+    padding: 1rem 0.5rem;
+}
+
+/* Ajustes para el perfil de usuario */
+.user-profile {
+    height: 85px; /* Altura fija para el perfil */
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid var(--dark-theme-lighter);
+    transition: all 0.3s ease;
+}
+
+.user-profile img {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 0.5rem;
+}
+
+/* Ajustes para los items del menú */
+.menu-link {
+    height: 45px; /* Altura fija para cada item */
+    padding: 0 1.5rem;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.layout-wrapper.collapsed .menu-link {
+    padding: 0;
+    justify-content: center;
+}
+
+/* Ajustes para el footer */
+.menu-footer {
+    height: 60px; /* Altura fija para el footer */
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    border-top: 1px solid var(--dark-theme-lighter);
+    transition: all 0.3s ease;
+}
+
+.layout-wrapper.collapsed .menu-footer {
+    justify-content: center;
+}
+
+/* Ajustes para los íconos */
+.menu-icon {
+    width: 24px; /* Ancho fijo para los íconos */
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.75rem;
+    transition: margin 0.3s ease;
+}
+
+.layout-wrapper.collapsed .menu-icon {
+    margin-right: 0;
+}
+
+/* Ajustes para el submenu */
+.menu-sub .menu-link {
+    height: 40px; /* Altura ligeramente menor para subitems */
+    padding: 0 1rem 0 3.25rem;
+}
+
+.layout-wrapper.collapsed .menu-sub .menu-link {
+    padding: 0 1rem;
+}
+
+/* Transiciones suaves */
+.menu-vertical,
+.layout-page,
+.app-brand-text,
+.menu-link div,
+.user-profile h6,
+.user-profile small {
+    transition: all 0.3s ease;
+}
+
+/* Mantener el espacio para el scrollbar */
+.menu-inner {
+    margin-right: 2px; /* Evita el salto cuando aparece el scrollbar */
+}
+
+/* Estilos para el botón de hamburguesa */
+.collapse-trigger {
+    padding: 0.5rem;
+    margin-right: 1rem;
+    border-radius: 0.375rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.collapse-trigger:hover {
+    background-color: var(--bs-gray);
+}
+
+.collapse-trigger i {
+    font-size: 1.25rem;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Ajuste para el navbar */
+.layout-navbar {
+    padding: 0.5rem 1rem;
+    min-height: 64px;
+    margin-bottom: 1rem;
+    background: white;
+    border-radius: 0.5rem;
+}
+
+/* Ajuste para el botón móvil */
+.layout-menu-toggle {
+    padding: 0.5rem;
+}
+
+.layout-menu-toggle .nav-link {
+    border-radius: 0.375rem;
+    transition: all 0.3s ease;
+}
+
+.layout-menu-toggle .nav-link:hover {
+    background-color: var(--bs-gray);
+}
+
+/* Agregar o modificar estos estilos */
+.layout-navbar {
+    background-color: #f5f5f9 !important; /* Color de fondo gris claro */
+    box-shadow: none !important;
+    height: 64px;
+    padding: 0 1rem;
+    margin: 0;
+    border-radius: 0;
+}
+
+.collapse-trigger {
+    color: #1a1f36 !important;
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    transition: background-color 0.2s ease;
+}
+
+.collapse-trigger:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.nav-link {
+    color: #1a1f36 !important;
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+}
+
+.nav-link:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Ajuste de iconos */
+.fas {
+    font-size: 1.25rem;
+}
+
+/* Contenedor principal */
+.container-xxl {
+    max-width: 100%;
+    padding: 0 1rem;
+}
+
+/* Estilos mínimos para el header */
+.navbar {
+    min-height: 64px;
+}
+
+.navbar .btn-link {
+    transition: background-color 0.2s;
+    border-radius: 0.375rem;
+    text-decoration: none !important; /* Eliminar subrayado */
+}
+
+.navbar .btn-link:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+    text-decoration: none !important; /* Mantener sin subrayado en hover */
+}
+
+/* Ajuste de iconos más pequeños y grises */
+.navbar .fas {
+    font-size: 1.1rem;
+    color: #6c757d;
+}
+
+/* Eliminar cualquier borde o sombra */
+.navbar, .btn-link {
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+/* Ajuste del padding de los botones */
+.navbar .btn-link {
+    padding: 0.4rem !important;
+}

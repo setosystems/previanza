@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="form-container">
+    <div class="form-header">
+        <h1>Configuración SMTP</h1>
+        <p class="form-subtitle">Configure los ajustes del servidor de correo saliente</p>
+    </div>
+
+    <form method="POST" class="modern-form">
+        {{ form.hidden_tag() }}
+        
+        <div class="form-grid">
+            <div class="form-section">
+                <h3>Configuración del Servidor</h3>
+                <div class="input-group">
+                    <div class="form-field">
+                        {{ form.mail_server.label }}
+                        {{ form.mail_server(class="modern-input") }}
+                    </div>
+                    <div class="form-field">
+                        {{ form.mail_port.label }}
+                        {{ form.mail_port(class="modern-input") }}
+                    </div>
+                </div>
+
+                <div class="input-group checkbox-group">
+                    <div class="form-field">
+                        {{ form.mail_use_tls(class="modern-checkbox") }}
+                        {{ form.mail_use_tls.label }}
+                    </div>
+                    <div class="form-field">
+                        {{ form.mail_use_ssl(class="modern-checkbox") }}
+                        {{ form.mail_use_ssl.label }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Credenciales</h3>
+                <div class="input-group">
+                    <div class="form-field">
+                        {{ form.mail_username.label }}
+                        {{ form.mail_username(class="modern-input") }}
+                    </div>
+                    <div class="form-field">
+                        {{ form.mail_password.label }}
+                        {{ form.mail_password(class="modern-input", type="password") }}
+                    </div>
+                </div>
+                <div class="form-field">
+                    {{ form.mail_default_sender.label }}
+                    {{ form.mail_default_sender(class="modern-input") }}
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Prueba de Configuración</h3>
+                <div class="form-field">
+                    <label>Dirección de Correo de Prueba</label>
+                    <div class="input-group">
+                        <input type="email" name="test_email" class="modern-input" placeholder="correo@ejemplo.com">
+                        <button type="submit" formaction="{{ url_for('config.send_test_email') }}" class="btn btn-secondary">
+                            <i class="fas fa-paper-plane"></i> Enviar Correo de Prueba
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {% if current_config %}
+            <div class="form-section">
+                <h3>Configuración Actual</h3>
+                <div class="current-config">
+                    {% for key, value in current_config.items() %}
+                        <div class="config-item">
+                            <strong>{{ key }}:</strong>
+                            <span>{{ value }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="form-actions">
+            <a href="{{ url_for('config.config_index') }}" class="btn btn-secondary">Cancelar</a>
+            {{ form.submit(class="btn btn-primary") }}
+        </div>
+    </form>
+</div>
+
+<style>
+/* Estilos específicos para la configuración SMTP */
+.checkbox-group {
+    display: flex;
+    gap: 30px;
+}
+
+.checkbox-group .form-field {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.modern-checkbox {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.current-config {
+    background: #f8f9fa;
+    border-radius: 6px;
+    padding: 15px;
+}
+
+.config-item {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.config-item:last-child {
+    border-bottom: none;
+}
+
+.config-item strong {
+    color: var(--text-color);
+    margin-right: 10px;
+}
+
+.config-item span {
+    color: #666;
+}
+
+@media (max-width: 768px) {
+    .checkbox-group {
+        flex-direction: column;
+        gap: 15px;
+    }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="form-container">
+    <div class="form-header">
+        <h1>Editar Agente</h1>
+        <p class="form-subtitle">Actualice la información del agente</p>
+    </div>
+
+    <form method="POST" class="modern-form">
+        {{ form.hidden_tag() }}
+        {{ form.id }}
+        
+        <div class="form-grid">
+            <div class="form-section">
+                <h3>Información de Cuenta</h3>
+                <div class="input-group">
+                    <div class="form-field">
+                        {{ form.username.label }}
+                        {{ form.username(class="modern-input") }}
+                        {% for error in form.username.errors %}
+                            <span class="error-message">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="form-field">
+                        {{ form.email.label }}
+                        {{ form.email(class="modern-input") }}
+                        {% for error in form.email.errors %}
+                            <span class="error-message">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="form-field">
+                    {{ form.password.label }}
+                    {{ form.password(class="modern-input") }}
+                    <small class="form-text">Dejar en blanco para mantener la contraseña actual</small>
+                    {% for error in form.password.errors %}
+                        <span class="error-message">{{ error }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Información Personal</h3>
+                <div class="input-group">
+                    <div class="form-field">
+                        {{ form.name.label }}
+                        {{ form.name(class="modern-input") }}
+                        {% for error in form.name.errors %}
+                            <span class="error-message">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="form-field">
+                        {{ form.phone.label }}
+                        {{ form.phone(class="modern-input") }}
+                        {% for error in form.phone.errors %}
+                            <span class="error-message">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="form-field">
+                    {{ form.address.label }}
+                    {{ form.address(class="modern-input") }}
+                    {% for error in form.address.errors %}
+                        <span class="error-message">{{ error }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Documentación</h3>
+                <div class="input-group">
+                    <div class="form-field">
+                        {{ form.document_type.label }}
+                        {{ form.document_type(class="modern-input select-input") }}
+                        {% for error in form.document_type.errors %}
+                            <span class="error-message">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="form-field">
+                        {{ form.document_number.label }}
+                        {{ form.document_number(class="modern-input") }}
+                        {% for error in form.document_number.errors %}
+                            <span class="error-message">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Fechas</h3>
+                <div class="input-group">
+                    <div class="form-field">
+                        {{ form.date_of_birth.label }}
+                        {{ form.date_of_birth(class="modern-input", type="date") }}
+                        {% for error in form.date_of_birth.errors %}
+                            <span class="error-message">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="form-field">
+                        {{ form.hire_date.label }}
+                        {{ form.hire_date(class="modern-input", type="date") }}
+                        {% for error in form.hire_date.errors %}
+                            <span class="error-message">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Jerarquía</h3>
+                <div class="form-field">
+                    {{ form.parent_id.label }}
+                    {{ form.parent_id(class="modern-input select-input") }}
+                    {% for error in form.parent_id.errors %}
+                        <span class="error-message">{{ error }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a href="{{ url_for('agents.list_agents') }}" class="btn btn-secondary">Cancelar</a>
+            {{ form.submit(class="btn btn-primary") }}
+        </div>
+    </form>
+</div>
+{% endblock %}

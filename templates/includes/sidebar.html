@@ -1,0 +1,139 @@
+<aside id="layout-menu" class="layout-menu menu-vertical menu bg-dark-theme">
+    <div class="app-brand demo">
+        <a href="/" class="app-brand-link">
+            <span class="app-brand-logo demo">
+                <img src="{{ url_for('static', filename='img/logo_black.svg') }}" alt="Logo" height="40">
+            </span>
+            <span class="app-brand-text text-white demo menu-text fw-bolder ms-2">Previanza</span>
+        </a>
+    </div>
+
+    <div class="menu-inner-shadow"></div>
+
+    <!-- Perfil del usuario -->
+    <div class="user-profile text-center my-3">
+        <img src="{{ url_for('static', filename='img/user.png') }}" 
+             alt="user-avatar" class="rounded-circle mb-2" width="50">
+        <h6 class="text-white mb-0">{{ current_user.name if current_user.is_authenticated else 'Usuario' }}</h6>
+        <small class="text-muted">{{ current_user.role.value if current_user.is_authenticated else 'Invitado' }}</small>
+    </div>
+
+    <ul class="menu-inner py-1">
+        <!-- Inicio -->
+        <li class="menu-item {{ 'active' if request.endpoint == 'index' else '' }}">
+            <a href="{{ url_for('index') }}" class="menu-link">
+                <i class="menu-icon fas fa-home"></i>
+                <div>Inicio</div>
+            </a>
+        </li>
+
+        {% if current_user.is_authenticated %}
+            {% if current_user.role in [UserRole.ADMIN, UserRole.DIGITADOR] %}
+                <!-- Clientes -->
+                <li class="menu-item {{ 'active' if request.endpoint and request.endpoint.startswith('clients.') else '' }}">
+                    <a href="{{ url_for('clients.list_clients') }}" class="menu-link">
+                        <i class="menu-icon fas fa-users"></i>
+                        <div>Clientes</div>
+                    </a>
+                </li>
+
+                <!-- Pólizas -->
+                <li class="menu-item {{ 'active' if request.endpoint and request.endpoint.startswith('policies.') else '' }}">
+                    <a href="{{ url_for('policies.list_policies') }}" class="menu-link">
+                        <i class="menu-icon fas fa-file-contract"></i>
+                        <div>Pólizas</div>
+                    </a>
+                </li>
+
+                <!-- Productos -->
+                <li class="menu-item {{ 'active' if request.endpoint and request.endpoint.startswith('products.') else '' }}">
+                    <a href="{{ url_for('products.list_products') }}" class="menu-link">
+                        <i class="menu-icon fas fa-box"></i>
+                        <div>Productos</div>
+                    </a>
+                </li>
+            {% endif %}
+
+            {% if current_user.role == UserRole.ADMIN %}
+                <!-- Agentes -->
+                <li class="menu-item {{ 'active' if request.endpoint and request.endpoint.startswith('agents.') else '' }}">
+                    <a href="{{ url_for('agents.list_agents') }}" class="menu-link">
+                        <i class="menu-icon fas fa-user-tie"></i>
+                        <div>Agentes</div>
+                    </a>
+                </li>
+
+                <!-- Gestión de Usuarios -->
+                <li class="menu-item {{ 'active' if request.endpoint == 'auth.list_users' else '' }}">
+                    <a href="{{ url_for('auth.list_users') }}" class="menu-link">
+                        <i class="menu-icon fas fa-users-cog"></i>
+                        <div>Gestión de Usuarios</div>
+                    </a>
+                </li>
+
+                <!-- Configuración -->
+                <li class="menu-item {{ 'active' if request.endpoint and request.endpoint.startswith('config.') else '' }}">
+                    <a href="{{ url_for('config.config_index') }}" class="menu-link">
+                        <i class="menu-icon fas fa-cogs"></i>
+                        <div>Configuración</div>
+                    </a>
+                </li>
+            {% endif %}
+
+            <!-- Informes -->
+            <li class="menu-item {{ 'active open' if request.endpoint and request.endpoint.startswith('reports.') else '' }}">
+                <a href="javascript:void(0);" class="menu-link">
+                    <i class="menu-icon fas fa-chart-bar"></i>
+                    <div>Informes</div>
+                    <i class="fas fa-chevron-down ms-auto menu-arrow"></i>
+                </a>
+                <ul class="menu-sub">
+                    <li class="menu-item {{ 'active' if request.endpoint == 'reports.dashboard' else '' }}">
+                        <a href="{{ url_for('reports.dashboard') }}" class="menu-link">
+                            <i class="menu-icon fas fa-tachometer-alt"></i>
+                            <div>Dashboard</div>
+                        </a>
+                    </li>
+                    <li class="menu-item {{ 'active' if request.endpoint == 'reports.sales_report' else '' }}">
+                        <a href="{{ url_for('reports.sales_report') }}" class="menu-link">
+                            <i class="menu-icon fas fa-chart-line"></i>
+                            <div>Reporte de Ventas</div>
+                        </a>
+                    </li>
+                    <li class="menu-item {{ 'active' if request.endpoint == 'reports.commission_report' else '' }}">
+                        <a href="{{ url_for('reports.commission_report') }}" class="menu-link">
+                            <i class="menu-icon fas fa-percentage"></i>
+                            <div>Reporte de Comisiones</div>
+                        </a>
+                    </li>
+                    <li class="menu-item {{ 'active' if request.endpoint == 'reports.client_analytics' else '' }}">
+                        <a href="{{ url_for('reports.client_analytics') }}" class="menu-link">
+                            <i class="menu-icon fas fa-users-cog"></i>
+                            <div>Análisis de Clientes</div>
+                        </a>
+                    </li>
+                    <li class="menu-item {{ 'active' if request.endpoint == 'reports.policy_analytics' else '' }}">
+                        <a href="{{ url_for('reports.policy_analytics') }}" class="menu-link">
+                            <i class="menu-icon fas fa-file-invoice-dollar"></i>
+                            <div>Análisis de Pólizas</div>
+                        </a>
+                    </li>
+                    <li class="menu-item {{ 'active' if request.endpoint == 'reports.diagram' else '' }}">
+                        <a href="{{ url_for('reports.diagram') }}" class="menu-link">
+                            <i class="menu-icon fas fa-project-diagram"></i>
+                            <div>Diagrama de Comisiones</div>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+        {% endif %}
+    </ul>
+
+    <!-- Cerrar Sesión al final -->
+    <div class="menu-footer">
+        <a href="{{ url_for('auth.logout') }}" class="menu-link logout-link">
+            <i class="menu-icon fas fa-sign-out-alt"></i>
+            <div>Cerrar Sesión</div>
+        </a>
+    </div>
+</aside> 

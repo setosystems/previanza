@@ -1,0 +1,276 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="detail-page">
+    <div class="detail-header">
+        <h1>Detalles de Póliza</h1>
+        <div class="detail-actions">
+            {% if current_user.role != UserRole.AGENTE %}
+            <a href="{{ url_for('policies.edit_policy', id=policy.id) }}" class="btn btn-primary">
+                <i class="fas fa-edit"></i> Editar
+            </a>
+            {% endif %}
+            <a href="{{ url_for('policies.list_policies') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+        </div>
+    </div>
+
+    <div class="detail-content">
+        <div class="detail-section">
+            <div class="section-header">
+                <i class="fas fa-file-invoice"></i>
+                <h2>Información de la Póliza</h2>
+            </div>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <label>Número de Póliza:</label>
+                    <span>{{ policy.policy_number }}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Fecha de Inicio:</label>
+                    <span>{{ policy.start_date.strftime('%d/%m/%Y') }}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Fecha de Fin:</label>
+                    <span>{{ policy.end_date.strftime('%d/%m/%Y') }}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Prima:</label>
+                    <span class="amount">${{ "{:,.2f}".format(policy.premium) }}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Estado de Emisión:</label>
+                    <span class="status-badge emision-{{ policy.emision_status.name.lower() }}">
+                        {{ policy.emision_status.value }}
+                    </span>
+                </div>
+                <div class="detail-item">
+                    <label>Estado de Pago:</label>
+                    <span class="status-badge payment-{{ policy.payment_status.name.lower() }}">
+                        {{ policy.payment_status.value }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-section">
+            <div class="section-header">
+                <i class="fas fa-user"></i>
+                <h2>Cliente</h2>
+            </div>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <label>Nombre:</label>
+                    <span>{{ policy.client.name }}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Email:</label>
+                    <span>{{ policy.client.email }}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Teléfono:</label>
+                    <span>{{ policy.client.phone or 'No especificado' }}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Dirección:</label>
+                    <span>{{ policy.client.address or 'No especificada' }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-section">
+            <div class="section-header">
+                <i class="fas fa-box"></i>
+                <h2>Producto</h2>
+            </div>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <label>Nombre:</label>
+                    <span>{{ policy.product.name }}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Aseguradora:</label>
+                    <span>{{ policy.product.aseguradora }}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Descripción:</label>
+                    <span>{{ policy.product.description or 'Sin descripción' }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-section">
+            <div class="section-header">
+                <i class="fas fa-money-bill-wave"></i>
+                <h2>Comisiones</h2>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Agente</th>
+                            <th>Tipo</th>
+                            <th>Porcentaje</th>
+                            <th>Monto</th>
+                            <th>Fecha</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for commission in commissions %}
+                        <tr>
+                            <td>{{ commission.agent.name }}</td>
+                            <td>
+                                <span class="commission-type {{ 'override' if commission.commission_type == 'override' else 'direct' }}">
+                                    {{ "Sobrecomisión" if commission.commission_type == 'override' else "Directa" }}
+                                </span>
+                            </td>
+                            <td class="text-right">{{ commission.percentage_applied }}%</td>
+                            <td class="text-right amount">${{ "{:,.2f}".format(commission.amount) }}</td>
+                            <td>{{ commission.date.strftime('%d/%m/%Y') }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3"><strong>Total Comisiones</strong></td>
+                            <td colspan="2" class="text-right amount">
+                                <strong>${{ "{:,.2f}".format(total_commission) }}</strong>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.detail-page {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.detail-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.detail-content {
+    display: grid;
+    gap: 20px;
+}
+
+.detail-section {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.section-header {
+    background: var(--primary-color);
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.section-header i {
+    font-size: 20px;
+}
+
+.section-header h2 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.detail-item label {
+    color: #666;
+    font-size: 0.9em;
+}
+
+.detail-item span {
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+.amount {
+    color: var(--secondary-color);
+    font-weight: bold;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    font-weight: 500;
+}
+
+.emision-pendiente { background: #ffeeba; color: #856404; }
+.emision-emitida { background: #d4edda; color: #155724; }
+.emision-caducada { background: #f8d7da; color: #721c24; }
+.emision-anulada { background: #e2e3e5; color: #383d41; }
+
+.payment-pendiente { background: #ffeeba; color: #856404; }
+.payment-pagado { background: #d4edda; color: #155724; }
+.payment-abonado { background: #cce5ff; color: #004085; }
+.payment-reembolsado { background: #f8d7da; color: #721c24; }
+
+.commission-type {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+.commission-type.direct {
+    background: #d4edda;
+    color: #155724;
+}
+
+.commission-type.override {
+    background: #cce5ff;
+    color: #004085;
+}
+
+@media (max-width: 768px) {
+    .detail-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+    }
+
+    .detail-actions {
+        flex-direction: column;
+    }
+
+    .detail-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}

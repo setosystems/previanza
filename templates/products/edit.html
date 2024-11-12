@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="form-container">
+    <div class="form-header">
+        <h1>Editar Producto</h1>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data" class="modern-form">
+        {{ form.hidden_tag() }}
+        
+        <div class="form-grid">
+            <div class="form-section">
+                <h3>Información Básica</h3>
+                <div class="form-field">
+                    {{ form.name.label }}
+                    {{ form.name(class="modern-input") }}
+                    {% for error in form.name.errors %}
+                        <span class="error-message">{{ error }}</span>
+                    {% endfor %}
+                </div>
+
+                <div class="form-field">
+                    {{ form.description.label }}
+                    {{ form.description(class="modern-input") }}
+                    {% for error in form.description.errors %}
+                        <span class="error-message">{{ error }}</span>
+                    {% endfor %}
+                </div>
+
+                <div class="form-field">
+                    {{ form.aseguradora.label }}
+                    {{ form.aseguradora(class="modern-input") }}
+                    {% for error in form.aseguradora.errors %}
+                        <span class="error-message">{{ error }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Comisiones</h3>
+                <div class="form-field">
+                    {{ form.commission_percentage.label }}
+                    {{ form.commission_percentage(class="modern-input") }}
+                    {% for error in form.commission_percentage.errors %}
+                        <span class="error-message">{{ error }}</span>
+                    {% endfor %}
+                </div>
+
+                <div class="form-field checkbox-field">
+                    {{ form.sobrecomision(class="modern-checkbox") }}
+                    {{ form.sobrecomision.label }}
+                </div>
+
+                <div class="form-field">
+                    {{ form.override_percentage.label }}
+                    {{ form.override_percentage(class="modern-input") }}
+                    {% for error in form.override_percentage.errors %}
+                        <span class="error-message">{{ error }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Imagen del Producto</h3>
+                {% if product.image_url %}
+                <div class="current-image">
+                    <h4>Imagen Actual</h4>
+                    <img src="{{ url_for('static', filename=product.image_url) }}" 
+                         alt="{{ product.name }}"
+                         style="max-width: 200px; margin: 10px 0;">
+                </div>
+                {% endif %}
+                <div class="form-field">
+                    {{ form.image.label }}
+                    {{ form.image(class="modern-input") }}
+                    {% for error in form.image.errors %}
+                        <span class="error-message">{{ error }}</span>
+                    {% endfor %}
+                    <div class="image-preview" id="imagePreview"></div>
+                    <small class="help-text">Deja este campo vacío si no deseas cambiar la imagen actual.</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a href="{{ url_for('products.list_products') }}" class="btn btn-secondary">Cancelar</a>
+            {{ form.submit(class="btn btn-primary") }}
+        </div>
+    </form>
+</div>
+
+<script>
+// Preview de imagen
+document.querySelector('input[type="file"]').addEventListener('change', function(e) {
+    const preview = document.getElementById('imagePreview');
+    preview.innerHTML = '';
+    
+    if (this.files && this.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.style.maxWidth = '200px';
+            img.style.maxHeight = '200px';
+            preview.appendChild(img);
+        }
+        reader.readAsDataURL(this.files[0]);
+    }
+});
+</script>
+
+<style>
+.image-preview {
+    margin-top: 10px;
+    padding: 10px;
+    border: 1px dashed #ddd;
+    border-radius: 4px;
+    min-height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.current-image {
+    margin-bottom: 20px;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+.current-image h4 {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+    color: #666;
+}
+
+.help-text {
+    display: block;
+    margin-top: 5px;
+    color: #666;
+    font-size: 0.9em;
+}
+</style>
+{% endblock %}

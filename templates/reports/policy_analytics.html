@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Análisis de Pólizas</h1>
+    
+    <h2>Distribución de Pólizas por Producto</h2>
+    <canvas id="policy-distribution-chart"></canvas>
+
+    <h2>Tendencia de Pólizas en el Tiempo</h2>
+    <canvas id="policy-trend-chart"></canvas>
+
+    <h2>Prima Promedio por Producto</h2>
+    <canvas id="avg-premium-chart"></canvas>
+{% endblock %}
+
+{% block scripts %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Policy Distribution Chart
+        new Chart(document.getElementById('policy-distribution-chart'), {
+            type: 'pie',
+            data: {
+                labels: {{ policy_distribution|map(attribute='name')|list|tojson }},
+                datasets: [{
+                    data: {{ policy_distribution|map(attribute='policy_count')|list|tojson }},
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.8)',
+                        'rgba(54, 162, 235, 0.8)',
+                        'rgba(255, 206, 86, 0.8)',
+                        'rgba(75, 192, 192, 0.8)',
+                        'rgba(153, 102, 255, 0.8)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                title: {
+                    display: true,
+                    text: 'Distribución de Pólizas por Producto'
+                }
+            }
+        });
+
+        // Policy Trend Chart
+        new Chart(document.getElementById('policy-trend-chart'), {
+            type: 'line',
+            data: {
+                labels: {{ policy_trend|map(attribute='month')|map('strftime', '%Y-%m')|list|tojson }},
+                datasets: [{
+                    label: 'Número de Pólizas',
+                    data: {{ policy_trend|map(attribute='policy_count')|list|tojson }},
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Número de Pólizas'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Mes'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Average Premium Chart
+        new Chart(document.getElementById('avg-premium-chart'), {
+            type: 'bar',
+            data: {
+                labels: {{ avg_premium_by_product|map(attribute='name')|list|tojson }},
+                datasets: [{
+                    label: 'Prima Promedio',
+                    data: {{ avg_premium_by_product|map(attribute='avg_premium')|list|tojson }},
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)'
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Prima Promedio ($)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Producto'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+{% endblock %}

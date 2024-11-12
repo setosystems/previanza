@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="container-xxl">
+        <div class="list-header">
+            <h1>Lista de Clientes</h1>
+            
+            <form class="search-form" method="GET" action="{{ url_for('clients.list_clients') }}">
+                <input type="text" 
+                       class="search-input" 
+                       name="name" 
+                       placeholder="Buscar por nombre" 
+                       value="{{ request.args.get('name', '') }}">
+                
+                <input type="email" 
+                       class="search-input" 
+                       name="email" 
+                       placeholder="Buscar por email" 
+                       value="{{ request.args.get('email', '') }}">
+                
+                <select class="search-select" name="document_type">
+                    <option value="">Tipo de documento</option>
+                    {% for doc_type in document_types %}
+                        <option value="{{ doc_type.name }}" 
+                                {% if request.args.get('document_type') == doc_type.name %}selected{% endif %}>
+                            {{ doc_type.value }}
+                        </option>
+                    {% endfor %}
+                </select>
+                
+                <button type="submit" class="search-button">
+                    <i class="fas fa-search"></i>
+                    Buscar
+                </button>
+            </form>
+
+            <div class="action-buttons">
+                <a href="{{ url_for('clients.create_client') }}" class="btn-new">
+                    <i class="fas fa-plus"></i>
+                    Nuevo Cliente
+                </a>
+                <a href="{{ url_for('clients.bulk_upload_clients') }}" class="btn-upload">
+                    <i class="fas fa-upload"></i>
+                    Carga Masiva
+                </a>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>NOMBRE</th>
+                        <th>EMAIL</th>
+                        <th>TELÉFONO</th>
+                        <th>CIUDAD</th>
+                        <th>TIPO DE DOCUMENTO</th>
+                        <th>NÚMERO DE DOCUMENTO</th>
+                        <th>ACCIONES</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for client in clients %}
+                        <tr>
+                            <td>{{ client.name }}</td>
+                            <td>{{ client.email }}</td>
+                            <td>{{ client.phone }}</td>
+                            <td>{{ client.city }}</td>
+                            <td>{{ client.document_type.value if client.document_type else '' }}</td>
+                            <td>{{ client.document_number }}</td>
+                            <td class="action-buttons">
+                                <a href="{{ url_for('clients.client_detail', id=client.id) }}" 
+                                   class="action-button view-button">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{{ url_for('clients.edit_client', id=client.id) }}" 
+                                   class="action-button edit-button">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{{ url_for('clients.delete_client', id=client.id) }}" 
+                                   class="action-button delete-button"
+                                   onclick="return confirm('¿Está seguro de que desea eliminar este cliente?')">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if pagination %}
+        <div class="pagination">
+            {% if pagination.has_prev %}
+                <a href="{{ url_for('clients.list_clients', page=pagination.prev_num) }}">&laquo; Anterior</a>
+            {% endif %}
+            
+            <span>Página {{ pagination.page }} de {{ pagination.pages }}</span>
+            
+            {% if pagination.has_next %}
+                <a href="{{ url_for('clients.list_clients', page=pagination.next_num) }}">Siguiente &raquo;</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

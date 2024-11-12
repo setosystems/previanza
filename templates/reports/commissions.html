@@ -1,0 +1,307 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="report-container">
+    <div class="report-header">
+        <div class="header-title">
+            <i class="fas fa-chart-line"></i>
+            <h1>Reporte de Comisiones</h1>
+        </div>
+        
+        <div class="filter-section">
+            <form method="GET" class="filter-form">
+                <div class="filter-group">
+                    <div class="form-group">
+                        <label for="start_date">Fecha Inicio:</label>
+                        <input type="date" id="start_date" name="start_date" 
+                               class="modern-input" value="{{ start_date or '' }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="end_date">Fecha Fin:</label>
+                        <input type="date" id="end_date" name="end_date" 
+                               class="modern-input" value="{{ end_date or '' }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="agent_id">Agente:</label>
+                        <select id="agent_id" name="agent_id" class="modern-input">
+                            <option value="">Todos los agentes</option>
+                            {% for agent in agents %}
+                                <option value="{{ agent.id }}" 
+                                        {% if agent_id|int == agent.id %}selected{% endif %}>
+                                    {{ agent.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-filter"></i> Aplicar Filtros
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="exportToPDF()">
+                        <i class="fas fa-file-pdf"></i> Exportar a PDF
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="report-content">
+        <div class="table-section">
+            <div class="section-header">
+                <i class="fas fa-list"></i>
+                <h2>Detalle por Agente</h2>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Agente</th>
+                            <th class="text-right">Total Comisión</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for result in results %}
+                        <tr>
+                            <td>{{ result.agent_name }}</td>
+                            <td class="text-right amount">${{ "{:,.2f}".format(result.total_commission) }}</td>
+                            <td>
+                                <button class="btn btn-info btn-sm" 
+                                        onclick="showDetails('{{ result.agent_id }}')"
+                                        title="Ver detalles de comisiones">
+                                    <i class="fas fa-search-dollar"></i> Detalles
+                                </button>
+                                <form action="{{ url_for('reports.generate_commission_report', agent_id=result.agent_id) }}" method="POST">
+                                    <button type="submit" class="btn btn-primary">Generar Reporte</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr class="total-row">
+                            <td><strong>Total General</strong></td>
+                            <td class="text-right">
+                                <strong>${{ "{:,.2f}".format(total_commission) }}</strong>
+                            </td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para detalles -->
+<div id="detailsModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div class="header-title">
+                <i class="fas fa-file-invoice-dollar"></i>
+                <h2>Detalles de Comisiones</h2>
+            </div>
+            <span class="close">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div id="detailsContent"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+
+<script>
+function showDetails(agentId) {
+    const startDate = document.getElementById('start_date').value;
+    const endDate = document.getElementById('end_date').value;
+    
+    fetch(`/reports/agent/${agentId}/details?start_date=${startDate}&end_date=${endDate}`)
+        .then(response => response.json())
+        .then(data => {
+            const modal = document.getElementById('detailsModal');
+            const content = document.getElementById('detailsContent');
+            
+            let html = '<table class="details-table">';
+            html += `<thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Póliza</th>
+                            <th>Producto</th>
+                            <th>Prima</th>
+                            <th>Comisión</th>
+                            <th>Tipo</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>`;
+            html += '<tbody>';
+            
+            data.details.forEach(detail => {
+                html += `<tr>
+                    <td>${detail.date}</td>
+                    <td>${detail.policy_number}</td>
+                    <td>${detail.product_name}</td>
+                    <td class="text-right">$${detail.premium.toLocaleString('es-CO', {minimumFractionDigits: 2})}</td>
+                    <td class="text-right">$${detail.commission.toLocaleString('es-CO', {minimumFractionDigits: 2})}</td>
+                    <td>${detail.commission_type}</td>
+                    <td>
+                        <span class="status-badge ${detail.payment_status.toLowerCase()}">
+                            ${detail.payment_status}
+                        </span>
+                    </td>
+                    <td>
+                        <select class="status-select" onchange="updateCommissionStatus(${detail.id}, this.value)">
+                            <option value="">Cambiar estado</option>
+                            <option value="PENDIENTE">Pendiente</option>
+                            <option value="PAGADO">Pagado</option>
+                            <option value="ANULADO">Anulado</option>
+                        </select>
+                    </td>
+                </tr>`;
+            });
+            
+            html += '</tbody></table>';
+            content.innerHTML = html;
+            modal.style.display = 'block';
+        });
+}
+
+function updateCommissionStatus(commissionId, newStatus) {
+    if (!newStatus) return;
+
+    const formData = new FormData();
+    formData.append('status', newStatus);
+
+    fetch(`/reports/update_commission_status/${commissionId}`, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Actualizar la vista
+            const statusCell = document.querySelector(`tr[data-commission-id="${commissionId}"] .status-badge`);
+            if (statusCell) {
+                statusCell.className = `status-badge ${data.new_status.toLowerCase()}`;
+                statusCell.textContent = data.new_status;
+            }
+            showMessage('success', data.message);
+        } else {
+            showMessage('error', data.message);
+        }
+    })
+    .catch(error => {
+        showMessage('error', 'Error al actualizar el estado');
+    });
+}
+
+function showMessage(type, text) {
+    const message = document.createElement('div');
+    message.className = `alert alert-${type}`;
+    message.textContent = text;
+    message.style.position = 'fixed';
+    message.style.top = '20px';
+    message.style.right = '20px';
+    message.style.zIndex = '9999';
+    document.body.appendChild(message);
+    
+    setTimeout(() => {
+        message.remove();
+    }, 3000);
+}
+
+function exportToPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    // Configuración del documento
+    doc.setFont('helvetica');
+    
+    // Título
+    doc.setFontSize(16);
+    doc.text('Reporte de Comisiones', 14, 20);
+    
+    // Período
+    doc.setFontSize(12);
+    const startDate = document.getElementById('start_date').value;
+    const endDate = document.getElementById('end_date').value;
+    doc.text(`Período: ${startDate} - ${endDate}`, 14, 30);
+    
+    // Tabla de resultados
+    doc.autoTable({
+        html: 'table',
+        startY: 40,
+        theme: 'grid',
+        headStyles: {
+            fillColor: [44, 62, 80],
+            textColor: 255,
+            fontSize: 10
+        },
+        bodyStyles: {
+            fontSize: 9
+        },
+        footStyles: {
+            fillColor: [238, 238, 238],
+            textColor: 0,
+            fontSize: 10,
+            fontStyle: 'bold'
+        }
+    });
+    
+    // Guardar el PDF
+    const fileName = `reporte-comisiones-${startDate}-${endDate}.pdf`;
+    doc.save(fileName);
+}
+
+// Cerrar modal
+document.querySelector('.close').onclick = function() {
+    document.getElementById('detailsModal').style.display = 'none';
+}
+
+window.onclick = function(event) {
+    const modal = document.getElementById('detailsModal');
+    if (event.target == modal) {
+        modal.style.display = 'none';
+    }
+}
+</script>
+
+<style>
+.status-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.status-badge.pendiente {
+    background-color: #FEF3C7;
+    color: #92400E;
+}
+
+.status-badge.pagado {
+    background-color: #D1FAE5;
+    color: #065F46;
+}
+
+.status-badge.anulado {
+    background-color: #FEE2E2;
+    color: #991B1B;
+}
+
+.status-select {
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+    border: 1px solid var(--border-color);
+    font-size: 0.875rem;
+}
+</style>
+{% endblock %}

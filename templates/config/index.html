@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="form-container">
+    <div class="form-header">
+        <h1>Configuración del Sistema</h1>
+        <p class="form-subtitle">Gestione las configuraciones generales del sistema</p>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- Configuración de Comisiones -->
+        <div class="card">
+            <i class="fas fa-percentage"></i>
+            <h3>Configuración de Comisiones</h3>
+            <p>Configure las reglas de comisiones para los agentes.</p>
+            <a href="{{ url_for('config.commission_settings') }}" class="btn btn-primary">
+                Ir a Comisiones
+            </a>
+        </div>
+
+        <!-- Configuración de Notificaciones -->
+        <div class="card">
+            <i class="fas fa-bell"></i>
+            <h3>Configuración de Notificaciones</h3>
+            <p>Gestione las notificaciones del sistema.</p>
+            <a href="{{ url_for('config.config_index') }}" class="btn btn-primary">
+                Ir a Notificaciones
+            </a>
+        </div>
+
+        <!-- Gestión de Roles de Usuario -->
+        <div class="card">
+            <i class="fas fa-users-cog"></i>
+            <h3>Gestión de Roles de Usuario</h3>
+            <p>Administre los roles y permisos de los usuarios.</p>
+            <a href="{{ url_for('config.config_index') }}" class="btn btn-primary">
+                Ir a Roles de Usuario
+            </a>
+        </div>
+
+        <!-- Configuración SMTP -->
+        <div class="card">
+            <i class="fas fa-envelope-open-text"></i>
+            <h3>Configuración SMTP</h3>
+            <p>Configure los ajustes del servidor de correo saliente.</p>
+            <a href="{{ url_for('config.smtp_config') }}" class="btn btn-primary">
+                Ir a Configuración SMTP
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Estilos específicos para la página de configuración */
+.dashboard-grid .card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 2rem;
+}
+
+.dashboard-grid .card i {
+    font-size: 3rem;
+    color: var(--secondary-color);
+    margin-bottom: 1.5rem;
+}
+
+.dashboard-grid .card h3 {
+    color: var(--text-color);
+    margin-bottom: 1rem;
+}
+
+.dashboard-grid .card p {
+    color: #666;
+    margin-bottom: 1.5rem;
+    flex-grow: 1;
+}
+
+.dashboard-grid .card .btn {
+    width: 100%;
+    margin-top: auto;
+}
+
+.dashboard-grid .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.dashboard-grid .card .btn:hover {
+    background-color: var(--active-color);
+}
+</style>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Sales Report</h1>
+    <form method="GET" action="{{ url_for('reports.sales_report') }}">
+        <label for="start_date">Start Date:</label>
+        <input type="date" id="start_date" name="start_date" value="{{ start_date }}">
+        <label for="end_date">End Date:</label>
+        <input type="date" id="end_date" name="end_date" value="{{ end_date }}">
+        <input type="submit" value="Filter">
+    </form>
+
+    <canvas id="sales-chart"></canvas>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Total Sales</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for sale in sales %}
+                <tr>
+                    <td>{{ sale.date.strftime('%Y-%m-%d') }}</td>
+                    <td>${{ "{:,.2f}".format(sale.total_sales) }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+
+{% block scripts %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('static', filename='js/reports.js') }}"></script>
+{% endblock %}

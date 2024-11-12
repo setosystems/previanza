@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="list-header">
+        <h1>Lista de Productos</h1>
+        
+        <form class="search-form" method="GET" action="{{ url_for('products.list_products') }}">
+            <input type="text" 
+                   class="search-input" 
+                   name="name" 
+                   placeholder="Buscar por nombre" 
+                   value="{{ request.args.get('name', '') }}">
+            
+            <button type="submit" class="search-button">
+                <i class="fas fa-search"></i>
+                Buscar
+            </button>
+        </form>
+
+        <div class="action-buttons">
+            <a href="{{ url_for('products.create_product') }}" class="btn-new">
+                <i class="fas fa-plus"></i>
+                Nuevo Producto
+            </a>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>NOMBRE</th>
+                    <th>DESCRIPCIÓN</th>
+                    <th>ASEGURADORA</th>
+                    <th>SOBRECOMISIÓN</th>
+                    <th>ACCIONES</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                    <tr>
+                        <td>{{ product.name }}</td>
+                        <td>{{ product.description }}</td>
+                        <td>{{ product.aseguradora }}</td>
+                        <td>{{ "Sí" if product.sobrecomision else "No" }}</td>
+                        <td class="action-buttons">
+                            <a href="{{ url_for('products.edit_product', id=product.id) }}" 
+                               class="action-button edit-button"
+                               title="Editar producto">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{{ url_for('products.delete_product', id=product.id) }}" 
+                               class="action-button delete-button"
+                               onclick="return confirm('¿Está seguro de que desea eliminar este producto?')"
+                               title="Eliminar producto">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
