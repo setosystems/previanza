@@ -1,96 +1,120 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="form-container">
-    <div class="form-header">
-        <h1>Editar Cliente</h1>
-        <p class="form-subtitle">Actualice la información del cliente</p>
+<form class="w-full max-w-lg mx-auto" method="POST">
+  {{ form.hidden_tag() }}
+  
+  <!-- Información Personal -->
+  <div class="flex flex-wrap -mx-3 mb-6">
+    <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+      <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="name">
+        Nombre
+      </label>
+      {{ form.name(
+        class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white",
+        placeholder="Juan Pérez"
+      ) }}
+      {% for error in form.name.errors %}
+        <p class="text-red-500 text-xs italic">{{ error }}</p>
+      {% endfor %}
     </div>
+    <div class="w-full md:w-1/2 px-3">
+      <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="email">
+        Email
+      </label>
+      {{ form.email(
+        class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500",
+        placeholder="ejemplo@correo.com"
+      ) }}
+    </div>
+  </div>
 
-    <form method="POST" class="modern-form">
-        {{ form.hidden_tag() }}
-        
-        <div class="form-grid">
-            <div class="form-section">
-                <h3>Información Personal</h3>
-                <div class="input-group">
-                    <div class="form-field">
-                        {{ form.name.label }}
-                        {{ form.name(class="modern-input") }}
-                        {% for error in form.name.errors %}
-                            <span class="error-message">{{ error }}</span>
-                        {% endfor %}
-                    </div>
-                    <div class="form-field">
-                        {{ form.email.label }}
-                        {{ form.email(class="modern-input") }}
-                        {% for error in form.email.errors %}
-                            <span class="error-message">{{ error }}</span>
-                        {% endfor %}
-                    </div>
-                </div>
+  <!-- Dirección -->
+  <div class="flex flex-wrap -mx-3 mb-6">
+    <div class="w-full px-3">
+      <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="address">
+        Dirección
+      </label>
+      {{ form.address(
+        class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500",
+        placeholder="Av. Principal #123"
+      ) }}
+    </div>
+  </div>
 
-                <div class="input-group">
-                    <div class="form-field">
-                        {{ form.phone.label }}
-                        {{ form.phone(class="modern-input") }}
-                        {% for error in form.phone.errors %}
-                            <span class="error-message">{{ error }}</span>
-                        {% endfor %}
-                    </div>
-                    <div class="form-field">
-                        {{ form.birthdate.label }}
-                        {{ form.birthdate(class="modern-input", type="date") }}
-                        {% for error in form.birthdate.errors %}
-                            <span class="error-message">{{ error }}</span>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
+  <!-- Ciudad -->
+  <div class="flex flex-wrap -mx-3 mb-6">
+    <div class="w-full px-3">
+      <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="city">
+        Ciudad
+      </label>
+      {{ form.city(
+        class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500",
+        placeholder="Quito"
+      ) }}
+    </div>
+  </div>
 
-            <div class="form-section">
-                <h3>Ubicación</h3>
-                <div class="form-field">
-                    {{ form.address.label }}
-                    {{ form.address(class="modern-input") }}
-                    {% for error in form.address.errors %}
-                        <span class="error-message">{{ error }}</span>
-                    {% endfor %}
-                </div>
-                <div class="form-field">
-                    {{ form.city.label }}
-                    {{ form.city(class="modern-input") }}
-                    {% for error in form.city.errors %}
-                        <span class="error-message">{{ error }}</span>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <div class="form-section">
-                <h3>Documentación</h3>
-                <div class="input-group">
-                    <div class="form-field">
-                        {{ form.document_type.label }}
-                        {{ form.document_type(class="modern-input select-input") }}
-                        {% for error in form.document_type.errors %}
-                            <span class="error-message">{{ error }}</span>
-                        {% endfor %}
-                    </div>
-                    <div class="form-field">
-                        {{ form.document_number.label }}
-                        {{ form.document_number(class="modern-input") }}
-                        {% for error in form.document_number.errors %}
-                            <span class="error-message">{{ error }}</span>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
+  <!-- Documentación y Teléfono -->
+  <div class="flex flex-wrap -mx-3 mb-2">
+    <div class="w-full md:w-1/3 px-3 mb-6 md:mb-0">
+      <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="document_type">
+        Tipo de Documento
+      </label>
+      <div class="relative">
+        {{ form.document_type(
+          class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+        ) }}
+        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+          <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+          </svg>
         </div>
+      </div>
+    </div>
+    <div class="w-full md:w-1/3 px-3 mb-6 md:mb-0">
+      <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="document_number">
+        Número de Documento
+      </label>
+      {{ form.document_number(
+        class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500",
+        placeholder="1234567890"
+      ) }}
+    </div>
+    <div class="w-full md:w-1/3 px-3 mb-6 md:mb-0">
+      <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="phone">
+        Teléfono
+      </label>
+      {{ form.phone(
+        class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500",
+        placeholder="+593 99 999 9999"
+      ) }}
+    </div>
+  </div>
 
-        <div class="form-actions">
-            <a href="{{ url_for('clients.list_clients') }}" class="btn btn-secondary">Cancelar</a>
-            {{ form.submit(class="btn btn-primary") }}
-        </div>
-    </form>
-</div>
+  <!-- Fecha de Nacimiento -->
+  <div class="flex flex-wrap -mx-3 mb-6">
+    <div class="w-full px-3">
+      <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="birthdate">
+        Fecha de Nacimiento
+      </label>
+      {{ form.birthdate(
+        class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500",
+        type="date"
+      ) }}
+    </div>
+  </div>
+
+  <!-- Botones -->
+  <div class="flex items-center justify-end mt-6">
+    <button class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-2" 
+            type="button" 
+            onclick="window.history.back()">
+      Cancelar
+    </button>
+    {{ form.submit(
+      class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+    ) }}
+  </div>
+</form>
 {% endblock %}
