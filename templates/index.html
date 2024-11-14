@@ -1,236 +1,94 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container-xxl flex-grow-1 container-p-y">
-    <!-- Bienvenida -->
-    <div class="welcome-card mb-4">
-        <h1 class="welcome-title">¡Bienvenido admin! 🎉</h1>
-        <p class="welcome-subtitle">Sistema de Gestión de Seguros</p>
+<div class="form-container">
+    <div class="form-header">
+        <h1>Configuración del Sistema</h1>
+        <p class="form-subtitle">Gestione las configuraciones generales del sistema</p>
     </div>
 
-
- 
-
-    <!-- Métricas -->
-    <div class="metrics-grid">
-        <!-- Pólizas -->
-        <div class="metric-card">
-            <div class="metric-icon-wrapper">
-                <div class="metric-icon" style="background: #1a1a1a;">
-                    <i class="fas fa-file-contract"></i>
-                </div>
-            </div>
-            <div class="metric-info">
-                <span class="metric-value">Clientes</span>
-            </div>
+    <div class="dashboard-grid">
+        <!-- Configuración de Comisiones -->
+        <div class="card">
+            <i class="fas fa-percentage"></i>
+            <h3>Configuración de Comisiones</h3>
+            <p>Configure las reglas de comisiones para los agentes.</p>
+            <a href="{{ url_for('config.commission_settings') }}" class="btn btn-primary">
+                Ir a Comisiones
+            </a>
         </div>
 
-        <!-- Usuarios -->
-        <div class="metric-card">
-            <div class="metric-icon-wrapper">
-                <div class="metric-icon" style="background: #ff4081;">
-                    <i class="fas fa-chart-bar"></i>
-                </div>
-            </div>
-            <div class="metric-info">
-                <span class="metric-value">Pólizas</span>
-            </div>
+        <!-- Configuración de Notificaciones -->
+        <div class="card">
+            <i class="fas fa-bell"></i>
+            <h3>Configuración de Notificaciones</h3>
+            <p>Gestione las notificaciones del sistema.</p>
+            <a href="{{ url_for('config.config_index') }}" class="btn btn-primary">
+                Ir a Notificaciones
+            </a>
         </div>
 
-        <!-- Ingresos -->
-        <div class="metric-card">
-            <div class="metric-icon-wrapper">
-                <div class="metric-icon" style="background: #00c853;">
-                    <i class="fas fa-store"></i>
-                </div>
-            </div>
-            <div class="metric-info">
-                <span class="metric-value">Productos</span>
-            </div>
+        <!-- Gestión de Roles de Usuario -->
+        <div class="card">
+            <i class="fas fa-users-cog"></i>
+            <h3>Gestión de Roles de Usuario</h3>
+            <p>Administre los roles y permisos de los usuarios.</p>
+            <a href="{{ url_for('config.config_index') }}" class="btn btn-primary">
+                Ir a Roles de Usuario
+            </a>
         </div>
 
-        <!-- Seguidores -->
-        <div class="metric-card">
-            <div class="metric-icon-wrapper">
-                <div class="metric-icon" style="background: #2196f3;">
-                    <i class="fas fa-users"></i>
-                </div>
-            </div>
-            <div class="metric-info">
-                <span class="metric-value">Agentes</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Enlaces Rápidos -->
-    <h2 class="section-title mt-5">Enlaces Rápidos</h2>
-    <div class="quick-links-grid">
-        <!-- Repite este patrón para cada enlace rápido -->
-        <div class="quick-link-card">
-            <div class="quick-link-icon">
-                <i class="fas fa-users"></i>
-            </div>
-            <h3>Gestionar Clientes</h3>
-            <p>Ver y administrar la información de los clientes</p>
-            <a href="{{ url_for('clients.list_clients') }}" class="quick-link-button">Acceder</a>
+        <!-- Configuración SMTP -->
+        <div class="card">
+            <i class="fas fa-envelope-open-text"></i>
+            <h3>Configuración SMTP</h3>
+            <p>Configure los ajustes del servidor de correo saliente.</p>
+            <a href="{{ url_for('config.smtp_config') }}" class="btn btn-primary">
+                Ir a Configuración SMTP
+            </a>
         </div>
     </div>
 </div>
 
 <style>
-/* Estilos para las métricas */
-.metrics-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
-    margin-top: 2rem;
-}
-
-.metric-card {
-    background: white;
-    border-radius: 16px;
-    padding: 1.5rem;
-    padding-top: 2.5rem;
-    position: relative;
-    margin-top: 1.5rem;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-    transition: transform 0.2s ease;
-}
-
-.metric-icon-wrapper {
-    position: absolute;
-    top: -1.5rem;
-    left: 1.5rem;
-}
-
-.metric-icon {
-    width: 64px;
-    height: 64px;
-    border-radius: 16px;
+/* Estilos específicos para la página de configuración */
+.dashboard-grid .card {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 1.5rem;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-.metric-info {
-    padding-top: 1rem;
-}
-
-.metric-label {
-    color: #666;
-    font-size: 0.875rem;
-    display: block;
-    margin-bottom: 0.5rem;
-}
-
-.metric-value {
-    font-size: 1.75rem;
-    font-weight: 600;
-    margin: 0;
-    line-height: 1.2;
-}
-
-.metric-trend {
-    margin-top: 0.5rem;
-    font-size: 0.875rem;
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-}
-
-.metric-trend.positive {
-    color: #00c853;
-}
-
-.metric-trend.neutral {
-    color: #666;
-}
-
-/* Estilos para la bienvenida */
-.welcome-card {
-    background: white;
-    border-radius: 16px;
+    text-align: center;
     padding: 2rem;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 
-.welcome-title {
-    font-size: 1.5rem;
-    color: #2196f3;
-    margin: 0;
-}
-
-.welcome-subtitle {
-    color: #666;
-    margin: 0.5rem 0 0;
-}
-
-/* Estilos para enlaces rápidos */
-.section-title {
-    font-size: 1.25rem;
-    color: #333;
+.dashboard-grid .card i {
+    font-size: 3rem;
+    color: var(--secondary-color);
     margin-bottom: 1.5rem;
 }
 
-.quick-links-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.5rem;
-}
-
-.quick-link-card {
-    background: white;
-    border-radius: 16px;
-    padding: 1.5rem;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-    transition: transform 0.2s ease;
-}
-
-.quick-link-card:hover {
-    transform: translateY(-5px);
-}
-
-.quick-link-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    background: #e7e7ff;
-    color: #696cff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.25rem;
+.dashboard-grid .card h3 {
+    color: var(--text-color);
     margin-bottom: 1rem;
 }
 
-.quick-link-card h3 {
-    font-size: 1.125rem;
-    margin: 0 0 0.5rem;
-}
-
-.quick-link-card p {
+.dashboard-grid .card p {
     color: #666;
-    font-size: 0.875rem;
-    margin: 0 0 1rem;
+    margin-bottom: 1.5rem;
+    flex-grow: 1;
 }
 
-.quick-link-button {
-    display: inline-block;
-    padding: 0.5rem 1rem;
-    background: #696cff;
-    color: white;
-    border-radius: 8px;
-    text-decoration: none;
-    font-size: 0.875rem;
-    transition: background 0.2s ease;
+.dashboard-grid .card .btn {
+    width: 100%;
+    margin-top: auto;
 }
 
-.quick-link-button:hover {
-    background: #5753e4;
-    color: white;
+.dashboard-grid .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.dashboard-grid .card .btn:hover {
+    background-color: var(--active-color);
 }
 </style>
 {% endblock %}

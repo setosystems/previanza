@@ -1,6 +1,6 @@
 import logging
 import click
-from flask import Flask, render_template, redirect, url_for
+from flask import Flask, render_template, redirect, url_for, send_from_directory
 from flask_login import LoginManager, current_user
 from flask_migrate import Migrate
 from config import Config, basedir
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 load_dotenv()  # Cargar variables de entorno desde .env
 
 def create_app():
-    app = Flask(__name__)
+    app = Flask(__name__, static_folder='static')
     app.config.from_object(Config)
 
     # Initialize extensions
@@ -103,6 +103,10 @@ def create_app():
             db.session.add(admin_user)
             db.session.commit()
             print(f"Usuario administrador '{username}' creado.")
+
+    @app.route('/static/<path:filename>')
+    def static_files(filename):
+        return send_from_directory(app.static_folder, filename)
 
     return app
 

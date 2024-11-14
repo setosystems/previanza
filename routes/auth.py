@@ -1,13 +1,12 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_user, logout_user, login_required, current_user
-from urllib.parse import urlparse
-from models import User, db, UserRole, DocumentType
 from forms import LoginForm, RegistrationForm, UserEditForm, RequestResetForm, ResetPasswordForm
+from models import User, db, UserRole, DocumentType
 from decorators import admin_required
 from flask_mail import Message
 from extensions import mail
-import logging
 from smtplib import SMTPException
+import logging
 
 bp = Blueprint('auth', __name__)
 
@@ -15,18 +14,19 @@ bp = Blueprint('auth', __name__)
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
+        
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
         if user is None or not user.check_password(form.password.data):
-            flash('Nombre de usuario o contraseña inválidos')
+            flash('Usuario o contraseña inválidos')
             return redirect(url_for('auth.login'))
+            
         login_user(user)
         next_page = request.args.get('next')
-        if not next_page or urlparse(next_page).netloc != '':
-            next_page = url_for('index')
-        return redirect(next_page)
-    return render_template('login.html', title='Iniciar Sesión', form=form)
+        return redirect(next_page if next_page else url_for('index'))
+        
+    return render_template('auth/login.html', form=form)
 
 @bp.route('/logout')
 def logout():
