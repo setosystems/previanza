@@ -1,114 +1,119 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="bg-white shadow-sm rounded-lg p-6">
-        <div class="mb-8">
-            <h1 class="text-2xl font-bold text-gray-900">Crear Nuevo Agente</h1>
-            <p class="mt-2 text-sm text-gray-600">Ingrese la información del nuevo agente</p>
+<div class="w-full max-w-lg mx-auto">
+    <div class="flex flex-wrap -mx-3 mb-6">
+        <div class="w-full px-3">
+            <h1 class="text-2xl font-bold text-gray-900 mb-4">Crear Nuevo Agente</h1>
+            <p class="text-sm text-gray-600 mb-6">Ingrese la información del nuevo agente</p>
+        </div>
+    </div>
+
+    <form method="POST" class="space-y-6">
+        {{ form.hidden_tag() }}
+        
+        <!-- Información de Cuenta -->
+        <div class="flex flex-wrap -mx-3 mb-6">
+            <div class="w-full px-3">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Información de Cuenta</h3>
+                <div class="space-y-4">
+                    <div>
+                        {{ form.username.label(class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2") }}
+                        {{ form.username(class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white", placeholder="Nombre de usuario") }}
+                        {% for error in form.username.errors %}
+                            <p class="text-red-500 text-xs italic">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <div>
+                        {{ form.password.label(class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2") }}
+                        {{ form.password(class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white", placeholder="Contraseña") }}
+                        {% for error in form.password.errors %}
+                            <p class="text-red-500 text-xs italic">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <form method="POST" class="space-y-8">
-            {{ form.hidden_tag() }}
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Información de Cuenta -->
-                <div class="space-y-6">
-                    <h3 class="text-lg font-medium text-gray-900">Información de Cuenta</h3>
-                    <div class="space-y-4">
-                        <div>
-                            {{ form.username.label(class="block text-sm font-medium text-gray-700") }}
-                            {{ form.username(class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm") }}
-                            {% for error in form.username.errors %}
-                                <p class="mt-1 text-sm text-red-600">{{ error }}</p>
-                            {% endfor %}
-                        </div>
-
-                        <div>
-                            {{ form.password.label(class="block text-sm font-medium text-gray-700") }}
-                            {{ form.password(class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm") }}
-                            {% for error in form.password.errors %}
-                                <p class="mt-1 text-sm text-red-600">{{ error }}</p>
-                            {% endfor %}
-                        </div>
+        <!-- Información Personal -->
+        <div class="flex flex-wrap -mx-3 mb-6">
+            <div class="w-full px-3">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Información Personal</h3>
+                <div class="space-y-4">
+                    <div>
+                        {{ form.name.label(class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2") }}
+                        {{ form.name(class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white", placeholder="Nombre completo") }}
+                        {% for error in form.name.errors %}
+                            <p class="text-red-500 text-xs italic">{{ error }}</p>
+                        {% endfor %}
                     </div>
-                </div>
 
-                <!-- Información Personal -->
-                <div class="space-y-6">
-                    <h3 class="text-lg font-medium text-gray-900">Información Personal</h3>
-                    <div class="space-y-4">
-                        <div>
-                            {{ form.name.label(class="block text-sm font-medium text-gray-700") }}
-                            {{ form.name(class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm") }}
-                            {% for error in form.name.errors %}
-                                <p class="mt-1 text-sm text-red-600">{{ error }}</p>
-                            {% endfor %}
-                        </div>
-
-                        <div>
-                            {{ form.email.label(class="block text-sm font-medium text-gray-700") }}
-                            {{ form.email(class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm") }}
-                            {% for error in form.email.errors %}
-                                <p class="mt-1 text-sm text-red-600">{{ error }}</p>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Documentación -->
-                <div class="space-y-6">
-                    <h3 class="text-lg font-medium text-gray-900">Documentación</h3>
-                    <div class="space-y-4">
-                        <div>
-                            {{ form.document_type.label(class="block text-sm font-medium text-gray-700") }}
-                            {{ form.document_type(class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm") }}
-                            {% for error in form.document_type.errors %}
-                                <p class="mt-1 text-sm text-red-600">{{ error }}</p>
-                            {% endfor %}
-                        </div>
-
-                        <div>
-                            {{ form.document_number.label(class="block text-sm font-medium text-gray-700") }}
-                            {{ form.document_number(class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm") }}
-                            {% for error in form.document_number.errors %}
-                                <p class="mt-1 text-sm text-red-600">{{ error }}</p>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Información Laboral -->
-                <div class="space-y-6">
-                    <h3 class="text-lg font-medium text-gray-900">Información Laboral</h3>
-                    <div class="space-y-4">
-                        <div>
-                            {{ form.hire_date.label(class="block text-sm font-medium text-gray-700") }}
-                            {{ form.hire_date(class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm", type="date") }}
-                            {% for error in form.hire_date.errors %}
-                                <p class="mt-1 text-sm text-red-600">{{ error }}</p>
-                            {% endfor %}
-                        </div>
-
-                        <div>
-                            {{ form.parent_id.label(class="block text-sm font-medium text-gray-700") }}
-                            {{ form.parent_id(class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm") }}
-                            {% for error in form.parent_id.errors %}
-                                <p class="mt-1 text-sm text-red-600">{{ error }}</p>
-                            {% endfor %}
-                        </div>
+                    <div>
+                        {{ form.email.label(class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2") }}
+                        {{ form.email(class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white", placeholder="ejemplo@correo.com") }}
+                        {% for error in form.email.errors %}
+                            <p class="text-red-500 text-xs italic">{{ error }}</p>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200">
-                <a href="{{ url_for('agents.list_agents') }}" 
-                   class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
-                    Cancelar
-                </a>
-                {{ form.submit(class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary") }}
+        <!-- Documentación -->
+        <div class="flex flex-wrap -mx-3 mb-6">
+            <div class="w-full px-3">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Documentación</h3>
+                <div class="flex flex-wrap -mx-3">
+                    <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                        {{ form.document_type.label(class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2") }}
+                        {{ form.document_type(class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white") }}
+                        {% for error in form.document_type.errors %}
+                            <p class="text-red-500 text-xs italic">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    <div class="w-full md:w-1/2 px-3">
+                        {{ form.document_number.label(class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2") }}
+                        {{ form.document_number(class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white", placeholder="Número de documento") }}
+                        {% for error in form.document_number.errors %}
+                            <p class="text-red-500 text-xs italic">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
-        </form>
-    </div>
+        </div>
+
+        <!-- Información Laboral -->
+        <div class="flex flex-wrap -mx-3 mb-6">
+            <div class="w-full px-3">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Información Laboral</h3>
+                <div class="flex flex-wrap -mx-3">
+                    <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                        {{ form.hire_date.label(class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2") }}
+                        {{ form.hire_date(class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white", type="date") }}
+                        {% for error in form.hire_date.errors %}
+                            <p class="text-red-500 text-xs italic">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    <div class="w-full md:w-1/2 px-3">
+                        {{ form.parent_id.label(class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2") }}
+                        {{ form.parent_id(class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white") }}
+                        {% for error in form.parent_id.errors %}
+                            <p class="text-red-500 text-xs italic">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botones -->
+        <div class="flex justify-end space-x-4">
+            <a href="{{ url_for('agents.list_agents') }}" 
+               class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                Cancelar
+            </a>
+            {{ form.submit(class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline") }}
+        </div>
+    </form>
 </div>
 {% endblock %}

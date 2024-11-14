@@ -1,76 +1,93 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <div class="list-header">
-        <h1>Gestión de Usuarios</h1>
-
-        <form class="search-form" method="GET" action="{{ url_for('auth.list_users') }}">
-            <input type="text" 
-                   class="search-input" 
-                   name="username" 
-                   placeholder="Buscar por nombre de usuario" 
-                   value="{{ request.args.get('username', '') }}">
+<div class="w-full max-w-lg mx-auto">
+    <!-- Header Section -->
+    <div class="flex flex-wrap -mx-3 mb-6">
+        <div class="w-full px-3">
+            <h1 class="text-2xl font-bold text-gray-900 mb-4">Gestión de Usuarios</h1>
             
-            <input type="email" 
-                   class="search-input" 
-                   name="email" 
-                   placeholder="Buscar por email" 
-                   value="{{ request.args.get('email', '') }}">
-            
-            <button type="submit" class="search-button">
-                <i class="fas fa-search"></i>
-                Buscar
-            </button>
-        </form>
-
-        <div class="action-buttons">
-            <a href="{{ url_for('auth.register') }}" class="btn-new">
-                <i class="fas fa-user-plus"></i>
-                Crear Nuevo Usuario
-            </a>
+            <!-- Action Buttons -->
+            <div class="flex justify-end space-x-4 mb-6">
+                <a href="{{ url_for('auth.register') }}" 
+                   class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                    <i class="fas fa-user-plus mr-2"></i>Crear Nuevo Usuario
+                </a>
+            </div>
         </div>
     </div>
-    
-    <div class="table-container">
-        <table>
-            <thead>
+
+    <!-- Search Form -->
+    <form method="GET" action="{{ url_for('auth.list_users') }}" class="mb-8">
+        <div class="flex flex-wrap -mx-3 mb-6">
+            <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="username">
+                    Usuario
+                </label>
+                <input type="text" 
+                       id="username"
+                       name="username" 
+                       value="{{ request.args.get('username', '') }}"
+                       class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
+                       placeholder="Nombre de usuario">
+            </div>
+            <div class="w-full md:w-1/2 px-3">
+                <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="email">
+                    Email
+                </label>
+                <input type="email" 
+                       id="email"
+                       name="email" 
+                       value="{{ request.args.get('email', '') }}"
+                       class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                       placeholder="ejemplo@correo.com">
+            </div>
+        </div>
+
+        <div class="flex flex-wrap -mx-3 mb-2">
+            <div class="w-full px-3 mb-6 md:mb-0">
+                <button type="submit" 
+                        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded focus:outline-none focus:shadow-outline w-full">
+                    <i class="fas fa-search mr-2"></i>Buscar
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Table Section -->
+    <div class="bg-white shadow-sm rounded-lg overflow-hidden">
+        <table class="w-full">
+            <thead class="bg-gray-50">
                 <tr>
-                    <th>ID</th>
-                    <th>NOMBRE DE USUARIO</th>
-                    <th>EMAIL</th>
-                    <th>ROL</th>
-                    <th>NOMBRE COMPLETO</th>
-                    <th>TELÉFONO</th>
-                    <th>FECHA DE CONTRATACIÓN</th>
-                    <th>ACCIONES</th>
+                    <th class="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider text-gray-700">Usuario</th>
+                    <th class="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider text-gray-700">Email</th>
+                    <th class="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider text-gray-700">Rol</th>
+                    <th class="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider text-gray-700">Acciones</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-gray-200">
                 {% for user in users %}
-                    <tr>
-                        <td>{{ user.id }}</td>
-                        <td>{{ user.username }}</td>
-                        <td>{{ user.email }}</td>
-                        <td>{{ user.role.value }}</td>
-                        <td>{{ user.name }}</td>
-                        <td>{{ user.phone }}</td>
-                        <td>{{ user.hire_date.strftime('%Y-%m-%d') if user.hire_date else 'N/A' }}</td>
-                        <td class="action-buttons">
-                            <a href="{{ url_for('auth.edit_user', user_id=user.id) }}" 
-                               class="action-button edit-button"
-                               title="Editar usuario">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <a href="{{ url_for('auth.delete_user', user_id=user.id) }}" 
-                               class="action-button delete-button"
-                               onclick="return confirm('¿Estás seguro de que quieres eliminar este usuario?')"
-                               title="Eliminar usuario">
-                                <i class="fas fa-trash"></i>
-                            </a>
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ user.username }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ user.email }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ user.role.value }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div class="flex space-x-3">
+                                <a href="{{ url_for('auth.edit_user', user_id=user.id) }}" 
+                                   class="text-green-600 hover:text-green-900">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{{ url_for('auth.delete_user', user_id=user.id) }}" 
+                                   class="text-red-600 hover:text-red-900"
+                                   onclick="return confirm('¿Está seguro de que desea eliminar este usuario?')">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
                         </td>
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+</div>
 {% endblock %}

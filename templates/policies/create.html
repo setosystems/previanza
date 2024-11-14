@@ -1,157 +1,174 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="form-container">
-    <div class="form-header">
-        <h1>Crear Nueva Póliza</h1>
-        <p class="form-subtitle">Ingrese la información de la nueva póliza</p>
+<div class="w-full max-w-lg mx-auto">
+    <div class="flex flex-wrap -mx-3 mb-6">
+        <div class="w-full px-3">
+            <h1 class="text-2xl font-bold text-gray-900 mb-4">Crear Nueva Póliza</h1>
+            <p class="text-sm text-gray-600 mb-6">Ingrese la información de la nueva póliza</p>
+        </div>
     </div>
 
-    <form method="POST" class="modern-form">
+    <form method="POST" class="space-y-6">
         {{ form.hidden_tag() }}
         
-        <div class="form-grid">
-            <div class="form-section">
-                <h3>Información Básica</h3>
-                <div class="input-group">
-                    <div class="form-field">
-                        {{ form.policy_number.label }}
-                        {{ form.policy_number(class="modern-input") }}
+        <!-- Información Básica -->
+        <div class="flex flex-wrap -mx-3 mb-6">
+            <div class="w-full px-3">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Información Básica</h3>
+                <div class="space-y-4">
+                    <div>
+                        {{ form.policy_number.label(class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2") }}
+                        {{ form.policy_number(class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white", placeholder="Número de póliza") }}
                         {% for error in form.policy_number.errors %}
-                            <span class="error-message">{{ error }}</span>
+                            <p class="text-red-500 text-xs italic">{{ error }}</p>
                         {% endfor %}
                     </div>
-                    <div class="form-field">
-                        {{ form.product_id.label }}
-                        {{ form.product_id(class="modern-input select-input") }}
+
+                    <div>
+                        {{ form.product_id.label(class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2") }}
+                        {{ form.product_id(class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white") }}
                         {% for error in form.product_id.errors %}
-                            <span class="error-message">{{ error }}</span>
+                            <p class="text-red-500 text-xs italic">{{ error }}</p>
                         {% endfor %}
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="form-section">
-                <h3>Fechas y Valores</h3>
-                <div class="input-group">
-                    <div class="form-field">
-                        {{ form.start_date.label }}
-                        {{ form.start_date(class="modern-input", type="date") }}
+        <!-- Fechas y Valores -->
+        <div class="flex flex-wrap -mx-3 mb-6">
+            <div class="w-full px-3">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Fechas y Valores</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        {{ form.start_date.label(class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2") }}
+                        {{ form.start_date(class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white", type="date") }}
                         {% for error in form.start_date.errors %}
-                            <span class="error-message">{{ error }}</span>
+                            <p class="text-red-500 text-xs italic">{{ error }}</p>
                         {% endfor %}
                     </div>
-                    <div class="form-field">
-                        {{ form.end_date.label }}
-                        {{ form.end_date(class="modern-input", type="date") }}
+                    <div>
+                        {{ form.end_date.label(class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2") }}
+                        {{ form.end_date(class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white", type="date") }}
                         {% for error in form.end_date.errors %}
-                            <span class="error-message">{{ error }}</span>
+                            <p class="text-red-500 text-xs italic">{{ error }}</p>
                         {% endfor %}
                     </div>
                 </div>
-                <div class="form-field">
-                    {{ form.premium.label }}
-                    {{ form.premium(class="modern-input") }}
+                <div class="mt-4">
+                    {{ form.premium.label(class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2") }}
+                    {{ form.premium(class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white", placeholder="0.00") }}
                     {% for error in form.premium.errors %}
-                        <span class="error-message">{{ error }}</span>
+                        <p class="text-red-500 text-xs italic">{{ error }}</p>
                     {% endfor %}
                 </div>
             </div>
+        </div>
 
-            <div class="form-section">
-                <h3>Participantes</h3>
-                <div class="input-group">
-                    <div class="form-field">
-                        {{ form.client.label }}
-                        {{ form.client(class="modern-input", id="client_search") }}
-                        {{ form.client_id(id="client_id") }}
-                        <div id="client_results" class="search-results"></div>
+        <!-- Participantes -->
+        <div class="flex flex-wrap -mx-3 mb-6">
+            <div class="w-full px-3">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Participantes</h3>
+                <div class="space-y-4">
+                    <div class="relative">
+                        {{ form.client.label(class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2") }}
+                        {{ form.client(class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white", id="client_search", placeholder="Buscar cliente...") }}
+                        {{ form.client_id(id="client_id", type="hidden") }}
+                        <div id="client_results" class="absolute z-10 w-full bg-white shadow-lg rounded-b border-t-0 border"></div>
                         {% for error in form.client.errors %}
-                            <span class="error-message">{{ error }}</span>
+                            <p class="text-red-500 text-xs italic">{{ error }}</p>
                         {% endfor %}
                     </div>
-                    <div class="form-field">
-                        {{ form.agent.label }}
-                        {{ form.agent(class="modern-input", id="agent_search") }}
-                        {{ form.agent_id(id="agent_id") }}
-                        <div id="agent_results" class="search-results"></div>
-                        {% for error in form.agent.errors %}
-                            <span class="error-message">{{ error }}</span>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
 
-            <div class="form-section">
-                <h3>Estado</h3>
-                <div class="input-group">
-                    <div class="form-field">
-                        {{ form.emision_status.label }}
-                        {{ form.emision_status(class="modern-input select-input") }}
-                        {% for error in form.emision_status.errors %}
-                            <span class="error-message">{{ error }}</span>
-                        {% endfor %}
-                    </div>
-                    <div class="form-field">
-                        {{ form.payment_status.label }}
-                        {{ form.payment_status(class="modern-input select-input") }}
-                        {% for error in form.payment_status.errors %}
-                            <span class="error-message">{{ error }}</span>
+                    <div class="relative">
+                        {{ form.agent.label(class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2") }}
+                        {{ form.agent(class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white", id="agent_search", placeholder="Buscar agente...") }}
+                        {{ form.agent_id(id="agent_id", type="hidden") }}
+                        <div id="agent_results" class="absolute z-10 w-full bg-white shadow-lg rounded-b border-t-0 border"></div>
+                        {% for error in form.agent.errors %}
+                            <p class="text-red-500 text-xs italic">{{ error }}</p>
                         {% endfor %}
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="form-actions">
-            <a href="{{ url_for('policies.list_policies') }}" class="btn btn-secondary">Cancelar</a>
-            {{ form.submit(class="btn btn-primary") }}
+        <!-- Estado -->
+        <div class="flex flex-wrap -mx-3 mb-6">
+            <div class="w-full px-3">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Estado</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        {{ form.emision_status.label(class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2") }}
+                        {{ form.emision_status(class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white") }}
+                        {% for error in form.emision_status.errors %}
+                            <p class="text-red-500 text-xs italic">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    <div>
+                        {{ form.payment_status.label(class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2") }}
+                        {{ form.payment_status(class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white") }}
+                        {% for error in form.payment_status.errors %}
+                            <p class="text-red-500 text-xs italic">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botones -->
+        <div class="flex justify-end space-x-4">
+            <a href="{{ url_for('policies.list_policies') }}" 
+               class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                Cancelar
+            </a>
+            {{ form.submit(class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline") }}
         </div>
     </form>
 </div>
-{% endblock %}
 
 {% block scripts %}
 <script>
-    function setupSearch(inputId, resultsId, hiddenInputId, searchUrl) {
-        const input = document.getElementById(inputId);
-        const results = document.getElementById(resultsId);
-        const hiddenInput = document.getElementById(hiddenInputId);
+function setupSearch(inputId, resultsId, hiddenInputId, searchUrl) {
+    const input = document.getElementById(inputId);
+    const results = document.getElementById(resultsId);
+    const hiddenInput = document.getElementById(hiddenInputId);
 
-        input.addEventListener('input', function() {
-            if (this.value.length > 2) {
-                fetch(`${searchUrl}?query=${this.value}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        results.innerHTML = '';
-                        data.forEach(item => {
-                            const div = document.createElement('div');
-                            div.textContent = item.name;
-                            div.className = 'search-result-item';
-                            div.addEventListener('click', function() {
-                                input.value = item.name;
-                                hiddenInput.value = item.id;
-                                results.innerHTML = '';
-                            });
-                            results.appendChild(div);
+    input.addEventListener('input', function() {
+        if (this.value.length > 2) {
+            fetch(`${searchUrl}?query=${this.value}`)
+                .then(response => response.json())
+                .then(data => {
+                    results.innerHTML = '';
+                    data.forEach(item => {
+                        const div = document.createElement('div');
+                        div.textContent = item.name;
+                        div.className = 'p-2 hover:bg-gray-100 cursor-pointer';
+                        div.addEventListener('click', function() {
+                            input.value = item.name;
+                            hiddenInput.value = item.id;
+                            results.innerHTML = '';
                         });
+                        results.appendChild(div);
                     });
-            } else {
-                results.innerHTML = '';
-            }
-        });
-
-        // Cerrar dropdown al hacer clic fuera
-        document.addEventListener('click', function(event) {
-            if (!event.target.closest(`#${inputId}`) && !event.target.closest(`#${resultsId}`)) {
-                results.innerHTML = '';
-            }
-        });
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        setupSearch('client_search', 'client_results', 'client_id', '{{ url_for("policies.search_clients") }}');
-        setupSearch('agent_search', 'agent_results', 'agent_id', '{{ url_for("policies.search_agents") }}');
+                });
+        } else {
+            results.innerHTML = '';
+        }
     });
+
+    document.addEventListener('click', function(event) {
+        if (!event.target.closest(`#${inputId}`) && !event.target.closest(`#${resultsId}`)) {
+            results.innerHTML = '';
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    setupSearch('client_search', 'client_results', 'client_id', '{{ url_for("policies.search_clients") }}');
+    setupSearch('agent_search', 'agent_results', 'agent_id', '{{ url_for("policies.search_agents") }}');
+});
 </script>
+{% endblock %}
 {% endblock %}

@@ -1,70 +1,95 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <div class="list-header">
-        <h1>Lista de Agentes</h1>
-        
-        <form class="search-form" method="GET" action="{{ url_for('agents.list_agents') }}">
-            <input type="text" 
-                   class="search-input" 
-                   name="username" 
-                   placeholder="Nombre de usuario" 
-                   value="{{ request.args.get('username', '') }}">
+<div class="w-full max-w-lg mx-auto">
+    <!-- Header Section -->
+    <div class="flex flex-wrap -mx-3 mb-6">
+        <div class="w-full px-3">
+            <h1 class="text-2xl font-bold text-gray-900 mb-4">Lista de Agentes</h1>
             
-            <input type="email" 
-                   class="search-input" 
-                   name="email" 
-                   placeholder="Email" 
-                   value="{{ request.args.get('email', '') }}">
-            
-            <button type="submit" class="search-button">
-                <i class="fas fa-search"></i>
-                Buscar
-            </button>
-        </form>
-
-        <div class="action-buttons">
-            <a href="{{ url_for('agents.create_agent') }}" class="btn-new">
-                <i class="fas fa-plus"></i>
-                Nuevo Agente
-            </a>
+            <!-- Action Buttons -->
+            <div class="flex justify-end space-x-4 mb-6">
+                <a href="{{ url_for('agents.create_agent') }}" 
+                   class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                    <i class="fas fa-plus mr-2"></i>Nuevo Agente
+                </a>
+            </div>
         </div>
     </div>
 
-    <div class="table-container">
-        <table>
-            <thead>
+    <!-- Search Form -->
+    <form method="GET" action="{{ url_for('agents.list_agents') }}" class="mb-8">
+        <div class="flex flex-wrap -mx-3 mb-6">
+            <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
+                <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="username">
+                    Usuario
+                </label>
+                <input type="text" 
+                       id="username"
+                       name="username" 
+                       value="{{ request.args.get('username', '') }}"
+                       class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
+                       placeholder="Nombre de usuario">
+            </div>
+            <div class="w-full md:w-1/2 px-3">
+                <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="email">
+                    Email
+                </label>
+                <input type="email" 
+                       id="email"
+                       name="email" 
+                       value="{{ request.args.get('email', '') }}"
+                       class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+                       placeholder="ejemplo@correo.com">
+            </div>
+        </div>
+
+        <div class="flex flex-wrap -mx-3 mb-2">
+            <div class="w-full px-3 mb-6 md:mb-0">
+                <button type="submit" 
+                        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded focus:outline-none focus:shadow-outline w-full">
+                    <i class="fas fa-search mr-2"></i>Buscar
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Table Section -->
+    <div class="bg-white shadow-sm rounded-lg overflow-hidden">
+        <table class="w-full">
+            <thead class="bg-gray-50">
                 <tr>
-                    <th>NOMBRE DE USUARIO</th>
-                    <th>EMAIL</th>
-                    <th>NOMBRE COMPLETO</th>
-                    <th>TELÉFONO</th>
-                    <th>ACCIONES</th>
+                    <th class="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider text-gray-700">Usuario</th>
+                    <th class="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider text-gray-700">Email</th>
+                    <th class="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider text-gray-700">Nombre</th>
+                    <th class="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider text-gray-700">Teléfono</th>
+                    <th class="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider text-gray-700">Acciones</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-gray-200">
                 {% for agent in agents %}
-                    <tr>
-                        <td>{{ agent.username }}</td>
-                        <td>{{ agent.email }}</td>
-                        <td>{{ agent.name }}</td>
-                        <td>{{ agent.phone }}</td>
-                        <td class="action-buttons">
-                            <a href="{{ url_for('agents.edit_agent', id=agent.id) }}" 
-                               class="action-button edit-button"
-                               title="Editar agente">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <a href="{{ url_for('agents.delete_agent', id=agent.id) }}" 
-                               class="action-button delete-button"
-                               onclick="return confirm('¿Está seguro de que desea eliminar este agente?')"
-                               title="Eliminar agente">
-                                <i class="fas fa-trash"></i>
-                            </a>
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ agent.username }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ agent.email }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ agent.name }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ agent.phone }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div class="flex space-x-3">
+                                <a href="{{ url_for('agents.edit_agent', id=agent.id) }}" 
+                                   class="text-green-600 hover:text-green-900">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{{ url_for('agents.delete_agent', id=agent.id) }}" 
+                                   class="text-red-600 hover:text-red-900"
+                                   onclick="return confirm('¿Está seguro de que desea eliminar este agente?')">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
                         </td>
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+</div>
 {% endblock %}
