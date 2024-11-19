@@ -1,120 +1,163 @@
 {% extends "base.html" %}
 
 {% block content %}
-<form class="w-full max-w-lg mx-auto" method="POST">
-  {{ form.hidden_tag() }}
-  
-  <!-- Información Personal -->
-  <div class="flex flex-wrap -mx-3 mb-6">
-    <div class="w-full md:w-1/2 px-3 mb-6 md:mb-0">
-      <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="name">
-        Nombre
-      </label>
-      {{ form.name(
-        class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white",
-        placeholder="Juan Pérez"
-      ) }}
-      {% for error in form.name.errors %}
-        <p class="text-red-500 text-xs italic">{{ error }}</p>
-      {% endfor %}
-    </div>
-    <div class="w-full md:w-1/2 px-3">
-      <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="email">
-        Email
-      </label>
-      {{ form.email(
-        class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500",
-        placeholder="ejemplo@correo.com"
-      ) }}
-    </div>
-  </div>
-
-  <!-- Dirección -->
-  <div class="flex flex-wrap -mx-3 mb-6">
-    <div class="w-full px-3">
-      <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="address">
-        Dirección
-      </label>
-      {{ form.address(
-        class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500",
-        placeholder="Av. Principal #123"
-      ) }}
-    </div>
-  </div>
-
-  <!-- Ciudad -->
-  <div class="flex flex-wrap -mx-3 mb-6">
-    <div class="w-full px-3">
-      <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="city">
-        Ciudad
-      </label>
-      {{ form.city(
-        class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500",
-        placeholder="Quito"
-      ) }}
-    </div>
-  </div>
-
-  <!-- Documentación y Teléfono -->
-  <div class="flex flex-wrap -mx-3 mb-2">
-    <div class="w-full md:w-1/3 px-3 mb-6 md:mb-0">
-      <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="document_type">
-        Tipo de Documento
-      </label>
-      <div class="relative">
-        {{ form.document_type(
-          class="block appearance-none w-full bg-gray-200 border border-gray-200 text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-        ) }}
-        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-          <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-          </svg>
+<div class="container-fluid">
+    <div class="max-w-2xl mx-auto">
+        <div class="mb-6">
+            <h1 class="page-title">Editar Cliente</h1>
+            <p class="subtitle">Actualice la información del cliente</p>
         </div>
-      </div>
-    </div>
-    <div class="w-full md:w-1/3 px-3 mb-6 md:mb-0">
-      <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="document_number">
-        Número de Documento
-      </label>
-      {{ form.document_number(
-        class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500",
-        placeholder="1234567890"
-      ) }}
-    </div>
-    <div class="w-full md:w-1/3 px-3 mb-6 md:mb-0">
-      <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="phone">
-        Teléfono
-      </label>
-      {{ form.phone(
-        class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500",
-        placeholder="+593 99 999 9999"
-      ) }}
-    </div>
-  </div>
 
-  <!-- Fecha de Nacimiento -->
-  <div class="flex flex-wrap -mx-3 mb-6">
-    <div class="w-full px-3">
-      <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="birthdate">
-        Fecha de Nacimiento
-      </label>
-      {{ form.birthdate(
-        class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white focus:border-gray-500",
-        type="date"
-      ) }}
-    </div>
-  </div>
+        <div class="card">
+            <form method="POST" class="space-y-6">
+                {{ form.hidden_tag() }}
+                
+                <div class="card-body">
+                    <!-- Información Personal -->
+                    <div class="space-y-6">
+                        <h3 class="section-title">Información Personal</h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="form-group">
+                                {{ form.name.label(class="form-label") }}
+                                {{ form.name(class="form-input", placeholder="Nombre completo") }}
+                                {% for error in form.name.errors %}
+                                    <span class="form-error">{{ error }}</span>
+                                {% endfor %}
+                            </div>
 
-  <!-- Botones -->
-  <div class="flex items-center justify-end mt-6">
-    <button class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mr-2" 
-            type="button" 
-            onclick="window.history.back()">
-      Cancelar
-    </button>
-    {{ form.submit(
-      class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-    ) }}
-  </div>
-</form>
+                            <div class="form-group">
+                                {{ form.email.label(class="form-label") }}
+                                {{ form.email(class="form-input", placeholder="correo@ejemplo.com") }}
+                                {% for error in form.email.errors %}
+                                    <span class="form-error">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="form-group">
+                                {{ form.phone.label(class="form-label") }}
+                                {{ form.phone(class="form-input", placeholder="+593 99 999 9999") }}
+                                {% for error in form.phone.errors %}
+                                    <span class="form-error">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+
+                            <div class="form-group">
+                                {{ form.birthdate.label(class="form-label") }}
+                                {{ form.birthdate(class="form-input", type="date") }}
+                                {% for error in form.birthdate.errors %}
+                                    <span class="form-error">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <!-- Dirección -->
+                    <div class="space-y-6">
+                        <h3 class="section-title">Dirección</h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="form-group md:col-span-2">
+                                {{ form.address.label(class="form-label") }}
+                                {{ form.address(class="form-input", placeholder="Dirección completa") }}
+                                {% for error in form.address.errors %}
+                                    <span class="form-error">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+
+                            <div class="form-group">
+                                {{ form.city.label(class="form-label") }}
+                                {{ form.city(class="form-input", placeholder="Ciudad") }}
+                                {% for error in form.city.errors %}
+                                    <span class="form-error">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <!-- Documentación -->
+                    <div class="space-y-6">
+                        <h3 class="section-title">Documentación</h3>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="form-group">
+                                {{ form.document_type.label(class="form-label") }}
+                                {{ form.document_type(class="form-select") }}
+                                {% for error in form.document_type.errors %}
+                                    <span class="form-error">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+
+                            <div class="form-group">
+                                {{ form.document_number.label(class="form-label") }}
+                                {{ form.document_number(class="form-input", placeholder="Número de documento") }}
+                                {% for error in form.document_number.errors %}
+                                    <span class="form-error">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer flex justify-end space-x-4">
+                    <a href="{{ url_for('clients.list_clients') }}" class="btn-secondary">
+                        <i class="fas fa-times mr-2"></i>Cancelar
+                    </a>
+                    {{ form.submit(class="btn-primary") }}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Validación del lado del cliente
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+        const requiredFields = form.querySelectorAll('input[required], select[required]');
+        
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                isValid = false;
+                field.classList.add('border-danger-500');
+                const errorMsg = field.parentElement.querySelector('.form-error');
+                if (!errorMsg) {
+                    const error = document.createElement('span');
+                    error.className = 'form-error';
+                    error.textContent = 'Este campo es requerido';
+                    field.parentElement.appendChild(error);
+                }
+            } else {
+                field.classList.remove('border-danger-500');
+                const errorMsg = field.parentElement.querySelector('.form-error');
+                if (errorMsg) errorMsg.remove();
+            }
+        });
+
+        if (!isValid) {
+            e.preventDefault();
+        }
+    });
+
+    // Limpiar errores al escribir
+    form.querySelectorAll('input, select').forEach(field => {
+        field.addEventListener('input', function() {
+            this.classList.remove('border-danger-500');
+            const errorMsg = this.parentElement.querySelector('.form-error');
+            if (errorMsg) errorMsg.remove();
+        });
+    });
+});
+</script>
+{% endblock %}
+
 {% endblock %}

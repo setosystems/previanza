@@ -1,178 +1,211 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="w-full max-w-lg mx-auto">
-    <!-- Header Section -->
-    <div class="flex flex-wrap -mx-3 mb-6">
-        <div class="w-full px-3">
-            <div class="flex justify-between items-center mb-6">
-                <h1 class="text-2xl font-bold text-gray-900">Detalles de Póliza</h1>
+<div class="container-fluid">
+    <div class="max-w-4xl mx-auto">
+        <div class="mb-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="page-title">Póliza {{ policy.policy_number }}</h1>
+                    <p class="subtitle">Detalles de la póliza</p>
+                </div>
+                {% if current_user.role != UserRole.AGENTE %}
                 <div class="flex space-x-4">
-                    {% if current_user.role != UserRole.AGENTE %}
-                    <a href="{{ url_for('policies.edit_policy', id=policy.id) }}" 
-                       class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                        <i class="fas fa-edit mr-2"></i>Editar
+                    <a href="{{ url_for('policies.edit_policy', id=policy.id) }}" class="btn-primary">
+                        <i class="fas fa-edit mr-2"></i>Editar Póliza
                     </a>
-                    {% endif %}
-                    <a href="{{ url_for('policies.list_policies') }}" 
-                       class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                        <i class="fas fa-arrow-left mr-2"></i>Volver
-                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Información Principal -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <!-- Detalles de la Póliza -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="section-title flex items-center">
+                        <i class="fas fa-file-contract text-primary-600 mr-2"></i>
+                        Detalles de la Póliza
+                    </h3>
+                </div>
+                <div class="card-body space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Prima</p>
+                            <p class="text-xl font-semibold text-primary-600">${{ "{:,.2f}".format(policy.premium) }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Estado de Pago</p>
+                            <span class="badge {% if policy.payment_status.name == 'PAGADO' %}badge-success{% elif policy.payment_status.name == 'PENDIENTE' %}badge-warning{% else %}badge-danger{% endif %}">
+                                {{ policy.payment_status.value }}
+                            </span>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Fecha de Inicio</p>
+                            <p class="text-gray-900">{{ policy.start_date.strftime('%d/%m/%Y') }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Fecha de Fin</p>
+                            <p class="text-gray-900">{{ policy.end_date.strftime('%d/%m/%Y') }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Estado de Emisión</p>
+                            <span class="badge {% if policy.emision_status.name == 'EMITIDA' %}badge-success{% else %}badge-warning{% endif %}">
+                                {{ policy.emision_status.value }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información del Cliente -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="section-title flex items-center">
+                        <i class="fas fa-user text-primary-600 mr-2"></i>
+                        Cliente
+                    </h3>
+                </div>
+                <div class="card-body space-y-4">
+                    <div class="grid grid-cols-1 gap-4">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Nombre</p>
+                            <p class="text-gray-900">{{ policy.client.name }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Email</p>
+                            <p class="text-gray-900">{{ policy.client.email }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Teléfono</p>
+                            <p class="text-gray-900">{{ policy.client.phone or 'No especificado' }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Información del Producto -->
+            <div class="card md:col-span-2">
+                <div class="card-header">
+                    <h3 class="section-title flex items-center">
+                        <i class="fas fa-box text-primary-600 mr-2"></i>
+                        Producto
+                    </h3>
+                </div>
+                <div class="card-body space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Nombre del Producto</p>
+                            <p class="text-gray-900">{{ policy.product.name }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Aseguradora</p>
+                            <p class="text-gray-900">{{ policy.product.aseguradora }}</p>
+                        </div>
+                        <div class="col-span-2">
+                            <p class="text-sm font-medium text-gray-500">Descripción</p>
+                            <p class="text-gray-900">{{ policy.product.description or 'Sin descripción' }}</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Información de la Póliza -->
-    <div class="bg-white shadow-sm rounded-lg p-6 mb-6">
-        <h3 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
-            <i class="fas fa-file-invoice text-blue-500 mr-2"></i>
-            Información de la Póliza
-        </h3>
-        <div class="grid grid-cols-2 gap-4">
-            <div>
-                <p class="text-sm font-medium text-gray-500">Número de Póliza</p>
-                <p class="mt-1 text-sm text-gray-900">{{ policy.policy_number }}</p>
+        <!-- Comisiones -->
+        <div class="card">
+            <div class="card-header">
+                <div class="flex justify-between items-center">
+                    <h3 class="section-title flex items-center">
+                        <i class="fas fa-money-bill-wave text-primary-600 mr-2"></i>
+                        Comisiones
+                    </h3>
+                    {% if current_user.role == UserRole.ADMIN %}
+                    <button 
+                        type="button"
+                        data-policy-id="{{ policy.id }}"
+                        class="btn-secondary"
+                        id="recalculateBtn">
+                        <i class="fas fa-sync-alt mr-2"></i>Recalcular
+                    </button>
+                    {% endif %}
+                </div>
             </div>
-            <div>
-                <p class="text-sm font-medium text-gray-500">Prima</p>
-                <p class="mt-1 text-sm text-gray-900 font-semibold">${{ "{:,.2f}".format(policy.premium) }}</p>
-            </div>
-            <div>
-                <p class="text-sm font-medium text-gray-500">Fecha de Inicio</p>
-                <p class="mt-1 text-sm text-gray-900">{{ policy.start_date.strftime('%d/%m/%Y') }}</p>
-            </div>
-            <div>
-                <p class="text-sm font-medium text-gray-500">Fecha de Fin</p>
-                <p class="mt-1 text-sm text-gray-900">{{ policy.end_date.strftime('%d/%m/%Y') }}</p>
-            </div>
-            <div>
-                <p class="text-sm font-medium text-gray-500">Estado de Emisión</p>
-                <span class="inline-flex mt-1 px-2 py-1 text-xs font-semibold rounded-full
-                    {% if policy.emision_status.name == 'PENDIENTE' %}bg-yellow-100 text-yellow-800
-                    {% elif policy.emision_status.name == 'EMITIDA' %}bg-green-100 text-green-800
-                    {% elif policy.emision_status.name == 'CADUCADA' %}bg-red-100 text-red-800
-                    {% else %}bg-gray-100 text-gray-800{% endif %}">
-                    {{ policy.emision_status.value }}
-                </span>
-            </div>
-            <div>
-                <p class="text-sm font-medium text-gray-500">Estado de Pago</p>
-                <span class="inline-flex mt-1 px-2 py-1 text-xs font-semibold rounded-full
-                    {% if policy.payment_status.name == 'PENDIENTE' %}bg-yellow-100 text-yellow-800
-                    {% elif policy.payment_status.name == 'PAGADO' %}bg-green-100 text-green-800
-                    {% elif policy.payment_status.name == 'ABONADO' %}bg-blue-100 text-blue-800
-                    {% else %}bg-gray-100 text-gray-800{% endif %}">
-                    {{ policy.payment_status.value }}
-                </span>
+            <div class="card-body">
+                {% if commissions %}
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th class="table-header">Agente</th>
+                                <th class="table-header">Tipo</th>
+                                <th class="table-header text-right">Porcentaje</th>
+                                <th class="table-header text-right">Monto</th>
+                                <th class="table-header">Estado</th>
+                                <th class="table-header">Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for commission in commissions %}
+                            <tr class="table-row">
+                                <td class="table-cell">{{ commission.agent.name }}</td>
+                                <td class="table-cell">
+                                    <span class="badge {% if commission.commission_type == 'direct' %}badge-primary{% else %}badge-secondary{% endif %}">
+                                        {{ "Directa" if commission.commission_type == 'direct' else "Sobrecomisión" }}
+                                    </span>
+                                </td>
+                                <td class="table-cell text-right">{{ commission.percentage_applied }}%</td>
+                                <td class="table-cell text-right">${{ "{:,.2f}".format(commission.amount) }}</td>
+                                <td class="table-cell">
+                                    <span class="badge {% if commission.payment_status == 'PAGADO' %}badge-success{% else %}badge-warning{% endif %}">
+                                        {{ commission.payment_status }}
+                                    </span>
+                                </td>
+                                <td class="table-cell">{{ commission.date.strftime('%d/%m/%Y') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="3" class="table-cell font-medium">Total Comisiones</td>
+                                <td class="table-cell text-right font-medium">${{ "{:,.2f}".format(total_commission) }}</td>
+                                <td colspan="2"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-8">
+                    <div class="mb-4">
+                        <i class="fas fa-money-bill-wave text-gray-400 text-4xl"></i>
+                    </div>
+                    <p class="text-gray-500">No hay comisiones registradas para esta póliza.</p>
+                </div>
+                {% endif %}
             </div>
         </div>
-    </div>
 
-    <!-- Información del Cliente -->
-    <div class="bg-white shadow-sm rounded-lg p-6 mb-6">
-        <h3 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
-            <i class="fas fa-user text-blue-500 mr-2"></i>
-            Cliente
-        </h3>
-        <div class="grid grid-cols-2 gap-4">
-            <div>
-                <p class="text-sm font-medium text-gray-500">Nombre</p>
-                <p class="mt-1 text-sm text-gray-900">{{ policy.client.name }}</p>
-            </div>
-            <div>
-                <p class="text-sm font-medium text-gray-500">Email</p>
-                <p class="mt-1 text-sm text-gray-900">{{ policy.client.email }}</p>
-            </div>
-            <div>
-                <p class="text-sm font-medium text-gray-500">Teléfono</p>
-                <p class="mt-1 text-sm text-gray-900">{{ policy.client.phone or 'No especificado' }}</p>
-            </div>
-            <div>
-                <p class="text-sm font-medium text-gray-500">Dirección</p>
-                <p class="mt-1 text-sm text-gray-900">{{ policy.client.address or 'No especificada' }}</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Información del Producto -->
-    <div class="bg-white shadow-sm rounded-lg p-6 mb-6">
-        <h3 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
-            <i class="fas fa-box text-blue-500 mr-2"></i>
-            Producto
-        </h3>
-        <div class="grid grid-cols-2 gap-4">
-            <div>
-                <p class="text-sm font-medium text-gray-500">Nombre</p>
-                <p class="mt-1 text-sm text-gray-900">{{ policy.product.name }}</p>
-            </div>
-            <div>
-                <p class="text-sm font-medium text-gray-500">Aseguradora</p>
-                <p class="mt-1 text-sm text-gray-900">{{ policy.product.aseguradora }}</p>
-            </div>
-            <div class="col-span-2">
-                <p class="text-sm font-medium text-gray-500">Descripción</p>
-                <p class="mt-1 text-sm text-gray-900">{{ policy.product.description or 'Sin descripción' }}</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Comisiones -->
-    <div class="bg-white shadow-sm rounded-lg p-6">
-        <h3 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
-            <i class="fas fa-money-bill-wave text-blue-500 mr-2"></i>
-            Comisiones
-        </h3>
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider text-gray-700">Agente</th>
-                        <th class="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider text-gray-700">Tipo</th>
-                        <th class="px-6 py-3 text-right text-xs font-bold uppercase tracking-wider text-gray-700">Porcentaje</th>
-                        <th class="px-6 py-3 text-right text-xs font-bold uppercase tracking-wider text-gray-700">Monto</th>
-                        <th class="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider text-gray-700">Fecha</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    {% for commission in commissions %}
-                    <tr>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ commission.agent.name }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                                {% if commission.commission_type == 'direct' %}
-                                    bg-green-100 text-green-800
-                                {% else %}
-                                    bg-blue-100 text-blue-800
-                                {% endif %}">
-                                {{ "Directa" if commission.commission_type == 'direct' else "Sobrecomisión" }}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900">
-                            {{ commission.percentage_applied }}%
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-medium text-gray-900">
-                            ${{ "{:,.2f}".format(commission.amount) }}
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {{ commission.date.strftime('%d/%m/%Y') }}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-                <tfoot class="bg-gray-50">
-                    <tr>
-                        <td colspan="3" class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                            Total Comisiones
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-right text-gray-900">
-                            ${{ "{:,.2f}".format(total_commission) }}
-                        </td>
-                        <td></td>
-                    </tr>
-                </tfoot>
-            </table>
+        <div class="flex justify-center mt-6">
+            <a href="{{ url_for('policies.list_policies') }}" class="btn-secondary">
+                <i class="fas fa-arrow-left mr-2"></i>Volver a la Lista de Pólizas
+            </a>
         </div>
     </div>
 </div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const recalculateBtn = document.getElementById('recalculateBtn');
+    if (recalculateBtn) {
+        recalculateBtn.addEventListener('click', function() {
+            const policyId = this.dataset.policyId;
+            if (confirm('¿Está seguro de que desea recalcular las comisiones?')) {
+                window.location.href = "{{ url_for('policies.recalculate_commission', id='') }}" + policyId;
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
 {% endblock %}

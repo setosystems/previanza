@@ -1,44 +1,91 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Gestión de Productos</h1>
-    
-    <h2>Agregar Nuevo Producto</h2>
-    <form method="POST">
-        {{ form.hidden_tag() }}
-        <div class="form-group">
-            {{ form.name.label }}
-            {{ form.name(class="form-control") }}
+<div class="w-full max-w-lg mx-auto">
+    <!-- Header Section -->
+    <div class="flex flex-wrap -mx-3 mb-6">
+        <div class="w-full px-3">
+            <h1 class="text-2xl font-bold text-gray-900 mb-4">Gestión de Productos</h1>
         </div>
-        <div class="form-group">
-            {{ form.description.label }}
-            {{ form.description(class="form-control") }}
+    </div>
+
+    <!-- Add Product Form -->
+    <div class="bg-white shadow-sm rounded-lg overflow-hidden mb-8">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-medium text-gray-900">Agregar Nuevo Producto</h2>
         </div>
-        {{ form.submit(class="btn btn-primary") }}
-    </form>
+        
+        <div class="p-6">
+            <form method="POST" class="space-y-6">
+                {{ form.hidden_tag() }}
+                
+                <div>
+                    {{ form.name.label(class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2") }}
+                    {{ form.name(class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white") }}
+                    {% for error in form.name.errors %}
+                        <p class="text-red-500 text-xs italic">{{ error }}</p>
+                    {% endfor %}
+                </div>
 
-    <h2>Productos Existentes</h2>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Nombre</th>
-                <th>Descripción</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for product in products %}
-                <tr>
-                    <td>{{ product.name }}</td>
-                    <td>{{ product.description }}</td>
-                    <td>
-                        <a href="{{ url_for('config.edit_product', id=product.id) }}" class="btn btn-primary btn-sm">Editar</a>
-                        <a href="{{ url_for('config.delete_product', id=product.id) }}" class="btn btn-danger btn-sm" onclick="return confirm('¿Está seguro de que desea eliminar este producto?')">Eliminar</a>
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                <div>
+                    {{ form.description.label(class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2") }}
+                    {{ form.description(class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white") }}
+                    {% for error in form.description.errors %}
+                        <p class="text-red-500 text-xs italic">{{ error }}</p>
+                    {% endfor %}
+                </div>
 
-    <a href="{{ url_for('config.config_index') }}" class="btn btn-secondary">Volver a Configuración</a>
+                {{ form.submit(class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline") }}
+            </form>
+        </div>
+    </div>
+
+    <!-- Products Table -->
+    <div class="bg-white shadow-sm rounded-lg overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-medium text-gray-900">Productos Existentes</h2>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descripción</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for product in products %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ product.name }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ product.description }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div class="flex space-x-3">
+                                <a href="{{ url_for('config.edit_product', id=product.id) }}" 
+                                   class="text-blue-600 hover:text-blue-900">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{{ url_for('config.delete_product', id=product.id) }}" 
+                                   class="text-red-600 hover:text-red-900"
+                                   onclick="return confirm('¿Está seguro de que desea eliminar este producto?')">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="flex justify-end mt-6">
+        <a href="{{ url_for('config.config_index') }}" 
+           class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+            <i class="fas fa-arrow-left mr-2"></i>Volver a Configuración
+        </a>
+    </div>
+</div>
 {% endblock %}

@@ -1,0 +1,79 @@
+/* Sidebar Container */
+.sidebar {
+    @apply fixed inset-y-0 left-0 z-50 w-64 bg-primary-900 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out;
+}
+
+/* Logo Container */
+.sidebar-logo {
+    @apply flex items-center justify-between h-16 px-4 bg-primary-800/50;
+}
+
+.sidebar-logo img {
+    @apply h-8 w-auto;
+}
+
+.sidebar-logo span {
+    @apply text-lg font-semibold text-white;
+}
+
+/* User Profile */
+.sidebar-profile {
+    @apply px-4 py-4 border-b border-primary-800/50;
+}
+
+.sidebar-profile-info {
+    @apply flex items-center space-x-3;
+}
+
+.sidebar-profile img {
+    @apply h-10 w-10 rounded-full ring-2 ring-primary-700/50;
+}
+
+/* Navigation */
+.sidebar-nav {
+    @apply flex-1 px-2 py-4 space-y-1 overflow-y-auto;
+}
+
+/* Menu Items */
+.sidebar-menu-item {
+    @apply flex items-center px-2 py-2 text-sm font-medium rounded-lg transition-colors;
+}
+
+.sidebar-menu-item:not(.active) {
+    @apply text-primary-100 hover:text-white hover:bg-primary-800;
+}
+
+.sidebar-menu-item.active {
+    @apply bg-primary-800 text-white;
+}
+
+/* Icons */
+.sidebar-menu-item i {
+    @apply w-6 h-6 mr-3;
+}
+
+/* Submenu */
+.sidebar-submenu {
+    @apply mt-1 pl-4 space-y-1;
+}
+
+.sidebar-submenu-item {
+    @apply flex items-center px-2 py-2 text-sm font-medium rounded-lg transition-colors;
+}
+
+.sidebar-submenu-item:not(.active) {
+    @apply text-primary-200 hover:text-white hover:bg-primary-800;
+}
+
+.sidebar-submenu-item.active {
+    @apply bg-primary-800 text-white;
+}
+
+/* Footer */
+.sidebar-footer {
+    @apply p-4 border-t border-primary-800/50;
+}
+
+.sidebar-footer a {
+    @apply flex items-center px-2 py-2 text-sm font-medium text-red-400 hover:text-red-300 hover:bg-red-900/50 rounded-lg transition-colors;
+} 

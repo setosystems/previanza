@@ -1,19 +1,38 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Cambiar Rol de Usuario</h1>
-    <form method="POST">
-        <div class="form-group">
-            <label for="role">Nuevo Rol:</label>
-            <select name="role" id="role" class="form-control">
-                {% for role in roles %}
-                    <option value="{{ role.name }}" {% if user.role == role %}selected{% endif %}>
-                        {{ role.value }}
-                    </option>
-                {% endfor %}
-            </select>
+<div class="container-fluid">
+    <div class="max-w-lg mx-auto">
+        <div class="mb-6">
+            <h1 class="page-title">Cambiar Rol de Usuario</h1>
+            <p class="subtitle">Seleccione el nuevo rol para {{ user.username }}</p>
         </div>
-        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-    </form>
-    <a href="{{ url_for('auth.list_users') }}" class="btn btn-secondary mt-3">Volver a la Lista de Usuarios</a>
+
+        <div class="card">
+            <form method="POST" class="space-y-6">
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="role" class="form-label">Nuevo Rol:</label>
+                        <select name="role" id="role" class="form-select">
+                            {% for role in roles %}
+                                <option value="{{ role.name }}" {% if user.role == role %}selected{% endif %}>
+                                    {{ role.value }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="card-footer flex justify-end space-x-4">
+                    <a href="{{ url_for('auth.list_users') }}" class="btn-secondary">
+                        <i class="fas fa-arrow-left mr-2"></i>Volver
+                    </a>
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-save mr-2"></i>Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}

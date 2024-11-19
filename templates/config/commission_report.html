@@ -1,409 +1,206 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="report-container">
-    <div class="report-header">
-        <div class="header-title">
-            <i class="fas fa-chart-line"></i>
-            <h1>Reporte de Comisiones</h1>
+<div class="w-full max-w-lg mx-auto">
+    <!-- Header Section -->
+    <div class="flex flex-wrap -mx-3 mb-6">
+        <div class="w-full px-3">
+            <div class="flex items-center gap-3 mb-4">
+                <i class="fas fa-chart-line text-blue-600"></i>
+                <h1 class="text-2xl font-bold text-gray-900">Reporte de Comisiones</h1>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Form -->
+    <form method="GET" class="mb-8">
+        <div class="flex flex-wrap -mx-3 mb-6">
+            <div class="w-full md:w-1/3 px-3 mb-6 md:mb-0">
+                <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="start_date">
+                    Fecha Inicio
+                </label>
+                <input type="date" id="start_date" name="start_date" 
+                       value="{{ start_date or '' }}"
+                       class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white">
+            </div>
+            
+            <div class="w-full md:w-1/3 px-3 mb-6 md:mb-0">
+                <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="end_date">
+                    Fecha Fin
+                </label>
+                <input type="date" id="end_date" name="end_date" 
+                       value="{{ end_date or '' }}"
+                       class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white">
+            </div>
+            
+            <div class="w-full md:w-1/3 px-3 mb-6 md:mb-0">
+                <label class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2" for="agent_id">
+                    Agente
+                </label>
+                <select id="agent_id" name="agent_id" 
+                        class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white">
+                    <option value="">Todos los agentes</option>
+                    {% for agent in agents %}
+                        <option value="{{ agent.id }}" 
+                                {% if agent_id|int == agent.id %}selected{% endif %}>
+                            {{ agent.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="flex justify-end space-x-4">
+            <button type="submit" 
+                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                <i class="fas fa-filter mr-2"></i>Aplicar Filtros
+            </button>
+            <button type="button" onclick="exportToPDF()"
+                    class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                <i class="fas fa-file-pdf mr-2"></i>Exportar a PDF
+            </button>
+        </div>
+    </form>
+
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                    <i class="fas fa-dollar-sign text-blue-500 text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-sm font-medium text-gray-500">Total Comisiones</h3>
+                    <p class="text-2xl font-semibold text-gray-900">${{ "{:,.2f}".format(total_commission) }}</p>
+                    <small class="text-gray-500">Período: {{ start_date or 'Inicio' }} - {{ end_date or 'Actual' }}</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                    <i class="fas fa-hand-holding-usd text-green-500 text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-sm font-medium text-gray-500">Comisiones Directas</h3>
+                    <p class="text-2xl font-semibold text-gray-900">${{ "{:,.2f}".format(total_direct_commission) }}</p>
+                    <small class="text-gray-500">{{ (total_direct_commission / total_commission * 100)|round(1) if total_commission > 0 else 0 }}% del total</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+                    <i class="fas fa-level-up-alt text-yellow-500 text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-sm font-medium text-gray-500">Sobrecomisiones</h3>
+                    <p class="text-2xl font-semibold text-gray-900">${{ "{:,.2f}".format(total_override_commission) }}</p>
+                    <small class="text-gray-500">{{ (total_override_commission / total_commission * 100)|round(1) if total_commission > 0 else 0 }}% del total</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                    <i class="fas fa-users text-purple-500 text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-sm font-medium text-gray-500">Agentes Activos</h3>
+                    <p class="text-2xl font-semibold text-gray-900">{{ results|length }}</p>
+                    <small class="text-gray-500">Con comisiones en el período</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Table -->
+    <div class="bg-white shadow-sm rounded-lg overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-medium text-gray-900">Detalle por Agente</h2>
         </div>
         
-        <div class="filter-section">
-            <form method="GET" class="filter-form">
-                <div class="filter-group">
-                    <div class="form-group">
-                        <label for="start_date">Fecha Inicio:</label>
-                        <input type="date" id="start_date" name="start_date" 
-                               class="modern-input" value="{{ start_date or '' }}">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="end_date">Fecha Fin:</label>
-                        <input type="date" id="end_date" name="end_date" 
-                               class="modern-input" value="{{ end_date or '' }}">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="agent_id">Agente:</label>
-                        <select id="agent_id" name="agent_id" class="modern-input">
-                            <option value="">Todos los agentes</option>
-                            {% for agent in agents %}
-                                <option value="{{ agent.id }}" 
-                                        {% if agent_id|int == agent.id %}selected{% endif %}>
-                                    {{ agent.name }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-filter"></i> Aplicar Filtros
-                    </button>
-                    <button type="button" class="btn btn-secondary" onclick="exportToPDF()">
-                        <i class="fas fa-file-pdf"></i> Exportar a PDF
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div class="report-content">
-        <div class="summary-section">
-            <div class="section-header">
-                <i class="fas fa-chart-pie"></i>
-                <h2>Resumen General</h2>
-            </div>
-            <div class="summary-cards">
-                <div class="summary-card">
-                    <div class="card-icon">
-                        <i class="fas fa-dollar-sign"></i>
-                    </div>
-                    <div class="card-content">
-                        <h3>Total Comisiones</h3>
-                        <p class="amount">${{ "{:,.2f}".format(total_commission) }}</p>
-                        <small>Período: {{ start_date or 'Inicio' }} - {{ end_date or 'Actual' }}</small>
-                    </div>
-                </div>
-                <div class="summary-card">
-                    <div class="card-icon">
-                        <i class="fas fa-hand-holding-usd"></i>
-                    </div>
-                    <div class="card-content">
-                        <h3>Comisiones Directas</h3>
-                        <p class="amount">${{ "{:,.2f}".format(total_direct_commission) }}</p>
-                        <small>{{ (total_direct_commission / total_commission * 100)|round(1) if total_commission > 0 else 0 }}% del total</small>
-                    </div>
-                </div>
-                <div class="summary-card">
-                    <div class="card-icon">
-                        <i class="fas fa-level-up-alt"></i>
-                    </div>
-                    <div class="card-content">
-                        <h3>Sobrecomisiones</h3>
-                        <p class="amount">${{ "{:,.2f}".format(total_override_commission) }}</p>
-                        <small>{{ (total_override_commission / total_commission * 100)|round(1) if total_commission > 0 else 0 }}% del total</small>
-                    </div>
-                </div>
-                <div class="summary-card">
-                    <div class="card-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="card-content">
-                        <h3>Agentes Activos</h3>
-                        <p class="amount">{{ results|length }}</p>
-                        <small>Con comisiones en el período</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="table-section">
-            <div class="section-header">
-                <i class="fas fa-list"></i>
-                <h2>Detalle por Agente</h2>
-            </div>
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Agente</th>
-                            <th class="text-right">Comisiones Directas</th>
-                            <th class="text-right">Sobrecomisiones</th>
-                            <th class="text-right">Total</th>
-                            <th class="text-center">% del Total</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for result in results %}
-                        <tr>
-                            <td>{{ result.agent_name }}</td>
-                            <td class="text-right">${{ "{:,.2f}".format(result.direct_commission) }}</td>
-                            <td class="text-right">${{ "{:,.2f}".format(result.override_commission) }}</td>
-                            <td class="text-right amount">${{ "{:,.2f}".format(result.total_commission) }}</td>
-                            <td class="text-center">
-                                <div class="percentage-badge">
-                                    {{ (result.total_commission / total_commission * 100)|round(1) }}%
-                                </div>
-                            </td>
-                            <td>
-                                <button class="btn btn-info btn-sm" 
-                                        onclick="showDetails('{{ result.agent_id }}')"
-                                        title="Ver detalles de comisiones">
-                                    <i class="fas fa-search-dollar"></i> Detalles
-                                </button>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                    <tfoot>
-                        <tr class="total-row">
-                            <td><strong>Total General</strong></td>
-                            <td class="text-right">
-                                <strong>${{ "{:,.2f}".format(total_direct_commission) }}</strong>
-                            </td>
-                            <td class="text-right">
-                                <strong>${{ "{:,.2f}".format(total_override_commission) }}</strong>
-                            </td>
-                            <td class="text-right">
-                                <strong>${{ "{:,.2f}".format(total_commission) }}</strong>
-                            </td>
-                            <td class="text-center">
-                                <div class="percentage-badge total">100%</div>
-                            </td>
-                            <td></td>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Agente</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Comisiones Directas</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Sobrecomisiones</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">% del Total</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for result in results %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ result.agent_name }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                            ${{ "{:,.2f}".format(result.direct_commission) }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                            ${{ "{:,.2f}".format(result.override_commission) }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                            ${{ "{:,.2f}".format(result.total_commission) }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
+                                {{ (result.total_commission / total_commission * 100)|round(1) }}%
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
+                            <button onclick="showDetails('{{ result.agent_id }}')"
+                                    class="text-blue-600 hover:text-blue-900">
+                                <i class="fas fa-search-dollar"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot class="bg-gray-50">
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Total General</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right">
+                            ${{ "{:,.2f}".format(total_direct_commission) }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right">
+                            ${{ "{:,.2f}".format(total_override_commission) }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 text-right">
+                            ${{ "{:,.2f}".format(total_commission) }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-center">
+                            <span class="px-2 py-1 text-xs font-medium rounded-full bg-blue-500 text-white">
+                                100%
+                            </span>
+                        </td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
         </div>
     </div>
 </div>
 
-<!-- Modal para detalles -->
-<div id="detailsModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <div class="header-title">
-                <i class="fas fa-file-invoice-dollar"></i>
-                <h2>Detalles de Comisiones</h2>
-            </div>
-            <span class="close">&times;</span>
+<!-- Modal -->
+<div id="detailsModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full">
+    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-4/5 shadow-lg rounded-md bg-white">
+        <div class="flex items-center justify-between pb-3 border-b">
+            <h3 class="text-xl font-semibold text-gray-900">Detalles de Comisiones</h3>
+            <button class="close text-gray-400 hover:text-gray-500">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
-        <div class="modal-body">
-            <div id="detailsContent"></div>
-        </div>
+        <div id="detailsContent" class="mt-4"></div>
     </div>
 </div>
-
-<style>
-/* Estilos específicos para el reporte */
-.header-title {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.header-title i {
-    font-size: 24px;
-    color: var(--secondary-color);
-}
-
-.filter-group {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-}
-
-.summary-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-    margin-top: 20px;
-}
-
-.summary-card {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    transition: transform 0.3s ease;
-}
-
-.summary-card:hover {
-    transform: translateY(-5px);
-}
-
-.card-icon {
-    width: 50px;
-    height: 50px;
-    background: var(--secondary-color);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.card-icon i {
-    font-size: 24px;
-    color: white;
-}
-
-.card-content {
-    flex: 1;
-}
-
-.card-content h3 {
-    margin: 0;
-    font-size: 16px;
-    color: #666;
-}
-
-.card-content small {
-    color: #666;
-    font-size: 0.8em;
-}
-
-.amount {
-    margin: 5px 0;
-    font-size: 24px;
-    font-weight: bold;
-    color: var(--secondary-color);
-}
-
-.percentage-badge {
-    display: inline-block;
-    padding: 4px 8px;
-    border-radius: 12px;
-    background: #e9ecef;
-    color: #495057;
-    font-size: 0.9em;
-    font-weight: 500;
-}
-
-.percentage-badge.total {
-    background: var(--secondary-color);
-    color: white;
-}
-
-.section-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
-.section-header i {
-    font-size: 20px;
-    color: var(--secondary-color);
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .filter-group {
-        grid-template-columns: 1fr;
-    }
-
-    .summary-cards {
-        grid-template-columns: 1fr;
-    }
-
-    .form-actions {
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .form-actions button {
-        width: 100%;
-    }
-}
-</style>
-
 {% endblock %}
 
 {% block scripts %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
-
-<script>
-function showDetails(agentId) {
-    const startDate = document.getElementById('start_date').value;
-    const endDate = document.getElementById('end_date').value;
-    
-    fetch(`/config/commissions/agent/${agentId}/details?start_date=${startDate}&end_date=${endDate}`)
-        .then(response => response.json())
-        .then(data => {
-            const modal = document.getElementById('detailsModal');
-            const content = document.getElementById('detailsContent');
-            
-            let html = '<table class="details-table">';
-            html += `<thead>
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Póliza</th>
-                            <th>Producto</th>
-                            <th>Prima</th>
-                            <th>Comisión</th>
-                            <th>Tipo</th>
-                        </tr>
-                    </thead>`;
-            html += '<tbody>';
-            
-            data.details.forEach(detail => {
-                html += `<tr>
-                    <td>${detail.date}</td>
-                    <td>${detail.policy_number}</td>
-                    <td>${detail.product_name}</td>
-                    <td class="text-right">$${detail.premium.toLocaleString('es-CO', {minimumFractionDigits: 2})}</td>
-                    <td class="text-right">$${detail.commission.toLocaleString('es-CO', {minimumFractionDigits: 2})}</td>
-                    <td>${detail.commission_type}</td>
-                </tr>`;
-            });
-            
-            html += '</tbody></table>';
-            content.innerHTML = html;
-            modal.style.display = 'block';
-        });
-}
-
-function exportToPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    
-    // Configuración del documento
-    doc.setFont('helvetica');
-    
-    // Título
-    doc.setFontSize(16);
-    doc.text('Reporte de Comisiones', 14, 20);
-    
-    // Período
-    doc.setFontSize(12);
-    const startDate = document.getElementById('start_date').value;
-    const endDate = document.getElementById('end_date').value;
-    doc.text(`Período: ${startDate} - ${endDate}`, 14, 30);
-    
-    // Tabla de resultados
-    doc.autoTable({
-        html: 'table',
-        startY: 40,
-        theme: 'grid',
-        headStyles: {
-            fillColor: [44, 62, 80],
-            textColor: 255,
-            fontSize: 10
-        },
-        bodyStyles: {
-            fontSize: 9
-        },
-        footStyles: {
-            fillColor: [238, 238, 238],
-            textColor: 0,
-            fontSize: 10,
-            fontStyle: 'bold'
-        }
-    });
-    
-    // Guardar el PDF
-    const fileName = `reporte-comisiones-${startDate}-${endDate}.pdf`;
-    doc.save(fileName);
-}
-
-// Cerrar modal
-document.querySelector('.close').onclick = function() {
-    document.getElementById('detailsModal').style.display = 'none';
-}
-
-window.onclick = function(event) {
-    const modal = document.getElementById('detailsModal');
-    if (event.target == modal) {
-        modal.style.display = 'none';
-    }
-}
-</script>
+<script src="{{ url_for('static', filename='js/commission_reports.js') }}"></script>
 {% endblock %}

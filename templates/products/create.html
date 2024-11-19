@@ -1,116 +1,145 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="form-container">
-    <div class="form-header">
-        <h1>Crear Nuevo Producto</h1>
+<div class="container-fluid">
+    <div class="max-w-2xl mx-auto">
+        <div class="mb-6">
+            <h1 class="page-title">Crear Nuevo Producto</h1>
+            <p class="subtitle">Complete la información del nuevo producto</p>
+        </div>
+
+        <div class="card">
+            <form method="POST" enctype="multipart/form-data" class="space-y-6">
+                {{ form.hidden_tag() }}
+                
+                <div class="card-body">
+                    <!-- Información Básica -->
+                    <div class="space-y-6">
+                        <h3 class="section-title">Información Básica</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="form-group">
+                                {{ form.name.label(class="form-label") }}
+                                {{ form.name(class="form-input") }}
+                                {% for error in form.name.errors %}
+                                    <span class="form-error">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+
+                            <div class="form-group">
+                                {{ form.aseguradora.label(class="form-label") }}
+                                {{ form.aseguradora(class="form-input") }}
+                                {% for error in form.aseguradora.errors %}
+                                    <span class="form-error">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+
+                            <div class="form-group md:col-span-2">
+                                {{ form.description.label(class="form-label") }}
+                                {{ form.description(class="form-input") }}
+                                {% for error in form.description.errors %}
+                                    <span class="form-error">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <!-- Comisiones -->
+                    <div class="space-y-6">
+                        <h3 class="section-title">Comisiones</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="form-group">
+                                {{ form.commission_percentage.label(class="form-label") }}
+                                {{ form.commission_percentage(class="form-input") }}
+                                {% for error in form.commission_percentage.errors %}
+                                    <span class="form-error">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+
+                            <div class="form-group flex items-center">
+                                {{ form.sobrecomision(class="form-checkbox mr-2") }}
+                                {{ form.sobrecomision.label(class="form-label") }}
+                            </div>
+
+                            <div class="form-group" id="overrideGroup">
+                                {{ form.override_percentage.label(class="form-label") }}
+                                {{ form.override_percentage(class="form-input") }}
+                                {% for error in form.override_percentage.errors %}
+                                    <span class="form-error">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <!-- Imagen -->
+                    <div class="space-y-6">
+                        <h3 class="section-title">Imagen del Producto</h3>
+                        <div class="form-group">
+                            {{ form.image.label(class="form-label") }}
+                            {{ form.image(class="form-input") }}
+                            {% for error in form.image.errors %}
+                                <span class="form-error">{{ error }}</span>
+                            {% endfor %}
+                            <div id="imagePreview" class="mt-4 p-4 border border-dashed border-gray-300 rounded-lg"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer flex justify-end space-x-4">
+                    <a href="{{ url_for('products.list_products') }}" class="btn-secondary">
+                        <i class="fas fa-times mr-2"></i>Cancelar
+                    </a>
+                    {{ form.submit(class="btn-primary") }}
+                </div>
+            </form>
+        </div>
     </div>
-
-    <form method="POST" enctype="multipart/form-data" class="modern-form">
-        {{ form.hidden_tag() }}
-        
-        <div class="form-grid">
-            <div class="form-section">
-                <h3>Información Básica</h3>
-                <div class="form-field">
-                    {{ form.name.label }}
-                    {{ form.name(class="modern-input") }}
-                    {% for error in form.name.errors %}
-                        <span class="error-message">{{ error }}</span>
-                    {% endfor %}
-                </div>
-
-                <div class="form-field">
-                    {{ form.description.label }}
-                    {{ form.description(class="modern-input") }}
-                    {% for error in form.description.errors %}
-                        <span class="error-message">{{ error }}</span>
-                    {% endfor %}
-                </div>
-
-                <div class="form-field">
-                    {{ form.aseguradora.label }}
-                    {{ form.aseguradora(class="modern-input") }}
-                    {% for error in form.aseguradora.errors %}
-                        <span class="error-message">{{ error }}</span>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <div class="form-section">
-                <h3>Comisiones</h3>
-                <div class="form-field">
-                    {{ form.commission_percentage.label }}
-                    {{ form.commission_percentage(class="modern-input") }}
-                    {% for error in form.commission_percentage.errors %}
-                        <span class="error-message">{{ error }}</span>
-                    {% endfor %}
-                </div>
-
-                <div class="form-field checkbox-field">
-                    {{ form.sobrecomision(class="modern-checkbox") }}
-                    {{ form.sobrecomision.label }}
-                </div>
-
-                <div class="form-field">
-                    {{ form.override_percentage.label }}
-                    {{ form.override_percentage(class="modern-input") }}
-                    {% for error in form.override_percentage.errors %}
-                        <span class="error-message">{{ error }}</span>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <div class="form-section">
-                <h3>Imagen del Producto</h3>
-                <div class="form-field">
-                    {{ form.image.label }}
-                    {{ form.image(class="modern-input") }}
-                    {% for error in form.image.errors %}
-                        <span class="error-message">{{ error }}</span>
-                    {% endfor %}
-                    <div class="image-preview" id="imagePreview"></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="form-actions">
-            <a href="{{ url_for('products.list_products') }}" class="btn btn-secondary">Cancelar</a>
-            {{ form.submit(class="btn btn-primary") }}
-        </div>
-    </form>
 </div>
 
+{% block extra_js %}
 <script>
-// Preview de imagen
-document.querySelector('input[type="file"]').addEventListener('change', function(e) {
+document.addEventListener('DOMContentLoaded', function() {
+    // Preview de imagen
+    const imageInput = document.querySelector('input[type="file"]');
     const preview = document.getElementById('imagePreview');
-    preview.innerHTML = '';
     
-    if (this.files && this.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const img = document.createElement('img');
-            img.src = e.target.result;
-            img.style.maxWidth = '200px';
-            img.style.maxHeight = '200px';
-            preview.appendChild(img);
+    imageInput.addEventListener('change', function(e) {
+        preview.innerHTML = '';
+        
+        if (this.files && this.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.className = 'max-w-xs mx-auto';
+                preview.appendChild(img);
+            }
+            reader.readAsDataURL(this.files[0]);
         }
-        reader.readAsDataURL(this.files[0]);
+    });
+
+    // Manejo de sobrecomisión
+    const sobrecomisionCheckbox = document.getElementById('sobrecomision');
+    const overrideGroup = document.getElementById('overrideGroup');
+    const overrideInput = document.getElementById('override_percentage');
+
+    function updateOverrideVisibility() {
+        if (sobrecomisionCheckbox.checked) {
+            overrideGroup.classList.remove('hidden');
+            overrideInput.removeAttribute('disabled');
+        } else {
+            overrideGroup.classList.add('hidden');
+            overrideInput.setAttribute('disabled', 'disabled');
+            overrideInput.value = '';
+        }
     }
+
+    sobrecomisionCheckbox.addEventListener('change', updateOverrideVisibility);
+    updateOverrideVisibility();
 });
 </script>
-
-<style>
-.image-preview {
-    margin-top: 10px;
-    padding: 10px;
-    border: 1px dashed #ddd;
-    border-radius: 4px;
-    min-height: 100px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-</style>
+{% endblock %}
 {% endblock %}

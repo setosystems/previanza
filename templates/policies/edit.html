@@ -1,162 +1,172 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="w-full max-w-lg mx-auto">
-    <div class="flex flex-wrap -mx-3 mb-6">
-        <div class="w-full px-3">
-            <h1 class="text-2xl font-bold text-gray-900 mb-4">Editar Póliza</h1>
-            <p class="text-sm text-gray-600 mb-6">Actualice la información de la póliza</p>
+<div class="container-fluid">
+    <div class="max-w-2xl mx-auto">
+        <div class="mb-6">
+            <h1 class="page-title">Editar Póliza</h1>
+            <p class="subtitle">Actualice la información de la póliza {{ policy.policy_number }}</p>
+        </div>
+
+        <div class="card">
+            <form method="POST" class="space-y-6">
+                {{ form.hidden_tag() }}
+                
+                <div class="card-body">
+                    <!-- Información Básica -->
+                    <div class="space-y-6">
+                        <h3 class="section-title">Información Básica</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="form-group">
+                                {{ form.policy_number.label(class="form-label") }}
+                                {{ form.policy_number(class="form-input", placeholder="Número de póliza") }}
+                                {% for error in form.policy_number.errors %}
+                                    <span class="form-error">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+
+                            <div class="form-group">
+                                {{ form.product_id.label(class="form-label") }}
+                                {{ form.product_id(class="form-select") }}
+                                {% for error in form.product_id.errors %}
+                                    <span class="form-error">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <!-- Fechas y Valores -->
+                    <div class="space-y-6">
+                        <h3 class="section-title">Fechas y Valores</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="form-group">
+                                {{ form.start_date.label(class="form-label") }}
+                                {{ form.start_date(class="form-input", type="date") }}
+                                {% for error in form.start_date.errors %}
+                                    <span class="form-error">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+
+                            <div class="form-group">
+                                {{ form.end_date.label(class="form-label") }}
+                                {{ form.end_date(class="form-input", type="date") }}
+                                {% for error in form.end_date.errors %}
+                                    <span class="form-error">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+
+                            <div class="form-group md:col-span-2">
+                                {{ form.premium.label(class="form-label") }}
+                                {{ form.premium(class="form-input", placeholder="0.00") }}
+                                {% for error in form.premium.errors %}
+                                    <span class="form-error">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <!-- Participantes -->
+                    <div class="space-y-6">
+                        <h3 class="section-title">Participantes</h3>
+                        <div class="space-y-4">
+                            <div class="form-group relative">
+                                {{ form.client.label(class="form-label") }}
+                                {{ form.client(class="form-input", id="client_search", placeholder="Buscar cliente...") }}
+                                {{ form.client_id(id="client_id", type="hidden") }}
+                                <div id="client_results" class="absolute z-10 w-full bg-white shadow-lg rounded-md border border-gray-200 mt-1"></div>
+                                {% for error in form.client.errors %}
+                                    <span class="form-error">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+
+                            <div class="form-group relative">
+                                {{ form.agent.label(class="form-label") }}
+                                {{ form.agent(class="form-input", id="agent_search", placeholder="Buscar agente...") }}
+                                {{ form.agent_id(id="agent_id", type="hidden") }}
+                                <div id="agent_results" class="absolute z-10 w-full bg-white shadow-lg rounded-md border border-gray-200 mt-1"></div>
+                                {% for error in form.agent.errors %}
+                                    <span class="form-error">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <!-- Estado -->
+                    <div class="space-y-6">
+                        <h3 class="section-title">Estado</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="form-group">
+                                {{ form.emision_status.label(class="form-label") }}
+                                {{ form.emision_status(class="form-select") }}
+                                {% for error in form.emision_status.errors %}
+                                    <span class="form-error">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+
+                            <div class="form-group">
+                                {{ form.payment_status.label(class="form-label") }}
+                                {{ form.payment_status(class="form-select") }}
+                                <p class="text-sm text-gray-500 mt-1">
+                                    Cambiar a "PAGADO" calculará las comisiones automáticamente
+                                </p>
+                                {% for error in form.payment_status.errors %}
+                                    <span class="form-error">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer flex justify-end space-x-4">
+                    <a href="{{ url_for('policies.list_policies') }}" class="btn-secondary">
+                        <i class="fas fa-times mr-2"></i>Cancelar
+                    </a>
+                    {{ form.submit(class="btn-primary") }}
+                </div>
+            </form>
         </div>
     </div>
-
-    <form method="POST" class="space-y-6">
-        {{ form.hidden_tag() }}
-        
-        <!-- Información Básica -->
-        <div class="flex flex-wrap -mx-3 mb-6">
-            <div class="w-full px-3">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Información Básica</h3>
-                <div class="space-y-4">
-                    <div>
-                        {{ form.policy_number.label(class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2") }}
-                        {{ form.policy_number(class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white", placeholder="Número de póliza") }}
-                        {% for error in form.policy_number.errors %}
-                            <p class="text-red-500 text-xs italic">{{ error }}</p>
-                        {% endfor %}
-                    </div>
-
-                    <div>
-                        {{ form.product_id.label(class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2") }}
-                        {{ form.product_id(class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white") }}
-                        {% for error in form.product_id.errors %}
-                            <p class="text-red-500 text-xs italic">{{ error }}</p>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Fechas y Valores -->
-        <div class="flex flex-wrap -mx-3 mb-6">
-            <div class="w-full px-3">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Fechas y Valores</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        {{ form.start_date.label(class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2") }}
-                        {{ form.start_date(class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white", type="date") }}
-                        {% for error in form.start_date.errors %}
-                            <p class="text-red-500 text-xs italic">{{ error }}</p>
-                        {% endfor %}
-                    </div>
-                    <div>
-                        {{ form.end_date.label(class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2") }}
-                        {{ form.end_date(class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white", type="date") }}
-                        {% for error in form.end_date.errors %}
-                            <p class="text-red-500 text-xs italic">{{ error }}</p>
-                        {% endfor %}
-                    </div>
-                </div>
-                <div class="mt-4">
-                    {{ form.premium.label(class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2") }}
-                    {{ form.premium(class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white", placeholder="0.00") }}
-                    {% for error in form.premium.errors %}
-                        <p class="text-red-500 text-xs italic">{{ error }}</p>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-
-        <!-- Participantes -->
-        <div class="flex flex-wrap -mx-3 mb-6">
-            <div class="w-full px-3">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Participantes</h3>
-                <div class="space-y-4">
-                    <div class="relative">
-                        {{ form.client.label(class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2") }}
-                        {{ form.client(class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white", id="client_search", placeholder="Buscar cliente...") }}
-                        {{ form.client_id(id="client_id", type="hidden") }}
-                        <div id="client_results" class="absolute z-10 w-full bg-white shadow-lg rounded-b border-t-0 border"></div>
-                        {% for error in form.client.errors %}
-                            <p class="text-red-500 text-xs italic">{{ error }}</p>
-                        {% endfor %}
-                    </div>
-
-                    <div class="relative">
-                        {{ form.agent.label(class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2") }}
-                        {{ form.agent(class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white", id="agent_search", placeholder="Buscar agente...") }}
-                        {{ form.agent_id(id="agent_id", type="hidden") }}
-                        <div id="agent_results" class="absolute z-10 w-full bg-white shadow-lg rounded-b border-t-0 border"></div>
-                        {% for error in form.agent.errors %}
-                            <p class="text-red-500 text-xs italic">{{ error }}</p>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Estado -->
-        <div class="flex flex-wrap -mx-3 mb-6">
-            <div class="w-full px-3">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Estado</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        {{ form.emision_status.label(class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2") }}
-                        {{ form.emision_status(class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white") }}
-                        {% for error in form.emision_status.errors %}
-                            <p class="text-red-500 text-xs italic">{{ error }}</p>
-                        {% endfor %}
-                    </div>
-                    <div>
-                        {{ form.payment_status.label(class="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2") }}
-                        {{ form.payment_status(class="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 leading-tight focus:outline-none focus:bg-white") }}
-                        {% for error in form.payment_status.errors %}
-                            <p class="text-red-500 text-xs italic">{{ error }}</p>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Botones -->
-        <div class="flex justify-end space-x-4">
-            <a href="{{ url_for('policies.list_policies') }}" 
-               class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                Cancelar
-            </a>
-            {{ form.submit(class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline") }}
-        </div>
-    </form>
 </div>
 
-{% block scripts %}
+{% block extra_js %}
 <script>
 function setupSearch(inputId, resultsId, hiddenInputId, searchUrl, initialValue, initialId) {
     const input = document.getElementById(inputId);
     const results = document.getElementById(resultsId);
     const hiddenInput = document.getElementById(hiddenInputId);
+    let searchTimeout;
 
     // Set initial values
     input.value = initialValue;
     hiddenInput.value = initialId;
 
     input.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
         if (this.value.length > 2) {
-            fetch(`${searchUrl}?query=${this.value}`)
-                .then(response => response.json())
-                .then(data => {
-                    results.innerHTML = '';
-                    data.forEach(item => {
-                        const div = document.createElement('div');
-                        div.textContent = item.name;
-                        div.className = 'p-2 hover:bg-gray-100 cursor-pointer';
-                        div.addEventListener('click', function() {
-                            input.value = item.name;
-                            hiddenInput.value = item.id;
-                            results.innerHTML = '';
+            searchTimeout = setTimeout(() => {
+                fetch(`${searchUrl}?query=${this.value}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        results.innerHTML = '';
+                        data.forEach(item => {
+                            const div = document.createElement('div');
+                            div.className = 'p-2 hover:bg-gray-100 cursor-pointer';
+                            div.textContent = item.name;
+                            div.addEventListener('click', function() {
+                                input.value = item.name;
+                                hiddenInput.value = item.id;
+                                results.innerHTML = '';
+                            });
+                            results.appendChild(div);
                         });
-                        results.appendChild(div);
                     });
-                });
+            }, 300);
         } else {
             results.innerHTML = '';
         }
@@ -179,6 +189,31 @@ document.addEventListener('DOMContentLoaded', function() {
                '{{ url_for("policies.search_agents") }}',
                '{{ policy.agent.name }}',
                '{{ policy.agent_id }}');
+
+    // Validación del lado del cliente
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+        const requiredFields = form.querySelectorAll('input[required], select[required]');
+        
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                isValid = false;
+                field.classList.add('border-danger-500');
+                const errorMsg = field.parentElement.querySelector('.form-error');
+                if (!errorMsg) {
+                    const error = document.createElement('span');
+                    error.className = 'form-error';
+                    error.textContent = 'Este campo es requerido';
+                    field.parentElement.appendChild(error);
+                }
+            }
+        });
+
+        if (!isValid) {
+            e.preventDefault();
+        }
+    });
 });
 </script>
 {% endblock %}

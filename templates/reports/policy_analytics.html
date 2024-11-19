@@ -1,107 +1,150 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Análisis de Pólizas</h1>
-    
-    <h2>Distribución de Pólizas por Producto</h2>
-    <canvas id="policy-distribution-chart"></canvas>
+<div class="container-fluid">
+    <div class="mb-6">
+        <h1 class="page-title">Análisis de Pólizas</h1>
+        <p class="subtitle">Estadísticas y métricas de pólizas</p>
+    </div>
 
-    <h2>Tendencia de Pólizas en el Tiempo</h2>
-    <canvas id="policy-trend-chart"></canvas>
+    <!-- Gráficos -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <!-- Distribución por Producto -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="section-title flex items-center">
+                    <i class="fas fa-chart-pie text-primary-600 mr-2"></i>
+                    Distribución de Pólizas por Producto
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="h-80">
+                    <canvas id="policy-distribution-chart"></canvas>
+                </div>
+            </div>
+        </div>
 
-    <h2>Prima Promedio por Producto</h2>
-    <canvas id="avg-premium-chart"></canvas>
+        <!-- Prima Promedio -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="section-title flex items-center">
+                    <i class="fas fa-dollar-sign text-primary-600 mr-2"></i>
+                    Prima Promedio por Producto
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="h-80">
+                    <canvas id="avg-premium-chart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tendencia Temporal -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="section-title flex items-center">
+                <i class="fas fa-chart-line text-primary-600 mr-2"></i>
+                Tendencia de Pólizas en el Tiempo
+            </h3>
+        </div>
+        <div class="card-body">
+            <div class="h-80">
+                <canvas id="policy-trend-chart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Configuración común para los gráficos
+    const chartConfig = {
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        },
+        responsive: true,
+        maintainAspectRatio: false
+    };
+
+    // Gráfico de Distribución por Producto
+    new Chart(document.getElementById('policy-distribution-chart'), {
+        type: 'pie',
+        data: {
+            labels: {{ policy_distribution|map(attribute='name')|list|tojson|safe }},
+            datasets: [{
+                data: {{ policy_distribution|map(attribute='policy_count')|list|tojson|safe }},
+                backgroundColor: [
+                    'rgba(14, 165, 233, 0.6)',
+                    'rgba(34, 197, 94, 0.6)',
+                    'rgba(245, 158, 11, 0.6)',
+                    'rgba(239, 68, 68, 0.6)',
+                    'rgba(168, 85, 247, 0.6)'
+                ]
+            }]
+        },
+        options: chartConfig
+    });
+
+    // Gráfico de Prima Promedio
+    new Chart(document.getElementById('avg-premium-chart'), {
+        type: 'bar',
+        data: {
+            labels: {{ avg_premium_by_product|map(attribute='name')|list|tojson|safe }},
+            datasets: [{
+                label: 'Prima Promedio',
+                data: {{ avg_premium_by_product|map(attribute='avg_premium')|list|tojson|safe }},
+                backgroundColor: 'rgba(14, 165, 233, 0.6)',
+                borderColor: 'rgb(14, 165, 233)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            ...chartConfig,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Prima Promedio ($)'
+                    }
+                }
+            }
+        }
+    });
+
+    // Gráfico de Tendencia
+    new Chart(document.getElementById('policy-trend-chart'), {
+        type: 'line',
+        data: {
+            labels: {{ policy_trend|map(attribute='month')|map('strftime', '%Y-%m')|list|tojson|safe }},
+            datasets: [{
+                label: 'Número de Pólizas',
+                data: {{ policy_trend|map(attribute='policy_count')|list|tojson|safe }},
+                borderColor: 'rgb(14, 165, 233)',
+                backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            ...chartConfig,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Número de Pólizas'
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
 {% endblock %}
-
-{% block scripts %}
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        // Policy Distribution Chart
-        new Chart(document.getElementById('policy-distribution-chart'), {
-            type: 'pie',
-            data: {
-                labels: {{ policy_distribution|map(attribute='name')|list|tojson }},
-                datasets: [{
-                    data: {{ policy_distribution|map(attribute='policy_count')|list|tojson }},
-                    backgroundColor: [
-                        'rgba(255, 99, 132, 0.8)',
-                        'rgba(54, 162, 235, 0.8)',
-                        'rgba(255, 206, 86, 0.8)',
-                        'rgba(75, 192, 192, 0.8)',
-                        'rgba(153, 102, 255, 0.8)'
-                    ]
-                }]
-            },
-            options: {
-                responsive: true,
-                title: {
-                    display: true,
-                    text: 'Distribución de Pólizas por Producto'
-                }
-            }
-        });
-
-        // Policy Trend Chart
-        new Chart(document.getElementById('policy-trend-chart'), {
-            type: 'line',
-            data: {
-                labels: {{ policy_trend|map(attribute='month')|map('strftime', '%Y-%m')|list|tojson }},
-                datasets: [{
-                    label: 'Número de Pólizas',
-                    data: {{ policy_trend|map(attribute='policy_count')|list|tojson }},
-                    borderColor: 'rgb(75, 192, 192)',
-                    tension: 0.1
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Número de Pólizas'
-                        }
-                    },
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Mes'
-                        }
-                    }
-                }
-            }
-        });
-
-        // Average Premium Chart
-        new Chart(document.getElementById('avg-premium-chart'), {
-            type: 'bar',
-            data: {
-                labels: {{ avg_premium_by_product|map(attribute='name')|list|tojson }},
-                datasets: [{
-                    label: 'Prima Promedio',
-                    data: {{ avg_premium_by_product|map(attribute='avg_premium')|list|tojson }},
-                    backgroundColor: 'rgba(75, 192, 192, 0.6)'
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Prima Promedio ($)'
-                        }
-                    },
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Producto'
-                        }
-                    }
-                }
-            }
-        });
-    </script>
 {% endblock %}

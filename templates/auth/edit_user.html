@@ -1,126 +1,89 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="form-container">
-    <div class="form-header">
-        <h1>Editar Usuario</h1>
-        <p class="form-subtitle">Actualice la información del usuario</p>
+<div class="container-fluid">
+    <div class="max-w-2xl mx-auto">
+        <div class="mb-6">
+            <h1 class="page-title">Editar Usuario</h1>
+            <p class="subtitle">Actualice la información del usuario</p>
+        </div>
+
+        <div class="card">
+            <form method="POST" class="space-y-6">
+                {{ form.hidden_tag() }}
+                
+                <div class="card-body">
+                    <!-- Información de Cuenta -->
+                    <div class="space-y-6">
+                        <h3 class="section-title">Información de Cuenta</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="form-group">
+                                {{ form.username.label(class="form-label") }}
+                                {{ form.username(class="form-input") }}
+                                {% for error in form.username.errors %}
+                                    <span class="form-error">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+
+                            <div class="form-group">
+                                {{ form.role.label(class="form-label") }}
+                                {{ form.role(class="form-select") }}
+                                {% for error in form.role.errors %}
+                                    <span class="form-error">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <!-- Información Personal -->
+                    <div class="space-y-6">
+                        <h3 class="section-title">Información Personal</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="form-group">
+                                {{ form.name.label(class="form-label") }}
+                                {{ form.name(class="form-input") }}
+                                {% for error in form.name.errors %}
+                                    <span class="form-error">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+
+                            <div class="form-group">
+                                {{ form.email.label(class="form-label") }}
+                                {{ form.email(class="form-input") }}
+                                {% for error in form.email.errors %}
+                                    <span class="form-error">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <!-- Configuración de Supervisor -->
+                    {% if form.parent_id %}
+                    <div class="space-y-6">
+                        <h3 class="section-title">Configuración de Supervisor</h3>
+                        <div class="form-group">
+                            {{ form.parent_id.label(class="form-label") }}
+                            {{ form.parent_id(class="form-select") }}
+                            {% for error in form.parent_id.errors %}
+                                <span class="form-error">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="card-footer flex justify-end space-x-4">
+                    <a href="{{ url_for('auth.list_users') }}" class="btn-secondary">
+                        <i class="fas fa-times mr-2"></i>Cancelar
+                    </a>
+                    {{ form.submit(class="btn-primary") }}
+                </div>
+            </form>
+        </div>
     </div>
-
-    <form method="POST" class="modern-form">
-        {{ form.hidden_tag() }}
-        
-        <div class="form-grid">
-            <div class="form-section">
-                <h3>Información de Cuenta</h3>
-                <div class="input-group">
-                    <div class="form-field">
-                        {{ form.username.label }}
-                        {{ form.username(class="modern-input") }}
-                        {% for error in form.username.errors %}
-                            <span class="error-message">{{ error }}</span>
-                        {% endfor %}
-                    </div>
-                    <div class="form-field">
-                        {{ form.email.label }}
-                        {{ form.email(class="modern-input") }}
-                        {% for error in form.email.errors %}
-                            <span class="error-message">{{ error }}</span>
-                        {% endfor %}
-                    </div>
-                </div>
-                <div class="form-field">
-                    {{ form.role.label }}
-                    {{ form.role(class="modern-input select-input") }}
-                    {% for error in form.role.errors %}
-                        <span class="error-message">{{ error }}</span>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <div class="form-section">
-                <h3>Información Personal</h3>
-                <div class="input-group">
-                    <div class="form-field">
-                        {{ form.name.label }}
-                        {{ form.name(class="modern-input") }}
-                        {% for error in form.name.errors %}
-                            <span class="error-message">{{ error }}</span>
-                        {% endfor %}
-                    </div>
-                    <div class="form-field">
-                        {{ form.phone.label }}
-                        {{ form.phone(class="modern-input") }}
-                        {% for error in form.phone.errors %}
-                            <span class="error-message">{{ error }}</span>
-                        {% endfor %}
-                    </div>
-                </div>
-                <div class="form-field">
-                    {{ form.address.label }}
-                    {{ form.address(class="modern-input") }}
-                    {% for error in form.address.errors %}
-                        <span class="error-message">{{ error }}</span>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <div class="form-section">
-                <h3>Documentación</h3>
-                <div class="input-group">
-                    <div class="form-field">
-                        {{ form.document_type.label }}
-                        {{ form.document_type(class="modern-input select-input") }}
-                        {% for error in form.document_type.errors %}
-                            <span class="error-message">{{ error }}</span>
-                        {% endfor %}
-                    </div>
-                    <div class="form-field">
-                        {{ form.document_number.label }}
-                        {{ form.document_number(class="modern-input") }}
-                        {% for error in form.document_number.errors %}
-                            <span class="error-message">{{ error }}</span>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-section">
-                <h3>Fechas</h3>
-                <div class="input-group">
-                    <div class="form-field">
-                        {{ form.date_of_birth.label }}
-                        {{ form.date_of_birth(class="modern-input", type="date") }}
-                        {% for error in form.date_of_birth.errors %}
-                            <span class="error-message">{{ error }}</span>
-                        {% endfor %}
-                    </div>
-                    <div class="form-field">
-                        {{ form.hire_date.label }}
-                        {{ form.hire_date(class="modern-input", type="date") }}
-                        {% for error in form.hire_date.errors %}
-                            <span class="error-message">{{ error }}</span>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-section">
-                <h3>Jerarquía</h3>
-                <div class="form-field">
-                    {{ form.parent_id.label }}
-                    {{ form.parent_id(class="modern-input select-input") }}
-                    {% for error in form.parent_id.errors %}
-                        <span class="error-message">{{ error }}</span>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-
-        <div class="form-actions">
-            <a href="{{ url_for('auth.list_users') }}" class="btn btn-secondary">Cancelar</a>
-            {{ form.submit(class="btn btn-primary") }}
-        </div>
-    </form>
 </div>
 {% endblock %}

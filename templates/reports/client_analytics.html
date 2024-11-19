@@ -1,64 +1,160 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1>Análisis de Clientes</h1>
-    
-    <h2>Top 10 Clientes por Prima</h2>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Cliente</th>
-                <th>Número de Pólizas</th>
-                <th>Prima Total</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for client in top_clients %}
-                <tr>
-                    <td>{{ client.name }}</td>
-                    <td>{{ client.policy_count }}</td>
-                    <td>${{ "{:,.2f}".format(client.total_premium) }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<div class="container-fluid">
+    <div class="mb-6">
+        <h1 class="page-title">Análisis de Clientes</h1>
+        <p class="subtitle">Estadísticas y métricas de clientes</p>
+    </div>
 
-    <h2>Distribución de Clientes por Número de Pólizas</h2>
-    <canvas id="client-distribution-chart"></canvas>
-{% endblock %}
+    <!-- Top Clientes -->
+    <div class="card mb-8">
+        <div class="card-header">
+            <h3 class="section-title flex items-center">
+                <i class="fas fa-trophy text-primary-600 mr-2"></i>
+                Top 10 Clientes por Prima
+            </h3>
+        </div>
+        <div class="card-body">
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th class="table-header">Cliente</th>
+                            <th class="table-header text-center">Número de Pólizas</th>
+                            <th class="table-header text-right">Prima Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for client in top_clients %}
+                        <tr class="table-row">
+                            <td class="table-cell">{{ client.name }}</td>
+                            <td class="table-cell text-center">{{ client.policy_count }}</td>
+                            <td class="table-cell text-right">${{ "{:,.2f}".format(client.total_premium) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 
-{% block scripts %}
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        // Client Distribution Chart
-        new Chart(document.getElementById('client-distribution-chart'), {
-            type: 'bar',
-            data: {
-                labels: {{ top_clients|map(attribute='name')|list|tojson }},
-                datasets: [{
-                    label: 'Número de Pólizas',
-                    data: {{ top_clients|map(attribute='policy_count')|list|tojson }},
-                    backgroundColor: 'rgba(75, 192, 192, 0.6)'
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Número de Pólizas'
-                        }
-                    },
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Cliente'
-                        }
+    <!-- Gráficos -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Distribución de Clientes -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="section-title flex items-center">
+                    <i class="fas fa-chart-pie text-primary-600 mr-2"></i>
+                    Distribución de Clientes por Número de Pólizas
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="h-80">
+                    <canvas id="client-distribution-chart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tendencia de Clientes -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="section-title flex items-center">
+                    <i class="fas fa-chart-line text-primary-600 mr-2"></i>
+                    Tendencia de Adquisición de Clientes
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="h-80">
+                    <canvas id="client-trend-chart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Configuración común para los gráficos
+    const chartConfig = {
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        },
+        responsive: true,
+        maintainAspectRatio: false
+    };
+
+    // Gráfico de Distribución
+    new Chart(document.getElementById('client-distribution-chart'), {
+        type: 'bar',
+        data: {
+            labels: {{ top_clients|map(attribute='name')|list|tojson|safe }},
+            datasets: [{
+                label: 'Número de Pólizas',
+                data: {{ top_clients|map(attribute='policy_count')|list|tojson|safe }},
+                backgroundColor: 'rgba(14, 165, 233, 0.6)',
+                borderColor: 'rgb(14, 165, 233)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            ...chartConfig,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Número de Pólizas'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Cliente'
                     }
                 }
             }
-        });
-    </script>
+        }
+    });
+
+    // Gráfico de Tendencia
+    new Chart(document.getElementById('client-trend-chart'), {
+        type: 'line',
+        data: {
+            labels: {{ client_trend|map(attribute='month')|map('strftime', '%Y-%m')|list|tojson|safe }},
+            datasets: [{
+                label: 'Nuevos Clientes',
+                data: {{ client_trend|map(attribute='count')|list|tojson|safe }},
+                borderColor: 'rgb(14, 165, 233)',
+                backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            ...chartConfig,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Número de Clientes'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Mes'
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}
 {% endblock %}

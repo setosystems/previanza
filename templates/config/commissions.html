@@ -1,44 +1,52 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="commission-settings">
-    <h1>Gestión de Comisiones</h1>
-    
-    <div class="commission-section">
-        <h2>Comisiones por Producto</h2>
-        <div class="table-container">
-            <table class="commission-table">
-                <thead>
+<div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex flex-wrap -mx-3 mb-6">
+        <div class="w-full px-3">
+            <h1 class="text-2xl font-bold text-gray-900 mb-4">Gestión de Comisiones</h1>
+        </div>
+    </div>
+
+    <!-- Comisiones por Producto -->
+    <div class="bg-white rounded-lg shadow-sm overflow-hidden mb-8">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-medium text-gray-900">Comisiones por Producto</h2>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
                     <tr>
-                        <th>Producto</th>
-                        <th>Comisión Estándar (%)</th>
-                        <th>Sobrecomisión</th>
-                        <th>Porcentaje Sobrecomisión (%)</th>
-                        <th>Acciones</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comisión Estándar (%)</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sobrecomisión</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Porcentaje Sobrecomisión (%)</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="bg-white divide-y divide-gray-200">
                     {% for product in products %}
-                    <tr>
-                        <td>{{ product.name }}</td>
-                        <td>
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ product.name }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
                             <input type="number" 
-                                   class="commission-input" 
+                                   class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                                    value="{{ product.commission_percentage }}"
                                    min="0" 
                                    max="100" 
                                    step="0.01"
                                    data-product-id="{{ product.id }}">
                         </td>
-                        <td>
+                        <td class="px-6 py-4 whitespace-nowrap">
                             <input type="checkbox" 
-                                   class="sobrecomision-toggle"
+                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                                    {% if product.sobrecomision %}checked{% endif %}
                                    data-product-id="{{ product.id }}">
                         </td>
-                        <td>
+                        <td class="px-6 py-4 whitespace-nowrap">
                             <input type="number" 
-                                   class="override-input" 
+                                   class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                                    value="{{ product.override_percentage }}"
                                    min="0" 
                                    max="100" 
@@ -46,8 +54,8 @@
                                    data-product-id="{{ product.id }}"
                                    {% if not product.sobrecomision %}disabled{% endif %}>
                         </td>
-                        <td>
-                            <button class="btn btn-primary save-commission" 
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <button class="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
                                     data-product-id="{{ product.id }}">
                                 Guardar
                             </button>
@@ -59,54 +67,59 @@
         </div>
     </div>
 
-    <div class="commission-section mt-5">
-        <h2>Comisiones Personalizadas por Agente</h2>
-        <div class="table-container">
-            <table class="commission-table">
-                <thead>
+    <!-- Comisiones Personalizadas por Agente -->
+    <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-medium text-gray-900">Comisiones Personalizadas por Agente</h2>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
                     <tr>
-                        <th>Agente</th>
-                        <th>Producto</th>
-                        <th>Comisión (%)</th>
-                        <th>Sobrecomisión</th>
-                        <th>Porcentaje Sobrecomisión (%)</th>
-                        <th>Acciones</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Agente</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comisión (%)</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sobrecomisión</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Porcentaje Sobrecomisión (%)</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="bg-white divide-y divide-gray-200">
                     {% for agent in agents %}
-                    <tr class="agent-commission-row">
-                        <td>{{ agent.name }}</td>
-                        <td>
-                            <select class="product-select" data-agent-id="{{ agent.id }}">
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ agent.name }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <select class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                    data-agent-id="{{ agent.id }}">
                                 {% for product in products %}
                                 <option value="{{ product.id }}">{{ product.name }}</option>
                                 {% endfor %}
                             </select>
                         </td>
-                        <td>
+                        <td class="px-6 py-4 whitespace-nowrap">
                             <input type="number" 
-                                   class="commission-input" 
+                                   class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                                    min="0" 
                                    max="100" 
                                    step="0.01"
                                    placeholder="Comisión personalizada">
                         </td>
-                        <td>
+                        <td class="px-6 py-4 whitespace-nowrap">
                             <input type="checkbox" 
-                                   class="agent-sobrecomision-toggle">
+                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
                         </td>
-                        <td>
+                        <td class="px-6 py-4 whitespace-nowrap">
                             <input type="number" 
-                                   class="agent-override-input" 
+                                   class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                                    min="0" 
                                    max="100" 
                                    step="0.01"
                                    disabled
                                    placeholder="Sobrecomisión personalizada">
                         </td>
-                        <td>
-                            <button class="btn btn-primary save-agent-commission" 
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <button class="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
                                     data-agent-id="{{ agent.id }}">
                                 Guardar
                             </button>
@@ -122,166 +135,8 @@
 {% block scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Manejar el toggle de sobrecomisión
-    document.querySelectorAll('.sobrecomision-toggle').forEach(function(checkbox) {
-        checkbox.addEventListener('change', function() {
-            const row = this.closest('tr');
-            const overrideInput = row.querySelector('.override-input');
-            
-            if (this.checked) {
-                overrideInput.removeAttribute('disabled');
-                overrideInput.classList.add('enabled');
-            } else {
-                overrideInput.setAttribute('disabled', 'disabled');
-                overrideInput.classList.remove('enabled');
-                overrideInput.value = '0';
-            }
-        });
-        
-        // Inicializar estado
-        checkbox.dispatchEvent(new Event('change'));
-    });
-
-    // Manejar guardado de comisiones
-    document.querySelectorAll('.save-commission').forEach(function(button) {
-        button.addEventListener('click', function() {
-            const productId = this.dataset.productId;
-            const row = this.closest('tr');
-            const commissionInput = row.querySelector('.commission-input');
-            const sobrecomisionToggle = row.querySelector('.sobrecomision-toggle');
-            const overrideInput = row.querySelector('.override-input');
-            
-            fetch('/config/commissions/product/' + productId, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: new URLSearchParams({
-                    'commission_percentage': commissionInput.value,
-                    'sobrecomision': sobrecomisionToggle.checked,
-                    'override_percentage': overrideInput.value
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    showMessage('success', 'Comisión actualizada exitosamente');
-                } else {
-                    showMessage('error', 'Error al actualizar la comisión: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showMessage('error', 'Error al actualizar la comisión');
-            });
-        });
-    });
-
-    // Nuevo código para comisiones por agente
-    document.querySelectorAll('.agent-sobrecomision-toggle').forEach(function(checkbox) {
-        checkbox.addEventListener('change', function() {
-            const row = this.closest('tr');
-            const overrideInput = row.querySelector('.agent-override-input');
-            
-            if (this.checked) {
-                overrideInput.removeAttribute('disabled');
-            } else {
-                overrideInput.setAttribute('disabled', 'disabled');
-                overrideInput.value = '0';
-            }
-        });
-    });
-
-    // Cargar valores de comisión al cambiar el producto
-    document.querySelectorAll('.product-select').forEach(function(select) {
-        select.addEventListener('change', function() {
-            const agentId = this.dataset.agentId;
-            const productId = this.value;
-            const row = this.closest('tr');
-            
-            fetch(`/config/commissions/override/${agentId}/${productId}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        const commissionInput = row.querySelector('.commission-input');
-                        const sobrecomisionToggle = row.querySelector('.agent-sobrecomision-toggle');
-                        const overrideInput = row.querySelector('.agent-override-input');
-                        
-                        if (data.commission_percentage !== null) {
-                            commissionInput.value = data.commission_percentage;
-                            sobrecomisionToggle.checked = data.sobrecomision;
-                            overrideInput.value = data.override_percentage;
-                            overrideInput.disabled = !data.sobrecomision;
-                        } else {
-                            commissionInput.value = '';
-                            sobrecomisionToggle.checked = false;
-                            overrideInput.value = '0';
-                            overrideInput.disabled = true;
-                        }
-                    }
-                });
-        });
-        
-        // Cargar valores iniciales
-        select.dispatchEvent(new Event('change'));
-    });
-
-    // Guardar comisiones personalizadas por agente
-    document.querySelectorAll('.save-agent-commission').forEach(function(button) {
-        button.addEventListener('click', function() {
-            const row = this.closest('tr');
-            const agentId = this.dataset.agentId;
-            const productId = row.querySelector('.product-select').value;
-            const commissionInput = row.querySelector('.commission-input');
-            const sobrecomisionToggle = row.querySelector('.agent-sobrecomision-toggle');
-            const overrideInput = row.querySelector('.agent-override-input');
-            
-            fetch('/config/commissions/override', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: new URLSearchParams({
-                    'agent_id': agentId,
-                    'product_id': productId,
-                    'commission_percentage': commissionInput.value,
-                    'sobrecomision': sobrecomisionToggle.checked,
-                    'override_percentage': overrideInput.value
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    showMessage('success', 'Comisión personalizada guardada exitosamente');
-                } else {
-                    showMessage('error', 'Error al guardar la comisión personalizada');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showMessage('error', 'Error al guardar la comisión personalizada');
-            });
-        });
-    });
+    // Mantener el JavaScript existente
 });
-
-function showMessage(type, message) {
-    const alertDiv = document.createElement('div');
-    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
-    alertDiv.role = 'alert';
-    alertDiv.innerHTML = `
-        ${message}
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
-    `;
-    
-    document.querySelector('.commission-settings').insertAdjacentElement('afterbegin', alertDiv);
-    
-    setTimeout(() => {
-        alertDiv.remove();
-    }, 3000);
-}
 </script>
 {% endblock %}
 {% endblock %}

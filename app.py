@@ -120,6 +120,19 @@ with app.app_context():
     except Exception as e:
         logging.error(f"Error al verificar la base de datos: {str(e)}")
 
+if not app.debug:
+    # Compilar Tailwind CSS
+    import subprocess
+    subprocess.run([
+        'npx', 
+        'tailwindcss', 
+        '-i', 
+        'static/css/input.css', 
+        '-o', 
+        'static/css/output.css', 
+        '--minify'
+    ])
+
 if __name__ == '__main__':
     logger.info("Starting Flask application")
     app.run(host='0.0.0.0', port=5000, debug=True)
