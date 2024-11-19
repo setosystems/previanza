@@ -77,6 +77,15 @@ module.exports = {
           lg: '4rem',
           xl: '5rem',
         },
+      },
+      width: {
+        'sidebar': '16rem',
+      },
+      zIndex: {
+        'sidebar': '40',
+      },
+      transitionProperty: {
+        'sidebar': 'width, transform',
       }
     },
   },

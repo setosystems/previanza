@@ -1,4 +1,4 @@
-<aside class="bg-secondary-800 w-64 min-h-screen flex flex-col">
+<aside class="bg-secondary-800 w-64 min-h-screen flex flex-col z-40 transition-all duration-300 ease-in-out">
     <!-- Logo -->
     <div class="p-4 border-b border-secondary-700">
         <a href="/" class="flex items-center">
@@ -22,9 +22,9 @@
             <!-- Inicio -->
             <li>
                 <a href="{{ url_for('index') }}" 
-                   class="nav-link {% if request.endpoint == 'index' %}nav-link-active{% endif %}">
+                   class="flex items-center px-4 py-2 text-secondary-300 hover:text-white hover:bg-secondary-700 rounded-lg transition-colors duration-200">
                     <i class="fas fa-home w-5"></i>
-                    <span>Inicio</span>
+                    <span class="ml-3">Inicio</span>
                 </a>
             </li>
 
@@ -33,16 +33,16 @@
                     <!-- Clientes -->
                     <li>
                         <a href="{{ url_for('clients.list_clients') }}" 
-                           class="nav-link {% if request.endpoint and request.endpoint.startswith('clients.') %}nav-link-active{% endif %}">
+                           class="flex items-center px-4 py-2 text-secondary-300 hover:text-white hover:bg-secondary-700 rounded-lg transition-colors duration-200">
                             <i class="fas fa-users w-5"></i>
-                            <span>Clientes</span>
+                            <span class="ml-3">Clientes</span>
                         </a>
                     </li>
 
                     <!-- Pólizas -->
                     <li>
                         <a href="{{ url_for('policies.list_policies') }}" 
-                           class="nav-link {% if request.endpoint and request.endpoint.startswith('policies.') %}nav-link-active{% endif %}">
+                           class="flex items-center px-4 py-2 text-secondary-300 hover:text-white hover:bg-secondary-700 rounded-lg transition-colors duration-200">
                             <i class="fas fa-file-contract w-5"></i>
                             <span>Pólizas</span>
                         </a>
@@ -51,7 +51,7 @@
                     <!-- Productos -->
                     <li>
                         <a href="{{ url_for('products.list_products') }}" 
-                           class="nav-link {% if request.endpoint and request.endpoint.startswith('products.') %}nav-link-active{% endif %}">
+                           class="flex items-center px-4 py-2 text-secondary-300 hover:text-white hover:bg-secondary-700 rounded-lg transition-colors duration-200">
                             <i class="fas fa-box w-5"></i>
                             <span>Productos</span>
                         </a>
@@ -62,7 +62,7 @@
                     <!-- Agentes -->
                     <li>
                         <a href="{{ url_for('agents.list_agents') }}" 
-                           class="nav-link {% if request.endpoint and request.endpoint.startswith('agents.') %}nav-link-active{% endif %}">
+                           class="flex items-center px-4 py-2 text-secondary-300 hover:text-white hover:bg-secondary-700 rounded-lg transition-colors duration-200">
                             <i class="fas fa-user-tie w-5"></i>
                             <span>Agentes</span>
                         </a>
@@ -71,7 +71,7 @@
                     <!-- Gestión de Usuarios -->
                     <li>
                         <a href="{{ url_for('auth.list_users') }}" 
-                           class="nav-link {% if request.endpoint == 'auth.list_users' %}nav-link-active{% endif %}">
+                           class="flex items-center px-4 py-2 text-secondary-300 hover:text-white hover:bg-secondary-700 rounded-lg transition-colors duration-200">
                             <i class="fas fa-users-cog w-5"></i>
                             <span>Gestión de Usuarios</span>
                         </a>
@@ -80,7 +80,7 @@
                     <!-- Configuración -->
                     <li>
                         <a href="{{ url_for('config.config_index') }}" 
-                           class="nav-link {% if request.endpoint and request.endpoint.startswith('config.') %}nav-link-active{% endif %}">
+                           class="flex items-center px-4 py-2 text-secondary-300 hover:text-white hover:bg-secondary-700 rounded-lg transition-colors duration-200">
                             <i class="fas fa-cogs w-5"></i>
                             <span>Configuración</span>
                         </a>
@@ -90,53 +90,53 @@
                 <!-- Informes -->
                 <li class="relative">
                     <button type="button" 
-                            class="nav-link w-full flex items-center justify-between {% if request.endpoint and request.endpoint.startswith('reports.') %}nav-link-active{% endif %}"
+                            class="w-full flex items-center justify-between px-4 py-2 text-secondary-300 hover:text-white hover:bg-secondary-700 rounded-lg transition-colors duration-200"
                             onclick="toggleSubmenu(this)">
                         <div class="flex items-center">
                             <i class="fas fa-chart-bar w-5"></i>
-                            <span>Informes</span>
+                            <span class="ml-3">Informes</span>
                         </div>
                         <i class="fas fa-chevron-down transform transition-transform duration-200"></i>
                     </button>
-                    <ul class="pl-8 mt-1 space-y-1 {% if not request.endpoint or not request.endpoint.startswith('reports.') %}hidden{% endif %}">
+                    <ul class="pl-8 mt-1 space-y-1 hidden">
                         <li>
                             <a href="{{ url_for('reports.dashboard') }}" 
-                               class="nav-link {% if request.endpoint == 'reports.dashboard' %}nav-link-active{% endif %}">
+                               class="flex items-center px-4 py-2 text-secondary-300 hover:text-white hover:bg-secondary-700 rounded-lg transition-colors duration-200">
                                 <i class="fas fa-tachometer-alt w-5"></i>
                                 <span>Dashboard</span>
                             </a>
                         </li>
                         <li>
                             <a href="{{ url_for('reports.sales_report') }}" 
-                               class="nav-link {% if request.endpoint == 'reports.sales_report' %}nav-link-active{% endif %}">
+                               class="flex items-center px-4 py-2 text-secondary-300 hover:text-white hover:bg-secondary-700 rounded-lg transition-colors duration-200">
                                 <i class="fas fa-chart-line w-5"></i>
                                 <span>Reporte de Ventas</span>
                             </a>
                         </li>
                         <li>
                             <a href="{{ url_for('reports.commission_report') }}" 
-                               class="nav-link {% if request.endpoint == 'reports.commission_report' %}nav-link-active{% endif %}">
+                               class="flex items-center px-4 py-2 text-secondary-300 hover:text-white hover:bg-secondary-700 rounded-lg transition-colors duration-200">
                                 <i class="fas fa-percentage w-5"></i>
                                 <span>Reporte de Comisiones</span>
                             </a>
                         </li>
                         <li>
                             <a href="{{ url_for('reports.client_analytics') }}" 
-                               class="nav-link {% if request.endpoint == 'reports.client_analytics' %}nav-link-active{% endif %}">
+                               class="flex items-center px-4 py-2 text-secondary-300 hover:text-white hover:bg-secondary-700 rounded-lg transition-colors duration-200">
                                 <i class="fas fa-users-cog w-5"></i>
                                 <span>Análisis de Clientes</span>
                             </a>
                         </li>
                         <li>
                             <a href="{{ url_for('reports.policy_analytics') }}" 
-                               class="nav-link {% if request.endpoint == 'reports.policy_analytics' %}nav-link-active{% endif %}">
+                               class="flex items-center px-4 py-2 text-secondary-300 hover:text-white hover:bg-secondary-700 rounded-lg transition-colors duration-200">
                                 <i class="fas fa-file-invoice-dollar w-5"></i>
                                 <span>Análisis de Pólizas</span>
                             </a>
                         </li>
                         <li>
                             <a href="{{ url_for('reports.diagram') }}" 
-                               class="nav-link {% if request.endpoint == 'reports.diagram' %}nav-link-active{% endif %}">
+                               class="flex items-center px-4 py-2 text-secondary-300 hover:text-white hover:bg-secondary-700 rounded-lg transition-colors duration-200">
                                 <i class="fas fa-project-diagram w-5"></i>
                                 <span>Diagrama de Comisiones</span>
                             </a>
@@ -149,9 +149,10 @@
 
     <!-- Cerrar Sesión -->
     <div class="p-4 border-t border-secondary-700">
-        <a href="{{ url_for('auth.logout') }}" class="nav-link">
+        <a href="{{ url_for('auth.logout') }}" 
+           class="flex items-center px-4 py-2 text-secondary-300 hover:text-white hover:bg-secondary-700 rounded-lg transition-colors duration-200">
             <i class="fas fa-sign-out-alt w-5"></i>
-            <span>Cerrar Sesión</span>
+            <span class="ml-3">Cerrar Sesión</span>
         </a>
     </div>
 </aside>

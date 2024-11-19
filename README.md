@@ -1,39 +1,39 @@
 <div align="center">
 
-# 🏢 Sistema de Gestión de Seguros
+# 🏢 Sistema de Gestión de Seguros Previanza
 
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org)
 [![Flask](https://img.shields.io/badge/Flask-2.0+-green.svg)](https://flask.palletsprojects.com)
 [![License](https://img.shields.io/badge/License-Custom-blue.svg)](#licencia)
 
-Sistema web profesional para la gestión integral de seguros, desarrollado con Flask.
+Sistema web profesional para la gestión integral de seguros, desarrollado con Flask y diseñado específicamente para empresas aseguradoras. Permite gestionar pólizas, clientes, agentes y comisiones de manera eficiente y segura.
 
 </div>
 
 ## ✨ Características Principales
 
 ### 👥 Gestión de Usuarios y Roles
-- Roles diferenciados: Administrador, Digitador, Agente
-- Sistema de autenticación seguro
-- Control de acceso basado en roles
-- Recuperación de contraseña por email
+- Sistema de roles jerárquico (Administrador, Digitador, Agente)
+- Autenticación segura con recuperación de contraseña
+- Control de acceso basado en roles (RBAC)
+- Gestión de perfiles y permisos
 
 ### 👥 Gestión de Clientes
-- Registro y administración de clientes
-- Validación de documentos de identidad
-- Búsqueda avanzada y filtros
+- CRUD completo de clientes
+- Validación de documentos ecuatorianos
 - Carga masiva desde Excel
-- Historial completo de pólizas
+- Búsqueda avanzada con filtros
+- Historial de pólizas por cliente
 
 ### 📄 Gestión de Pólizas
 - Creación y seguimiento de pólizas
-- Asignación automática a agentes
-- Control de estados de emisión y pagos
-- Validaciones automáticas
+- Control de estados (emisión y pagos)
+- Cálculo automático de comisiones
 - Carga masiva de pólizas
+- Validaciones automáticas
 
 ### 💰 Sistema de Comisiones
-- Cálculo automático de comisiones
+- Cálculo automático multinivel
 - Sobrecomisiones para supervisores
 - Notificaciones por email
 - Reportes detallados
@@ -46,24 +46,26 @@ Sistema web profesional para la gestión integral de seguros, desarrollado con F
 - Análisis de rendimiento
 - Visualización de jerarquía de agentes
 
-## 📋 Requisitos
+## 🛠️ Tecnologías Utilizadas
 
-- Python 3.8+
-- PostgreSQL/SQLite
-- Servidor SMTP para emails
-- Dependencias en `requirements.txt`
+- **Backend**: Python 3.8+, Flask 3.0
+- **Base de Datos**: PostgreSQL 13
+- **Frontend**: TailwindCSS, AlpineJS
+- **Contenedores**: Docker, Docker Compose
+- **Cache**: Redis
+- **Servidor Web**: Nginx, Gunicorn
 
-## 🐳 Instalación con Docker
+## 📋 Requisitos del Sistema
 
-1. **Requisitos previos**
+- Docker y Docker Compose
+- 2GB RAM mínimo
+- 10GB espacio en disco
+- Conexión a Internet
+
+## 🚀 Instalación
+
+1. **Clonar el repositorio**
 ```bash
-- Docker
-- Docker Compose
-```
-
-2. **Configuración inicial**
-```bash
-# Clonar el repositorio
 git clone <repositorio>
 cd <directorio>
 
@@ -77,7 +79,7 @@ sudo chmod -R 777 static/
 sudo chmod -R +t static/
 ```
 
-3. **Iniciar con Docker**
+2. **Iniciar con Docker**
 ```bash
 # Construir e iniciar contenedores
 docker-compose up --build -d
@@ -86,12 +88,12 @@ docker-compose up --build -d
 docker-compose logs -f
 ```
 
-4. **Acceso**
+3. **Acceso**
 - Aplicación web: http://localhost
 - Base de datos: localhost:5433
 - Redis: localhost:6379
 
-5. **Credenciales por defecto**
+4. **Credenciales por defecto**
 ```
 Usuario: admin
 Email: admin@example.com
@@ -144,17 +146,6 @@ docker-compose restart
 docker-compose up --build -d
 ```
 
-## 💻 Uso
-
-1. **Iniciar el servidor**
-   ```bash
-   flask run
-   ```
-
-2. **Acceder a la aplicación**
-   - Abrir navegador en `http://localhost:5000`
-   - Iniciar sesión con las credenciales de administrador
-
 ## 🔧 Configuración
 
 ### Configuración de Email
@@ -171,11 +162,8 @@ MAIL_DEFAULT_SENDER = 'tu@email.com'
 ### Configuración de Base de Datos
 
 ```ini
-# SQLite (por defecto)
-SQLALCHEMY_DATABASE_URI = 'sqlite:///app.db'
-
-# PostgreSQL (opcional)
-SQLALCHEMY_DATABASE_URI = 'postgresql://usuario:contraseña@localhost/basededatos'
+# PostgreSQL (recomendado)
+DATABASE_URL = 'postgresql://usuario:contraseña@localhost/previanza'
 ```
 
 ## 📖 Documentación
@@ -201,6 +189,30 @@ sistema-seguros/
 - **reports**: Reportes y análisis
 - **config**: Configuraciones del sistema
 
+## 🔐 Seguridad
+
+- Autenticación basada en sesiones
+- Protección CSRF
+- Validación de datos
+- Encriptación de contraseñas
+- Control de acceso por roles
+- Sanitización de entradas
+- Protección contra inyección SQL
+- Headers de seguridad HTTP
+
+## 🔄 Backup y Restauración
+
+El sistema incluye scripts automatizados para backup:
+
+```bash
+# Ejecutar backup manual
+./backup.sh
+
+# Los backups se guardan en:
+/backups/db_YYYYMMDD_HHMMSS.sql    # Base de datos
+/backups/files_YYYYMMDD_HHMMSS.tar.gz  # Archivos
+```
+
 ## 🤝 Contribuir
 
 1. Fork el repositorio
@@ -218,3 +230,16 @@ Este proyecto está bajo una licencia personalizada. Ver el archivo [LICENSE](LI
 ## 👥 Autores
 
 * **Seto Systems** - *Trabajo Inicial* - [usuario](https://github.com/usuario)
+
+## 📞 Soporte
+
+Para soporte técnico:
+- Email: soporte@setosystems.com
+- Teléfono: +593 XXXXXXXX
+- Horario: Lunes a Viernes 9:00 - 18:00 (ECT)
+
+## 🙏 Agradecimientos
+
+* A todo el equipo de desarrollo
+* A nuestros usuarios por su feedback
+* A la comunidad de Flask y Python
