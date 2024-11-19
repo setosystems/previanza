@@ -8,9 +8,14 @@
         <div class="card-header">
             <div class="flex justify-between items-center">
                 <h2 class="section-title">Búsqueda de Clientes</h2>
-                <a href="{{ url_for('clients.create_client') }}" class="btn-primary">
-                    <i class="fas fa-plus mr-2"></i>Nuevo Cliente
-                </a>
+                <div class="flex space-x-4">
+                    <a href="{{ url_for('clients.create_client') }}" class="btn-primary">
+                        <i class="fas fa-plus mr-2"></i>Nuevo Cliente
+                    </a>
+                    <a href="{{ url_for('clients.bulk_upload_clients') }}" class="btn-secondary">
+                        <i class="fas fa-upload mr-2"></i>Carga Masiva
+                    </a>
+                </div>
             </div>
         </div>
         
