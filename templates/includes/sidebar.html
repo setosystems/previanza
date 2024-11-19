@@ -1,60 +1,55 @@
-<aside class="bg-primary-800 w-64 min-h-screen flex flex-col shadow-lg">
-    <!-- Logo con mejor contraste y espaciado -->
-    <div class="p-6 border-b border-primary-700/50">
-        <a href="/" class="flex items-center space-x-3">
-            <img src="{{ url_for('static', filename='img/logo_black.svg') }}" alt="Logo" class="h-8 w-auto">
-            <span class="text-primary-50 font-display text-lg">Previanza</span>
+<aside class="bg-primary-800 w-64 min-h-screen flex flex-col z-40 shadow-lg transition-all duration-300 ease-in-out">
+    <!-- Logo y Marca -->
+    <div class="p-4 border-b border-primary-700/50">
+        <a href="/" class="flex items-center">
+            <img src="{{ url_for('static', filename='img/logo_black.svg') }}" alt="Logo" class="h-8">
+            <span class="text-primary-50 font-display font-semibold ml-2">Previanza</span>
         </a>
     </div>
 
-    <!-- Perfil del usuario mejorado -->
-    <div class="p-6 border-b border-primary-700/50">
-        <div class="flex flex-col items-center">
-            <img src="{{ url_for('static', filename='img/user.png') }}" 
-                 alt="user-avatar" 
-                 class="w-16 h-16 rounded-full shadow-md mb-3">
-            <h6 class="text-primary-50 font-medium">
-                {{ current_user.name if current_user.is_authenticated else 'Usuario' }}
-            </h6>
-            <span class="text-primary-300 text-sm mt-1">
-                {{ current_user.role.value if current_user.is_authenticated else 'Invitado' }}
-            </span>
-        </div>
+    <!-- Perfil del usuario -->
+    <div class="p-4 text-center border-b border-primary-700/50">
+        <img src="{{ url_for('static', filename='img/user.png') }}" 
+             alt="user-avatar" 
+             class="w-12 h-12 rounded-full mx-auto mb-2 border-2 border-primary-600 shadow-md">
+        <h6 class="text-primary-100 font-medium">{{ current_user.name if current_user.is_authenticated else 'Usuario' }}</h6>
+        <span class="text-primary-300 text-sm">{{ current_user.role.value if current_user.is_authenticated else 'Invitado' }}</span>
     </div>
 
-    <!-- Menú Principal mejorado -->
-    <nav class="flex-1 overflow-y-auto py-6">
-        <ul class="space-y-2 px-3">
+    <!-- Menú Principal -->
+    <nav class="flex-1 overflow-y-auto py-4">
+        <ul class="space-y-0.5 px-2">
             <!-- Inicio -->
             <li>
                 <a href="{{ url_for('index') }}" 
-                   class="flex items-center px-4 py-3 text-primary-100 hover:bg-primary-700/50 
-                          {{ 'bg-primary-700 text-white' if request.endpoint == 'index' else '' }}
+                   class="flex items-center px-4 py-2.5 text-gray-100 hover:bg-primary-600/50 
+                          {{ 'bg-primary-600 text-white shadow-md' if request.endpoint == 'index' else '' }}
                           rounded-lg transition-all duration-200 group">
-                    <i class="fas fa-home w-5 text-primary-400 group-hover:text-white transition-colors"></i>
+                    <i class="fas fa-home w-5 text-primary-300 group-hover:text-white transition-colors"></i>
                     <span class="ml-3">Inicio</span>
                 </a>
             </li>
 
             {% if current_user.is_authenticated %}
                 {% if current_user.role in [UserRole.ADMIN, UserRole.DIGITADOR] %}
-                    <!-- Otros elementos del menú con el mismo patrón -->
+                    <!-- Clientes -->
                     <li>
                         <a href="{{ url_for('clients.list_clients') }}" 
-                           class="flex items-center px-4 py-3 text-primary-100 hover:bg-primary-700/50 
-                                  {{ 'bg-primary-700 text-white' if request.endpoint.startswith('clients.') else '' }}
+                           class="flex items-center px-4 py-2.5 text-gray-100 hover:bg-primary-600/50 
+                                  {{ 'bg-primary-600 text-white shadow-md' if request.endpoint.startswith('clients.') else '' }}
                                   rounded-lg transition-all duration-200 group">
-                            <i class="fas fa-users w-5 text-primary-400 group-hover:text-white transition-colors"></i>
+                            <i class="fas fa-users w-5 text-primary-300 group-hover:text-white transition-colors"></i>
                             <span class="ml-3">Clientes</span>
                         </a>
                     </li>
+
                     <!-- Pólizas -->
                     <li>
                         <a href="{{ url_for('policies.list_policies') }}" 
-                           class="flex items-center px-4 py-2 text-primary-200 hover:text-white hover:bg-primary-700 
-                                  {{ 'bg-primary-600 text-white' if request.endpoint.startswith('policies.') else '' }}
-                                  rounded-lg transition-colors duration-200">
-                            <i class="fas fa-file-contract w-5"></i>
+                           class="flex items-center px-4 py-2.5 text-gray-100 hover:bg-primary-600/50 
+                                  {{ 'bg-primary-600 text-white shadow-md' if request.endpoint.startswith('policies.') else '' }}
+                                  rounded-lg transition-all duration-200 group">
+                            <i class="fas fa-file-contract w-5 text-primary-300 group-hover:text-white transition-colors"></i>
                             <span>Pólizas</span>
                         </a>
                     </li>
@@ -62,8 +57,10 @@
                     <!-- Productos -->
                     <li>
                         <a href="{{ url_for('products.list_products') }}" 
-                           class="flex items-center px-4 py-2 text-primary-200 hover:text-white hover:bg-primary-700 rounded-lg transition-colors duration-200">
-                            <i class="fas fa-box w-5"></i>
+                           class="flex items-center px-4 py-2.5 text-gray-100 hover:bg-primary-600/50 
+                                  {{ 'bg-primary-600 text-white shadow-md' if request.endpoint.startswith('products.') else '' }}
+                                  rounded-lg transition-all duration-200 group">
+                            <i class="fas fa-box w-5 text-primary-300 group-hover:text-white transition-colors"></i>
                             <span>Productos</span>
                         </a>
                     </li>
@@ -73,8 +70,10 @@
                     <!-- Agentes -->
                     <li>
                         <a href="{{ url_for('agents.list_agents') }}" 
-                           class="flex items-center px-4 py-2 text-primary-200 hover:text-white hover:bg-primary-700 rounded-lg transition-colors duration-200">
-                            <i class="fas fa-user-tie w-5"></i>
+                           class="flex items-center px-4 py-2.5 text-gray-100 hover:bg-primary-600/50 
+                                  {{ 'bg-primary-600 text-white shadow-md' if request.endpoint.startswith('agents.') else '' }}
+                                  rounded-lg transition-all duration-200 group">
+                            <i class="fas fa-user-tie w-5 text-primary-300 group-hover:text-white transition-colors"></i>
                             <span>Agentes</span>
                         </a>
                     </li>
@@ -82,76 +81,91 @@
                     <!-- Gestión de Usuarios -->
                     <li>
                         <a href="{{ url_for('auth.list_users') }}" 
-                           class="flex items-center px-4 py-2 text-primary-200 hover:text-white hover:bg-primary-700 rounded-lg transition-colors duration-200">
-                            <i class="fas fa-users-cog w-5"></i>
-                            <span>Gestión de Usuarios</span>
+                           class="flex items-center px-4 py-2.5 text-gray-100 hover:bg-primary-600/50 
+                                  {{ 'bg-primary-600 text-white shadow-md' if request.endpoint.startswith('auth.') else '' }}
+                                  rounded-lg transition-all duration-200 group">
+                            <i class="fas fa-users-cog w-5 text-primary-300 group-hover:text-white transition-colors"></i>
+                            <span>Usuarios</span>
                         </a>
                     </li>
 
                     <!-- Configuración -->
                     <li>
                         <a href="{{ url_for('config.config_index') }}" 
-                           class="flex items-center px-4 py-2 text-primary-200 hover:text-white hover:bg-primary-700 rounded-lg transition-colors duration-200">
-                            <i class="fas fa-cogs w-5"></i>
+                           class="flex items-center px-4 py-2.5 text-gray-100 hover:bg-primary-600/50 
+                                  {{ 'bg-primary-600 text-white shadow-md' if request.endpoint.startswith('config.') else '' }}
+                                  rounded-lg transition-all duration-200 group">
+                            <i class="fas fa-cogs w-5 text-primary-300 group-hover:text-white transition-colors"></i>
                             <span>Configuración</span>
                         </a>
                     </li>
                 {% endif %}
 
-                <!-- Informes con diseño mejorado -->
+                <!-- Informes -->
                 <li class="relative">
                     <button type="button" 
-                            class="w-full flex items-center justify-between px-4 py-3 text-primary-100 
-                                   hover:bg-primary-700/50 rounded-lg transition-all duration-200 group"
-                            onclick="toggleSubmenu(this)">
+                            class="w-full flex items-center justify-between px-4 py-2.5 text-gray-100 
+                                   hover:bg-primary-600/50 rounded-lg transition-all duration-200 group
+                                   {{ 'bg-primary-600 text-white shadow-md' if request.endpoint.startswith('reports.') else '' }}">
                         <div class="flex items-center">
-                            <i class="fas fa-chart-bar w-5 text-primary-400 group-hover:text-white transition-colors"></i>
+                            <i class="fas fa-chart-bar w-5 text-primary-300 group-hover:text-white transition-colors"></i>
                             <span class="ml-3">Informes</span>
                         </div>
-                        <i class="fas fa-chevron-down text-primary-400 transform transition-transform duration-200"></i>
+                        <i class="fas fa-chevron-down transform transition-transform duration-200 text-primary-300 group-hover:text-white"></i>
                     </button>
-                    <ul class="pl-4 mt-2 space-y-2 hidden">
+                    <ul class="pl-4 mt-1 space-y-0.5 hidden">
                         <li>
                             <a href="{{ url_for('reports.dashboard') }}" 
-                               class="flex items-center px-4 py-2 text-primary-200 hover:text-white 
-                                      hover:bg-primary-700/50 rounded-lg transition-all duration-200">
-                                <i class="fas fa-tachometer-alt w-5"></i>
-                                <span class="ml-3 text-sm">Dashboard</span>
+                               class="flex items-center px-4 py-2 text-gray-200 hover:bg-primary-600/50 
+                                      {{ 'bg-primary-600 text-white shadow-md' if request.endpoint == 'reports.dashboard' else '' }}
+                                      rounded-lg transition-all duration-200 group">
+                                <i class="fas fa-tachometer-alt w-5 text-primary-300 group-hover:text-white"></i>
+                                <span class="ml-3">Dashboard</span>
                             </a>
                         </li>
                         <li>
                             <a href="{{ url_for('reports.sales_report') }}" 
-                               class="flex items-center px-4 py-2 text-primary-200 hover:text-white hover:bg-primary-700 rounded-lg transition-colors duration-200">
-                                <i class="fas fa-chart-line w-5"></i>
-                                <span>Reporte de Ventas</span>
+                               class="flex items-center px-4 py-2 text-gray-200 hover:bg-primary-600/50 
+                                      {{ 'bg-primary-600 text-white shadow-md' if request.endpoint == 'reports.sales_report' else '' }}
+                                      rounded-lg transition-all duration-200 group">
+                                <i class="fas fa-chart-line w-5 text-primary-300 group-hover:text-white"></i>
+                                <span class="ml-3">Reporte de Ventas</span>
                             </a>
                         </li>
                         <li>
                             <a href="{{ url_for('reports.commission_report') }}" 
-                               class="flex items-center px-4 py-2 text-primary-200 hover:text-white hover:bg-primary-700 rounded-lg transition-colors duration-200">
-                                <i class="fas fa-percentage w-5"></i>
-                                <span>Reporte de Comisiones</span>
+                               class="flex items-center px-4 py-2 text-gray-200 hover:bg-primary-600/50 
+                                      {{ 'bg-primary-600 text-white shadow-md' if request.endpoint == 'reports.commission_report' else '' }}
+                                      rounded-lg transition-all duration-200 group">
+                                <i class="fas fa-percentage w-5 text-primary-300 group-hover:text-white"></i>
+                                <span class="ml-3">Reporte de Comisiones</span>
                             </a>
                         </li>
                         <li>
                             <a href="{{ url_for('reports.client_analytics') }}" 
-                               class="flex items-center px-4 py-2 text-primary-200 hover:text-white hover:bg-primary-700 rounded-lg transition-colors duration-200">
-                                <i class="fas fa-users-cog w-5"></i>
-                                <span>Análisis de Clientes</span>
+                               class="flex items-center px-4 py-2 text-gray-200 hover:bg-primary-600/50 
+                                      {{ 'bg-primary-600 text-white shadow-md' if request.endpoint == 'reports.client_analytics' else '' }}
+                                      rounded-lg transition-all duration-200 group">
+                                <i class="fas fa-users-cog w-5 text-primary-300 group-hover:text-white"></i>
+                                <span class="ml-3">Análisis de Clientes</span>
                             </a>
                         </li>
                         <li>
                             <a href="{{ url_for('reports.policy_analytics') }}" 
-                               class="flex items-center px-4 py-2 text-primary-200 hover:text-white hover:bg-primary-700 rounded-lg transition-colors duration-200">
-                                <i class="fas fa-file-invoice-dollar w-5"></i>
-                                <span>Análisis de Pólizas</span>
+                               class="flex items-center px-4 py-2 text-gray-200 hover:bg-primary-600/50 
+                                      {{ 'bg-primary-600 text-white shadow-md' if request.endpoint == 'reports.policy_analytics' else '' }}
+                                      rounded-lg transition-all duration-200 group">
+                                <i class="fas fa-file-invoice-dollar w-5 text-primary-300 group-hover:text-white"></i>
+                                <span class="ml-3">Análisis de Pólizas</span>
                             </a>
                         </li>
                         <li>
                             <a href="{{ url_for('reports.diagram') }}" 
-                               class="flex items-center px-4 py-2 text-primary-200 hover:text-white hover:bg-primary-700 rounded-lg transition-colors duration-200">
-                                <i class="fas fa-project-diagram w-5"></i>
-                                <span>Diagrama de Comisiones</span>
+                               class="flex items-center px-4 py-2 text-gray-200 hover:bg-primary-600/50 
+                                      {{ 'bg-primary-600 text-white shadow-md' if request.endpoint == 'reports.diagram' else '' }}
+                                      rounded-lg transition-all duration-200 group">
+                                <i class="fas fa-project-diagram w-5 text-primary-300 group-hover:text-white"></i>
+                                <span class="ml-3">Diagrama de Comisiones</span>
                             </a>
                         </li>
                     </ul>
@@ -160,12 +174,12 @@
         </ul>
     </nav>
 
-    <!-- Cerrar Sesión mejorado -->
+    <!-- Cerrar Sesión -->
     <div class="p-4 border-t border-primary-700/50">
         <a href="{{ url_for('auth.logout') }}" 
-           class="flex items-center px-4 py-3 text-primary-100 hover:bg-primary-700/50 
+           class="flex items-center px-4 py-2.5 text-gray-100 hover:bg-primary-600/50 
                   rounded-lg transition-all duration-200 group">
-            <i class="fas fa-sign-out-alt w-5 text-primary-400 group-hover:text-white transition-colors"></i>
+            <i class="fas fa-sign-out-alt w-5 text-primary-300 group-hover:text-white transition-colors"></i>
             <span class="ml-3">Cerrar Sesión</span>
         </a>
     </div>

@@ -18,6 +18,19 @@ module.exports = {
           800: '#001d40',  // Azul profundo
           900: '#001326',  // Azul casi negro
         },
+        secondary: {
+          50: '#f4f7fb',   // Gris azulado muy claro
+          100: '#e9eef6',  // Gris azulado claro
+          200: '#d0ddee',  // Gris azulado medio claro
+          300: '#a6bddf',  // Gris azulado medio
+          400: '#749ac8',  // Gris azulado fuerte
+          500: '#4A78B0',  // Gris azulado principal (secondary)
+          600: '#3A5E8C',  // Gris azulado oscuro
+          700: '#2C4768',  // Gris azulado muy oscuro
+          800: '#1F3246',  // Gris azulado profundo
+          900: '#141E2A',  // Gris azulado casi negro
+        },
+        
         gray: {
           50: '#f9fafb',   // Blanco-gris claro
           100: '#f4f4f5',  // Gris claro

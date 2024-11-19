@@ -55,20 +55,45 @@
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>
         // Función para manejar el colapso del sidebar en móviles
-        document.getElementById('collapse-trigger').addEventListener('click', function() {
+        document.getElementById('collapse-trigger')?.addEventListener('click', function() {
             const sidebar = document.querySelector('aside');
             sidebar.classList.toggle('-translate-x-full');
         });
 
-        // Marcar el menú activo
+        // Marcar el menú activo y manejar dropdowns
         document.addEventListener('DOMContentLoaded', function() {
             const currentPath = window.location.pathname;
-            const menuItems = document.querySelectorAll('aside a');
+            // Seleccionar solo los enlaces dentro del nav del sidebar
+            const menuItems = document.querySelectorAll('aside nav a');
             
             menuItems.forEach(item => {
                 if (item.getAttribute('href') === currentPath) {
-                    item.classList.add('bg-secondary-700', 'text-white');
+                    item.classList.add('bg-primary-600', 'text-white');
+                    
+                    // Si el elemento está dentro de un submenu, mostrar el submenu
+                    const parentSubmenu = item.closest('ul.hidden');
+                    if (parentSubmenu) {
+                        parentSubmenu.classList.remove('hidden');
+                        const dropdownButton = parentSubmenu.previousElementSibling;
+                        if (dropdownButton) {
+                            const icon = dropdownButton.querySelector('.fa-chevron-down');
+                            if (icon) icon.classList.add('rotate-180');
+                            dropdownButton.classList.add('bg-primary-600', 'text-white');
+                        }
+                    }
                 }
+            });
+
+            // Manejar clicks en los botones dropdown
+            const dropdownButtons = document.querySelectorAll('button[type="button"]');
+            dropdownButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const submenu = this.nextElementSibling;
+                    const icon = this.querySelector('.fa-chevron-down');
+                    
+                    submenu.classList.toggle('hidden');
+                    icon.classList.toggle('rotate-180');
+                });
             });
         });
     </script>
