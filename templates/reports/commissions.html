@@ -54,9 +54,10 @@
                     <button type="submit" class="btn-primary">
                         <i class="fas fa-filter mr-2"></i>Aplicar Filtros
                     </button>
-                    <button type="button" 
-                            onclick="exportToPDF()"
-                            class="btn-secondary">
+                    <a href="{{ url_for('reports.mass_commission_report') }}" class="btn-secondary">
+                        <i class="fas fa-money-bill-wave mr-2"></i>Pago Masivo
+                    </a>
+                    <button type="button" onclick="exportToPDF()" class="btn-secondary">
                         <i class="fas fa-file-pdf mr-2"></i>Exportar a PDF
                     </button>
                 </div>
@@ -86,13 +87,12 @@
                             <td class="table-cell text-right">${{ "{:,.2f}".format(result.total_commission) }}</td>
                             <td class="table-cell">
                                 <div class="flex justify-center space-x-3">
-                                    <button type="button"
-                                            onclick="showDetails('{{ result.agent_id }}')"
-                                            class="text-primary-600 hover:text-primary-900"
-                                            title="Ver Detalles">
+                                    <a href="{{ url_for('reports.agent_commission_details', agent_id=result.agent_id|int) }}"
+                                       class="text-primary-600 hover:text-primary-900"
+                                       title="Ver Detalles">
                                         <i class="fas fa-search-dollar"></i>
-                                    </button>
-                                    <form action="{{ url_for('reports.generate_commission_report', agent_id=result.agent_id) }}" 
+                                    </a>
+                                    <form action="{{ url_for('reports.generate_commission_report', agent_id=result.agent_id|int) }}" 
                                           method="POST" 
                                           class="inline">
                                         <button type="submit" 
@@ -120,65 +120,21 @@
 </div>
 
 <!-- Modal de Detalles -->
-<div id="detailsModal" class="modal hidden">
-    <div class="modal-content">
+<div id="detailsModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-4/5 shadow-lg rounded-md bg-white">
         <div class="flex items-center justify-between pb-3 border-b">
             <h3 class="text-xl font-semibold text-gray-900">Detalles de Comisiones</h3>
             <button class="close text-gray-400 hover:text-gray-500">
                 <i class="fas fa-times"></i>
             </button>
         </div>
-        <div id="detailsContent" class="mt-4"></div>
+        <div id="detailsContent" class="mt-4 max-h-[calc(100vh-200px)] overflow-y-auto">
+            <!-- El contenido se cargará dinámicamente aquí -->
+        </div>
     </div>
 </div>
 
-{% block extra_js %}
-<script>
-function showDetails(agentId) {
-    const modal = document.getElementById('detailsModal');
-    const content = document.getElementById('detailsContent');
-    
-    // Mostrar modal con loader
-    modal.classList.remove('hidden');
-    content.innerHTML = `
-        <div class="flex justify-center items-center py-8">
-            <i class="fas fa-spinner fa-spin text-primary-600 text-3xl"></i>
-        </div>
-    `;
-    
-    // Cargar detalles
-    fetch(`/reports/agent-commission-details/${agentId}`)
-        .then(response => response.text())
-        .then(html => {
-            content.innerHTML = html;
-        })
-        .catch(error => {
-            content.innerHTML = `
-                <div class="text-center py-8 text-danger-500">
-                    <i class="fas fa-exclamation-circle text-4xl mb-4"></i>
-                    <p>Error al cargar los detalles</p>
-                </div>
-            `;
-        });
-}
-
-// Cerrar modal
-document.querySelector('.close').addEventListener('click', function() {
-    document.getElementById('detailsModal').classList.add('hidden');
-});
-
-// Cerrar modal al hacer clic fuera
-window.addEventListener('click', function(event) {
-    const modal = document.getElementById('detailsModal');
-    if (event.target === modal) {
-        modal.classList.add('hidden');
-    }
-});
-
-function exportToPDF() {
-    // Implementar exportación a PDF
-    alert('Funcionalidad de exportación a PDF en desarrollo');
-}
-</script>
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/commission_reports.js') }}"></script>
 {% endblock %}
 {% endblock %}

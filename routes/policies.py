@@ -10,6 +10,8 @@ import logging
 from decimal import Decimal, InvalidOperation
 from dateutil import parser  # Importar el módulo para analizar fechas
 from sqlalchemy.exc import OperationalError  # Añadir esta línea para importar OperationalError
+import sqlalchemy
+import sqlalchemy.exc  # Agregar esta línea
 
 bp = Blueprint('policies', __name__, url_prefix='/policies')
 
@@ -50,6 +52,12 @@ def create_policy():
             return render_template('policies/create.html', form=form)
         
         try:
+            # Verificar si ya existe una póliza con ese número
+            existing_policy = Policy.query.filter_by(policy_number=form.policy_number.data).first()
+            if existing_policy:
+                flash(f'Ya existe una póliza con el número {form.policy_number.data}. Por favor, utilice un número diferente.', 'error')
+                return render_template('policies/create.html', form=form)
+
             # Crear la póliza
             policy = Policy(
                 policy_number=form.policy_number.data,
@@ -63,7 +71,7 @@ def create_policy():
                 payment_status=PaymentStatus[form.payment_status.data.upper()]
             )
             db.session.add(policy)
-            db.session.flush()  # Para obtener el ID de la póliza
+            db.session.flush()
 
             # Calcular y registrar las comisiones
             agent.calculate_commission(policy)
@@ -75,7 +83,15 @@ def create_policy():
         except Exception as e:
             db.session.rollback()
             logging.error(f"Error al crear póliza: {str(e)}")
-            flash(f'Error al crear la póliza: {str(e)}', 'error')
+            
+            # Manejo específico de errores comunes
+            if isinstance(e, sqlalchemy.exc.IntegrityError):
+                if 'policy_policy_number_key' in str(e):
+                    flash(f'Ya existe una póliza con el número {form.policy_number.data}. Por favor, utilice un número diferente.', 'error')
+                else:
+                    flash('Error de integridad en los datos. Por favor, verifique la información ingresada.', 'error')
+            else:
+                flash('Ha ocurrido un error inesperado. Por favor, intente nuevamente o contacte al administrador.', 'error')
             
     return render_template('policies/create.html', form=form)
 
@@ -120,9 +136,9 @@ def edit_policy(id):
     
     # Establecer los valores actuales en el formulario
     form.client.data = policy.client.name
-    form.agent.data = policy.agent.username
-    form.emision_status.data = policy.emision_status.name  # Agregar esta línea
-    form.payment_status.data = policy.payment_status.name  # Agregar esta línea
+    form.agent.data = f"{policy.agent.name} ({policy.agent.document_number})"
+    form.emision_status.data = policy.emision_status.name
+    form.payment_status.data = policy.payment_status.name
     
     return render_template('policies/edit.html', form=form, policy=policy)
 
@@ -276,8 +292,14 @@ def search_clients():
 @admin_or_digitador_required
 def search_agents():
     query = request.args.get('query', '')
-    agents = User.query.filter(User.role == UserRole.AGENTE, User.username.ilike(f'%{query}%')).limit(10).all()
-    return jsonify([{'id': a.id, 'name': a.username} for a in agents])
+    agents = User.query.filter(
+        User.role == UserRole.AGENTE,
+        User.name.ilike(f'%{query}%')
+    ).limit(10).all()
+    return jsonify([{
+        'id': a.id, 
+        'name': f"{a.name} ({a.document_number})"
+    } for a in agents])
 
 @bp.route('/<int:id>')
 @login_required

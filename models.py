@@ -56,6 +56,10 @@ class User(UserMixin, db.Model):
 
     commission_overrides = relationship('AgentCommissionOverride', back_populates='agent')
 
+    __table_args__ = (
+        db.UniqueConstraint('document_type', 'document_number', name='uq_user_document'),
+    )
+
     def __init__(self, username, email, role, document_type, document_number, name=None, phone=None, address=None, date_of_birth=None, hire_date=None, parent_id=None):
         self.username = username
         self.email = email
@@ -282,6 +286,10 @@ class Client(db.Model):
     document_number = db.Column(String(20))
     birthdate = db.Column(Date)
     policies = relationship('Policy', back_populates='client')
+
+    __table_args__ = (
+        db.UniqueConstraint('document_type', 'document_number', name='uq_client_document'),
+    )
 
 class Product(db.Model):
     """

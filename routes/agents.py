@@ -3,6 +3,7 @@ from flask_login import login_required
 from models import User, db, UserRole
 from forms import AgentForm
 from decorators import admin_required
+from sqlalchemy.exc import IntegrityError
 
 bp = Blueprint('agents', __name__, url_prefix='/agents')
 
@@ -29,24 +30,35 @@ def create_agent():
     form = AgentForm()
     form.parent_id.choices = [(0, 'Ninguno')] + [(a.id, a.username) for a in User.query.filter_by(role=UserRole.AGENTE).all()]
     if form.validate_on_submit():
-        agent = User(
-            username=form.username.data,
-            email=form.email.data,
-            role=UserRole.AGENTE,
-            name=form.name.data,
-            phone=form.phone.data,
-            address=form.address.data,
-            date_of_birth=form.date_of_birth.data,
-            hire_date=form.hire_date.data,
-            document_type=form.document_type.data,
-            document_number=form.document_number.data,
-            parent_id=form.parent_id.data if form.parent_id.data != 0 else None
-        )
-        agent.set_password(form.password.data)
-        db.session.add(agent)
-        db.session.commit()
-        flash('Agente creado exitosamente.')
-        return redirect(url_for('agents.list_agents'))
+        try:
+            agent = User(
+                username=form.username.data,
+                email=form.email.data,
+                role=UserRole.AGENTE,
+                name=form.name.data,
+                phone=form.phone.data,
+                address=form.address.data,
+                date_of_birth=form.date_of_birth.data,
+                hire_date=form.hire_date.data,
+                document_type=form.document_type.data,
+                document_number=form.document_number.data,
+                parent_id=form.parent_id.data if form.parent_id.data != 0 else None
+            )
+            agent.set_password(form.password.data)
+            db.session.add(agent)
+            db.session.commit()
+            flash('Agente creado exitosamente.')
+            return redirect(url_for('agents.list_agents'))
+        except IntegrityError as e:
+            db.session.rollback()
+            if 'uq_user_document' in str(e):
+                flash('Ya existe un agente con ese número de documento.', 'error')
+            elif 'username' in str(e):
+                flash('El nombre de usuario ya está en uso.', 'error')
+            elif 'email' in str(e):
+                flash('El correo electrónico ya está en uso.', 'error')
+            else:
+                flash('Error al crear el agente: Datos duplicados.', 'error')
     return render_template('agents/create.html', form=form)
 
 @bp.route('/edit/<int:id>', methods=['GET', 'POST'])
@@ -81,6 +93,16 @@ def edit_agent(id):
             flash('Agente actualizado exitosamente.')
             return redirect(url_for('agents.list_agents'))
             
+        except IntegrityError as e:
+            db.session.rollback()
+            if 'uq_user_document' in str(e):
+                flash('Ya existe un agente con ese número de documento.', 'error')
+            elif 'username' in str(e):
+                flash('El nombre de usuario ya está en uso.', 'error')
+            elif 'email' in str(e):
+                flash('El correo electrónico ya está en uso.', 'error')
+            else:
+                flash('Error al actualizar el agente: Datos duplicados.', 'error')
         except Exception as e:
             db.session.rollback()
             flash(f'Error al actualizar el agente: {str(e)}', 'error')

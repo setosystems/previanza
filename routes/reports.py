@@ -232,64 +232,81 @@ def sales_report():
 @login_required
 def commission_report():
     """Vista para el reporte de comisiones."""
-    # Obtener parámetros de filtro
-    start_date = request.args.get('start_date')
-    end_date = request.args.get('end_date')
-    agent_id = request.args.get('agent_id')
-    
-    # Obtener todos los agentes para el selector
-    agents = User.query.filter_by(role=UserRole.AGENTE).all()
-    
-    # Construir la consulta base usando la nueva sintaxis de case()
-    query = db.session.query(
-        User.id.label('agent_id'),
-        User.name.label('agent_name'),
-        func.sum(
-            case(
-                (Commission.commission_type == 'direct', Commission.amount),
-                else_=0
-            )
-        ).label('direct_commission'),
-        func.sum(
-            case(
-                (Commission.commission_type == 'override', Commission.amount),
-                else_=0
-            )
-        ).label('override_commission'),
-        func.sum(Commission.amount).label('total_commission')
-    ).join(
-        Commission, User.id == Commission.agent_id
-    ).group_by(
-        User.id, User.name
-    )
-    
-    # Aplicar filtros
-    if start_date:
-        query = query.filter(Commission.date >= datetime.strptime(start_date, '%Y-%m-%d'))
-    if end_date:
-        query = query.filter(Commission.date <= datetime.strptime(end_date, '%Y-%m-%d'))
-    if agent_id:
-        query = query.filter(User.id == agent_id)
-    
-    # Ejecutar la consulta
-    results = query.all()
-    
-    # Calcular totales
-    total_direct_commission = sum(r.direct_commission or 0 for r in results)
-    total_override_commission = sum(r.override_commission or 0 for r in results)
-    total_commission = total_direct_commission + total_override_commission
-    
-    return render_template(
-        'reports/commissions.html',
-        results=results,
-        agents=agents,
-        start_date=start_date,
-        end_date=end_date,
-        agent_id=agent_id,
-        total_direct_commission=total_direct_commission,
-        total_override_commission=total_override_commission,
-        total_commission=total_commission
-    )
+    try:
+        # Obtener parámetros de filtro
+        start_date = request.args.get('start_date')
+        end_date = request.args.get('end_date')
+        agent_id = request.args.get('agent_id')
+        
+        # Obtener todos los agentes para el selector
+        agents = User.query.filter(
+            User.role == UserRole.AGENTE,
+            User.name.isnot(None),
+            User.name != ''
+        ).all()
+        
+        # Construir la consulta base con la sintaxis correcta de case()
+        query = db.session.query(
+            User.id.label('agent_id'),
+            User.name.label('agent_name'),
+            func.coalesce(
+                func.sum(
+                    case(
+                        (Commission.commission_type == 'direct', Commission.amount),
+                        else_=0
+                    )
+                ),
+                0
+            ).label('direct_commission'),
+            func.coalesce(
+                func.sum(
+                    case(
+                        (Commission.commission_type == 'override', Commission.amount),
+                        else_=0
+                    )
+                ),
+                0
+            ).label('override_commission'),
+            func.coalesce(func.sum(Commission.amount), 0).label('total_commission')
+        ).filter(
+            User.name.isnot(None),
+            User.name != ''
+        ).outerjoin(
+            Commission, User.id == Commission.agent_id
+        ).group_by(
+            User.id, User.name
+        )
+        
+        # Aplicar filtros
+        if start_date:
+            query = query.filter(Commission.date >= datetime.strptime(start_date, '%Y-%m-%d'))
+        if end_date:
+            query = query.filter(Commission.date <= datetime.strptime(end_date, '%Y-%m-%d'))
+        if agent_id:
+            query = query.filter(User.id == agent_id)
+        
+        # Ejecutar la consulta
+        results = query.all()
+        
+        # Calcular totales
+        total_direct_commission = sum(r.direct_commission or 0 for r in results)
+        total_override_commission = sum(r.override_commission or 0 for r in results)
+        total_commission = total_direct_commission + total_override_commission
+        
+        return render_template(
+            'reports/commissions.html',
+            results=results,
+            agents=agents,
+            start_date=start_date,
+            end_date=end_date,
+            agent_id=agent_id,
+            total_direct_commission=total_direct_commission,
+            total_override_commission=total_override_commission,
+            total_commission=total_commission
+        )
+    except Exception as e:
+        logging.error(f"Error en commission_report: {str(e)}")
+        return render_template('errors/500.html', error=str(e)), 500
 
 @bp.route('/client-analytics')
 @login_required
@@ -362,44 +379,56 @@ def agent_hierarchy_data():
         logging.error(f"Error al generar jerarquía de agentes: {str(e)}")
         return jsonify({"error": "Error al generar el diagrama"}), 500
 
-@bp.route('/agent/<int:agent_id>/details')
+@bp.route('/agent-commission-details/<int:agent_id>')
 @login_required
-def get_agent_commission_details(agent_id):
-    """Obtiene los detalles de comisiones para un agente específico."""
-    start_date = request.args.get('start_date')
-    end_date = request.args.get('end_date')
-    
-    query = db.session.query(
-        Commission,
-        Policy,
-        Product
-    ).join(
-        Policy, Commission.policy_id == Policy.id
-    ).join(
-        Product, Policy.product_id == Product.id
-    ).filter(
-        Commission.agent_id == agent_id
-    )
-    
-    if start_date:
-        query = query.filter(Commission.date >= datetime.strptime(start_date, '%Y-%m-%d'))
-    if end_date:
-        query = query.filter(Commission.date <= datetime.strptime(end_date, '%Y-%m-%d'))
-    
-    results = query.all()
-    
-    details = [{
-        'id': result.Commission.id,
-        'date': result.Commission.date.strftime('%Y-%m-%d'),
-        'policy_number': result.Policy.policy_number,
-        'product_name': result.Product.name,
-        'premium': float(result.Policy.premium),
-        'commission': float(result.Commission.amount),
-        'commission_type': 'Sobrecomisión' if result.Commission.commission_type == 'override' else 'Directa',
-        'payment_status': result.Commission.payment_status
-    } for result in results]
-    
-    return jsonify({'details': details})
+def agent_commission_details(agent_id):
+    try:
+        start_date = request.args.get('start_date')
+        end_date = request.args.get('end_date')
+        
+        # Asegurarse de que agent_id sea un entero
+        agent_id = int(agent_id)
+        agent = User.query.get_or_404(agent_id)
+        
+        query = db.session.query(
+            Commission,
+            Policy,
+            Product
+        ).join(
+            Policy, Commission.policy_id == Policy.id
+        ).join(
+            Product, Policy.product_id == Product.id
+        ).filter(
+            Commission.agent_id == agent_id
+        )
+        
+        if start_date:
+            query = query.filter(Commission.date >= datetime.strptime(start_date, '%Y-%m-%d'))
+        if end_date:
+            query = query.filter(Commission.date <= datetime.strptime(end_date, '%Y-%m-%d'))
+        
+        commissions = query.all()
+        
+        total_pending = sum(float(c.Commission.amount) for c in commissions if c.Commission.payment_status == 'PENDIENTE')
+        total_paid = sum(float(c.Commission.amount) for c in commissions if c.Commission.payment_status == 'PAGADO')
+        total_commission = total_pending + total_paid
+        
+        return render_template(
+            'reports/agent_commission_details.html',
+            agent=agent,
+            commissions=commissions,
+            start_date=start_date,
+            end_date=end_date,
+            total_pending=total_pending,
+            total_paid=total_paid,
+            total_commission=total_commission
+        )
+    except ValueError as e:
+        logging.error(f"Error de conversión de ID: {str(e)}")
+        return render_template('errors/500.html', error="ID de agente inválido"), 500
+    except Exception as e:
+        logging.error(f"Error en agent_commission_details: {str(e)}")
+        return render_template('errors/500.html', error=str(e)), 500
 
 @bp.route('/generate_commission_report/<int:agent_id>', methods=['POST'])
 @login_required
@@ -598,3 +627,35 @@ def update_commission_status(commission_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'success': False, 'message': str(e)}), 500
+
+@bp.route('/mass-commission-report')
+@login_required
+@admin_required
+def mass_commission_report():
+    """Vista para el reporte de comisiones masivo."""
+    try:
+        # Obtener agentes con comisiones pendientes
+        agent_data = db.session.query(
+            User,
+            func.count(Commission.id).label('pending_count'),
+            func.sum(Commission.amount).label('pending_amount')
+        ).join(
+            Commission
+        ).filter(
+            User.role == UserRole.AGENTE,
+            Commission.payment_status == 'PENDIENTE'
+        ).group_by(User.id).all()
+
+        # Calcular totales
+        total_pending_count = sum(data[1] for data in agent_data)
+        total_pending_amount = sum(float(data[2] or 0) for data in agent_data)
+
+        return render_template(
+            'reports/mass_commission_report.html',
+            agent_data=agent_data,
+            total_pending_count=total_pending_count,
+            total_pending_amount=total_pending_amount
+        )
+    except Exception as e:
+        logging.error(f"Error en mass_commission_report: {str(e)}")
+        return render_template('errors/500.html', error=str(e)), 500
