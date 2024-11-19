@@ -1,14 +1,25 @@
-<aside class="bg-primary-800 w-64 min-h-screen flex flex-col z-40 shadow-lg transition-all duration-300 ease-in-out">
+<aside class="bg-primary-800 flex flex-col z-40 shadow-lg transition-all duration-300 ease-in-out fixed lg:relative" 
+       :class="{ 'w-64': !collapsed, 'w-16': collapsed }"
+       x-data="{ collapsed: false }">
     <!-- Logo y Marca -->
-    <div class="p-4 border-b border-primary-700/50">
+    <div class="p-4 border-b border-primary-700/50 flex items-center justify-between">
         <a href="/" class="flex items-center">
             <img src="{{ url_for('static', filename='img/logo_black.svg') }}" alt="Logo" class="h-8">
-            <span class="text-primary-50 font-display font-semibold ml-2">Previanza</span>
+            <span class="text-primary-50 font-display font-semibold ml-2 transition-opacity duration-300"
+                  :class="{ 'opacity-0 hidden': collapsed }">Previanza</span>
         </a>
+        <!-- Botón de hamburguesa -->
+        <button class="text-primary-300 hover:text-white p-1 rounded-lg transition-colors duration-200" 
+                type="button" 
+                id="collapse-trigger"
+                @click="collapsed = !collapsed"
+                aria-label="Toggle sidebar">
+            <i class="fas fa-bars text-lg"></i>
+        </button>
     </div>
 
     <!-- Perfil del usuario -->
-    <div class="p-4 text-center border-b border-primary-700/50">
+    <div class="p-4 text-center border-b border-primary-700/50" x-show="!collapsed">
         <img src="{{ url_for('static', filename='img/user.png') }}" 
              alt="user-avatar" 
              class="w-12 h-12 rounded-full mx-auto mb-2 border-2 border-primary-600 shadow-md">
@@ -26,7 +37,8 @@
                           {{ 'bg-primary-600 text-white shadow-md' if request.endpoint == 'index' else '' }}
                           rounded-lg transition-all duration-200 group">
                     <i class="fas fa-home w-5 text-primary-300 group-hover:text-white transition-colors"></i>
-                    <span class="ml-3">Inicio</span>
+                    <span class="ml-3 transition-opacity duration-300"
+                          :class="{ 'opacity-0 hidden': collapsed }">Inicio</span>
                 </a>
             </li>
 
@@ -39,7 +51,8 @@
                                   {{ 'bg-primary-600 text-white shadow-md' if request.endpoint.startswith('clients.') else '' }}
                                   rounded-lg transition-all duration-200 group">
                             <i class="fas fa-users w-5 text-primary-300 group-hover:text-white transition-colors"></i>
-                            <span class="ml-3">Clientes</span>
+                            <span class="ml-3 transition-opacity duration-300"
+                                  :class="{ 'opacity-0 hidden': collapsed }">Clientes</span>
                         </a>
                     </li>
 
@@ -50,7 +63,8 @@
                                   {{ 'bg-primary-600 text-white shadow-md' if request.endpoint.startswith('policies.') else '' }}
                                   rounded-lg transition-all duration-200 group">
                             <i class="fas fa-file-contract w-5 text-primary-300 group-hover:text-white transition-colors"></i>
-                            <span>Pólizas</span>
+                            <span class="ml-3 transition-opacity duration-300"
+                                  :class="{ 'opacity-0 hidden': collapsed }">Pólizas</span>
                         </a>
                     </li>
 
@@ -61,7 +75,8 @@
                                   {{ 'bg-primary-600 text-white shadow-md' if request.endpoint.startswith('products.') else '' }}
                                   rounded-lg transition-all duration-200 group">
                             <i class="fas fa-box w-5 text-primary-300 group-hover:text-white transition-colors"></i>
-                            <span>Productos</span>
+                            <span class="ml-3 transition-opacity duration-300"
+                                  :class="{ 'opacity-0 hidden': collapsed }">Productos</span>
                         </a>
                     </li>
                 {% endif %}
@@ -74,18 +89,20 @@
                                   {{ 'bg-primary-600 text-white shadow-md' if request.endpoint.startswith('agents.') else '' }}
                                   rounded-lg transition-all duration-200 group">
                             <i class="fas fa-user-tie w-5 text-primary-300 group-hover:text-white transition-colors"></i>
-                            <span>Agentes</span>
+                            <span class="ml-3 transition-opacity duration-300"
+                                  :class="{ 'opacity-0 hidden': collapsed }">Agentes</span>
                         </a>
                     </li>
 
-                    <!-- Gestión de Usuarios -->
+                    <!-- Usuarios -->
                     <li>
                         <a href="{{ url_for('auth.list_users') }}" 
                            class="flex items-center px-4 py-2.5 text-gray-100 hover:bg-primary-600/50 
                                   {{ 'bg-primary-600 text-white shadow-md' if request.endpoint.startswith('auth.') else '' }}
                                   rounded-lg transition-all duration-200 group">
                             <i class="fas fa-users-cog w-5 text-primary-300 group-hover:text-white transition-colors"></i>
-                            <span>Usuarios</span>
+                            <span class="ml-3 transition-opacity duration-300"
+                                  :class="{ 'opacity-0 hidden': collapsed }">Usuarios</span>
                         </a>
                     </li>
 
@@ -96,7 +113,8 @@
                                   {{ 'bg-primary-600 text-white shadow-md' if request.endpoint.startswith('config.') else '' }}
                                   rounded-lg transition-all duration-200 group">
                             <i class="fas fa-cogs w-5 text-primary-300 group-hover:text-white transition-colors"></i>
-                            <span>Configuración</span>
+                            <span class="ml-3 transition-opacity duration-300"
+                                  :class="{ 'opacity-0 hidden': collapsed }">Configuración</span>
                         </a>
                     </li>
                 {% endif %}
@@ -109,9 +127,11 @@
                                    {{ 'bg-primary-600 text-white shadow-md' if request.endpoint.startswith('reports.') else '' }}">
                         <div class="flex items-center">
                             <i class="fas fa-chart-bar w-5 text-primary-300 group-hover:text-white transition-colors"></i>
-                            <span class="ml-3">Informes</span>
+                            <span class="ml-3 transition-opacity duration-300"
+                                  :class="{ 'opacity-0 hidden': collapsed }">Informes</span>
                         </div>
-                        <i class="fas fa-chevron-down transform transition-transform duration-200 text-primary-300 group-hover:text-white"></i>
+                        <i class="fas fa-chevron-down transform transition-transform duration-200 text-primary-300 group-hover:text-white"
+                           :class="{ 'opacity-0': collapsed }"></i>
                     </button>
                     <ul class="pl-4 mt-1 space-y-0.5 hidden">
                         <li>
@@ -120,7 +140,8 @@
                                       {{ 'bg-primary-600 text-white shadow-md' if request.endpoint == 'reports.dashboard' else '' }}
                                       rounded-lg transition-all duration-200 group">
                                 <i class="fas fa-tachometer-alt w-5 text-primary-300 group-hover:text-white"></i>
-                                <span class="ml-3">Dashboard</span>
+                                <span class="ml-3 transition-opacity duration-300"
+                                      :class="{ 'opacity-0 hidden': collapsed }">Dashboard</span>
                             </a>
                         </li>
                         <li>
@@ -129,7 +150,8 @@
                                       {{ 'bg-primary-600 text-white shadow-md' if request.endpoint == 'reports.sales_report' else '' }}
                                       rounded-lg transition-all duration-200 group">
                                 <i class="fas fa-chart-line w-5 text-primary-300 group-hover:text-white"></i>
-                                <span class="ml-3">Reporte de Ventas</span>
+                                <span class="ml-3 transition-opacity duration-300"
+                                      :class="{ 'opacity-0 hidden': collapsed }">Reporte de Ventas</span>
                             </a>
                         </li>
                         <li>
@@ -138,7 +160,8 @@
                                       {{ 'bg-primary-600 text-white shadow-md' if request.endpoint == 'reports.commission_report' else '' }}
                                       rounded-lg transition-all duration-200 group">
                                 <i class="fas fa-percentage w-5 text-primary-300 group-hover:text-white"></i>
-                                <span class="ml-3">Reporte de Comisiones</span>
+                                <span class="ml-3 transition-opacity duration-300"
+                                      :class="{ 'opacity-0 hidden': collapsed }">Reporte de Comisiones</span>
                             </a>
                         </li>
                         <li>
@@ -147,7 +170,8 @@
                                       {{ 'bg-primary-600 text-white shadow-md' if request.endpoint == 'reports.client_analytics' else '' }}
                                       rounded-lg transition-all duration-200 group">
                                 <i class="fas fa-users-cog w-5 text-primary-300 group-hover:text-white"></i>
-                                <span class="ml-3">Análisis de Clientes</span>
+                                <span class="ml-3 transition-opacity duration-300"
+                                      :class="{ 'opacity-0 hidden': collapsed }">Análisis de Clientes</span>
                             </a>
                         </li>
                         <li>
@@ -156,7 +180,8 @@
                                       {{ 'bg-primary-600 text-white shadow-md' if request.endpoint == 'reports.policy_analytics' else '' }}
                                       rounded-lg transition-all duration-200 group">
                                 <i class="fas fa-file-invoice-dollar w-5 text-primary-300 group-hover:text-white"></i>
-                                <span class="ml-3">Análisis de Pólizas</span>
+                                <span class="ml-3 transition-opacity duration-300"
+                                      :class="{ 'opacity-0 hidden': collapsed }">Análisis de Pólizas</span>
                             </a>
                         </li>
                         <li>
@@ -165,7 +190,8 @@
                                       {{ 'bg-primary-600 text-white shadow-md' if request.endpoint == 'reports.diagram' else '' }}
                                       rounded-lg transition-all duration-200 group">
                                 <i class="fas fa-project-diagram w-5 text-primary-300 group-hover:text-white"></i>
-                                <span class="ml-3">Diagrama de Comisiones</span>
+                                <span class="ml-3 transition-opacity duration-300"
+                                      :class="{ 'opacity-0 hidden': collapsed }">Diagrama de Comisiones</span>
                             </a>
                         </li>
                     </ul>
@@ -180,7 +206,8 @@
            class="flex items-center px-4 py-2.5 text-gray-100 hover:bg-primary-600/50 
                   rounded-lg transition-all duration-200 group">
             <i class="fas fa-sign-out-alt w-5 text-primary-300 group-hover:text-white transition-colors"></i>
-            <span class="ml-3">Cerrar Sesión</span>
+            <span class="ml-3 transition-opacity duration-300"
+                  :class="{ 'opacity-0 hidden': collapsed }">Cerrar Sesión</span>
         </a>
     </div>
 </aside>
