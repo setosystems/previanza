@@ -1,0 +1,18 @@
+/* Estilos para campos de sobrecomisión */
+#override-percentage-field {
+    display: none;
+}
+
+.override-input[disabled] {
+    background-color: #e9ecef !important;
+    cursor: not-allowed;
+}
+
+/* Estilos para la tabla de comisiones */
+.commission-table .override-input {
+    background-color: #fff;
+}
+
+.commission-table .override-input[disabled] {
+    background-color: #e9ecef !important;
+} 

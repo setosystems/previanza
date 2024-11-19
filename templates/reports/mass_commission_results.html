@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="report-container">
+    <div class="report-header">
+        <div class="header-title">
+            <i class="fas fa-clipboard-check"></i>
+            <h1>Resultados del Envío Masivo</h1>
+        </div>
+    </div>
+
+    <div class="report-content">
+        <div class="results-summary">
+            <div class="summary-card success">
+                <div class="card-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="card-content">
+                    <h3>Enviados Exitosamente</h3>
+                    <p class="amount">{{ results.success|length }}</p>
+                </div>
+            </div>
+
+            <div class="summary-card warning">
+                <div class="card-icon">
+                    <i class="fas fa-exclamation-circle"></i>
+                </div>
+                <div class="card-content">
+                    <h3>Sin Comisiones Pendientes</h3>
+                    <p class="amount">{{ results.no_commissions|length }}</p>
+                </div>
+            </div>
+
+            <div class="summary-card error">
+                <div class="card-icon">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+                <div class="card-content">
+                    <h3>Errores</h3>
+                    <p class="amount">{{ results.errors|length }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="results-details">
+            {% if results.success %}
+            <div class="result-section">
+                <div class="section-header">
+                    <i class="fas fa-check"></i>
+                    <h3>Reportes Enviados Exitosamente</h3>
+                </div>
+                <div class="result-list success">
+                    {% for agent_name in results.success %}
+                    <div class="result-item">
+                        <i class="fas fa-check"></i>
+                        <span>{{ agent_name }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if results.no_commissions %}
+            <div class="result-section">
+                <div class="section-header">
+                    <i class="fas fa-exclamation"></i>
+                    <h3>Agentes Sin Comisiones Pendientes</h3>
+                </div>
+                <div class="result-list warning">
+                    {% for agent_name in results.no_commissions %}
+                    <div class="result-item">
+                        <i class="fas fa-exclamation"></i>
+                        <span>{{ agent_name }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if results.errors %}
+            <div class="result-section">
+                <div class="section-header">
+                    <i class="fas fa-times"></i>
+                    <h3>Errores Encontrados</h3>
+                </div>
+                <div class="result-list error">
+                    {% for error in results.errors %}
+                    <div class="result-item">
+                        <i class="fas fa-times"></i>
+                        <span>{{ error.agent_name }}: {{ error.reason }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="form-actions">
+            <a href="{{ url_for('reports.mass_commission_report') }}" class="btn btn-primary">
+                <i class="fas fa-redo"></i> Nuevo Envío Masivo
+            </a>
+            <a href="{{ url_for('reports.commission_report') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver al Reporte de Comisiones
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+.results-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.summary-card {
+    background: var(--surface-color);
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.summary-card .card-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.summary-card .card-icon i {
+    font-size: 1.5rem;
+    color: white;
+}
+
+.summary-card.success .card-icon {
+    background-color: #34d399;
+}
+
+.summary-card.warning .card-icon {
+    background-color: #fbbf24;
+}
+
+.summary-card.error .card-icon {
+    background-color: #f87171;
+}
+
+.card-content h3 {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.card-content .amount {
+    margin: 0.25rem 0 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.results-details {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.result-section {
+    background: var(--surface-color);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.section-header i {
+    font-size: 1.25rem;
+}
+
+.section-header h3 {
+    margin: 0;
+    font-size: 1.125rem;
+    color: var(--text-primary);
+}
+
+.result-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.result-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    background: var(--background-color);
+    font-size: 0.875rem;
+}
+
+.result-list.success .result-item i { color: #34d399; }
+.result-list.warning .result-item i { color: #fbbf24; }
+.result-list.error .result-item i { color: #f87171; }
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+@media (max-width: 768px) {
+    .results-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions a {
+        width: 100%;
+        text-align: center;
+    }
+}
+</style>
+{% endblock %} 

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="report-container">
+    <div class="report-header">
+        <div class="header-title">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h1>Confirmar Envío de Reportes</h1>
+        </div>
+    </div>
+
+    <div class="report-content">
+        <div class="alert alert-warning">
+            <i class="fas fa-exclamation-circle"></i>
+            <strong>¡Atención!</strong> Al confirmar esta acción:
+            <ul>
+                <li>Se enviarán reportes de comisión a todos los agentes seleccionados.</li>
+                <li>Las comisiones incluidas quedarán marcadas como PAGADAS.</li>
+                <li>Esta acción no se puede deshacer.</li>
+            </ul>
+        </div>
+
+        <div class="confirmation-details">
+            <h3>Resumen de envío:</h3>
+            <div class="agents-summary">
+                {% for agent in agents %}
+                <div class="agent-summary-item">
+                    <div class="agent-info">
+                        <span class="agent-name">{{ agent.name }}</span>
+                        <span class="agent-email">{{ agent.email }}</span>
+                    </div>
+                    <div class="commission-info">
+                        <span class="commission-count">
+                            {{ agent_commissions[agent.id]['count'] }} comisiones
+                        </span>
+                        <span class="commission-total">
+                            Total: ${{ "{:,.2f}".format(agent_commissions[agent.id]['total']) }}
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('reports.process_mass_commission_report') }}" class="confirmation-form">
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-paper-plane"></i> Confirmar y Enviar
+                </button>
+                <a href="{{ url_for('reports.mass_commission_report') }}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %} 

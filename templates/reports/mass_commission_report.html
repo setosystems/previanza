@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="report-container">
+    <div class="report-header">
+        <div class="header-title">
+            <i class="fas fa-paper-plane"></i>
+            <h1>Envío Masivo de Reportes de Comisión</h1>
+        </div>
+    </div>
+
+    <form method="POST" action="{{ url_for('reports.confirm_mass_commission_report') }}" class="mass-report-form">
+        <div class="select-actions">
+            <div class="select-all-container">
+                <label class="select-all-label">
+                    <input type="checkbox" name="select_all" id="select_all" value="1">
+                    <span>Seleccionar Todos</span>
+                </label>
+            </div>
+            <a href="{{ url_for('reports.mass_commission_report') }}" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Borrar Selección
+            </a>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 50px;"></th>
+                        <th>Agente</th>
+                        <th>Email</th>
+                        <th class="text-right">Comisiones Pendientes</th>
+                        <th class="text-right">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for data in agent_data %}
+                    <tr>
+                        <td class="text-center">
+                            <input type="checkbox" name="agent_ids" value="{{ data.agent.id }}" class="agent-checkbox">
+                        </td>
+                        <td>{{ data.agent.name }}</td>
+                        <td>{{ data.agent.email }}</td>
+                        <td class="text-right">{{ data.pending_count }}</td>
+                        <td class="text-right">${{ "{:,.2f}".format(data.pending_amount) }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center">No hay agentes con comisiones pendientes</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                {% if agent_data %}
+                <tfoot>
+                    <tr class="total-row">
+                        <td colspan="3"><strong>Total General</strong></td>
+                        <td class="text-right">
+                            <strong>{{ total_pending_count }}</strong>
+                        </td>
+                        <td class="text-right">
+                            <strong>${{ "{:,.2f}".format(total_pending_amount) }}</strong>
+                        </td>
+                    </tr>
+                </tfoot>
+                {% endif %}
+            </table>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-check"></i> Continuar
+            </button>
+            <a href="{{ url_for('reports.commission_report') }}" class="btn btn-secondary">
+                <i class="fas fa-times"></i> Cancelar
+            </a>
+        </div>
+    </form>
+</div>
+
+<style>
+.mass-report-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.select-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: var(--background-color);
+    border-radius: 0.5rem;
+}
+
+.select-all-container {
+    display: flex;
+    align-items: center;
+}
+
+.select-all-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.select-all-label input[type="checkbox"] {
+    width: 1.125rem;
+    height: 1.125rem;
+    border-radius: 0.25rem;
+    border: 2px solid var(--border-color);
+    cursor: pointer;
+}
+
+.agent-checkbox {
+    width: 1.125rem;
+    height: 1.125rem;
+    border-radius: 0.25rem;
+    border: 2px solid var(--border-color);
+    cursor: pointer;
+}
+
+.table-container {
+    background: var(--surface-color);
+    border-radius: 0.75rem;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+th {
+    background: var(--primary-color);
+    color: white;
+    font-weight: 500;
+    text-align: left;
+    padding: 1rem;
+    font-size: 0.875rem;
+}
+
+td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.875rem;
+}
+
+tr:hover td {
+    background-color: rgba(59, 130, 246, 0.04);
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.total-row {
+    background-color: var(--background-color);
+    font-weight: 500;
+}
+
+.total-row td {
+    border-bottom: none;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+    .select-actions {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions button,
+    .form-actions a {
+        width: 100%;
+    }
+
+    .table-container {
+        overflow-x: auto;
+    }
+
+    table {
+        min-width: 800px;
+    }
+}
+</style>
+
+<script>
+document.getElementById('select_all').addEventListener('change', function() {
+    const checkboxes = document.getElementsByClassName('agent-checkbox');
+    for (let checkbox of checkboxes) {
+        checkbox.checked = this.checked;
+    }
+});
+</script>
+{% endblock %} 
