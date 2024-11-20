@@ -19,16 +19,10 @@
                 <div class="flex items-center gap-2">
                     <label class="flex items-center gap-2 cursor-pointer">
                         <input type="checkbox" 
-                               name="select_all" 
                                id="select_all" 
-                               value="1" 
                                class="form-checkbox h-4 w-4 text-primary-600 rounded border-gray-300">
                         <span class="text-sm font-medium text-gray-700">Seleccionar Todos</span>
                     </label>
-                    <a href="{{ url_for('reports.mass_commission_report') }}" 
-                       class="btn-secondary">
-                        <i class="fas fa-times mr-2"></i>Borrar Selección
-                    </a>
                 </div>
             </div>
         </div>
@@ -93,25 +87,7 @@
     </div>
 </div>
 
-{% block extra_js %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const selectAllCheckbox = document.getElementById('select_all');
-    const agentCheckboxes = document.querySelectorAll('.agent-checkbox');
-
-    selectAllCheckbox.addEventListener('change', function() {
-        agentCheckboxes.forEach(checkbox => {
-            checkbox.checked = this.checked;
-        });
-    });
-
-    agentCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            const allChecked = Array.from(agentCheckboxes).every(cb => cb.checked);
-            selectAllCheckbox.checked = allChecked;
-        });
-    });
-});
-</script>
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/mass_commission.js') }}"></script>
 {% endblock %}
 {% endblock %} 

@@ -20,85 +20,65 @@
             <h3 class="section-title">Detalle de Comisiones</h3>
         </div>
         <div class="card-body">
-            <div class="table-container">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th class="table-header">Fecha</th>
-                            <th class="table-header">Póliza</th>
-                            <th class="table-header">Producto</th>
-                            <th class="table-header text-right">Prima</th>
-                            <th class="table-header text-right">Comisión</th>
-                            <th class="table-header">Tipo</th>
-                            <th class="table-header">Estado</th>
-                            <th class="table-header">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for commission in commissions %}
-                        <tr class="table-row">
-                            <td class="table-cell">{{ commission.Commission.date.strftime('%Y-%m-%d') }}</td>
-                            <td class="table-cell">{{ commission.Policy.policy_number }}</td>
-                            <td class="table-cell">{{ commission.Product.name }}</td>
-                            <td class="table-cell text-right">${{ "{:,.2f}".format(commission.Policy.premium) }}</td>
-                            <td class="table-cell text-right">${{ "{:,.2f}".format(commission.Commission.amount) }}</td>
-                            <td class="table-cell">{{ "Directa" if commission.Commission.commission_type == 'direct' else "Sobrecomisión" }}</td>
-                            <td class="table-cell">
-                                <span class="badge {{ 'badge-success' if commission.Commission.payment_status == 'PAGADO' else 'badge-warning' }}">
-                                    {{ commission.Commission.payment_status }}
-                                </span>
-                            </td>
-                            <td class="table-cell">
-                                <select onchange="updateCommissionStatus({{ commission.Commission.id }}, this.value)"
-                                        class="form-select form-select-sm">
-                                    <option value="">Cambiar estado</option>
-                                    <option value="PENDIENTE" {% if commission.Commission.payment_status == 'PENDIENTE' %}selected{% endif %}>Pendiente</option>
-                                    <option value="PAGADO" {% if commission.Commission.payment_status == 'PAGADO' %}selected{% endif %}>Pagado</option>
-                                    <option value="ANULADO" {% if commission.Commission.payment_status == 'ANULADO' %}selected{% endif %}>Anulado</option>
-                                </select>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <td colspan="4" class="table-cell font-medium">Total</td>
-                            <td class="table-cell text-right font-medium">${{ "{:,.2f}".format(total_commission) }}</td>
-                            <td colspan="3"></td>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
+            <form method="POST" action="{{ url_for('reports.update_multiple_commission_status') }}">
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th class="table-header">Fecha</th>
+                                <th class="table-header">Póliza</th>
+                                <th class="table-header">Producto</th>
+                                <th class="table-header text-right">Prima</th>
+                                <th class="table-header text-right">Comisión</th>
+                                <th class="table-header">Tipo</th>
+                                <th class="table-header">Estado</th>
+                                <th class="table-header">Nuevo Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for commission in commissions %}
+                            <tr class="table-row">
+                                <td class="table-cell">{{ commission.Commission.date.strftime('%Y-%m-%d') }}</td>
+                                <td class="table-cell">{{ commission.Policy.policy_number }}</td>
+                                <td class="table-cell">{{ commission.Product.name }}</td>
+                                <td class="table-cell text-right">${{ "{:,.2f}".format(commission.Policy.premium) }}</td>
+                                <td class="table-cell text-right">${{ "{:,.2f}".format(commission.Commission.amount) }}</td>
+                                <td class="table-cell">{{ "Directa" if commission.Commission.commission_type == 'direct' else "Sobrecomisión" }}</td>
+                                <td class="table-cell">
+                                    <span class="badge {{ 'badge-success' if commission.Commission.payment_status == 'PAGADO' else 'badge-warning' }}">
+                                        {{ commission.Commission.payment_status }}
+                                    </span>
+                                </td>
+                                <td class="table-cell">
+                                    <select name="status_{{ commission.Commission.id }}" class="form-select form-select-sm">
+                                        <option value="">Seleccionar estado</option>
+                                        <option value="PENDIENTE" {% if commission.Commission.payment_status == 'PENDIENTE' %}selected{% endif %}>Pendiente</option>
+                                        <option value="PAGADO" {% if commission.Commission.payment_status == 'PAGADO' %}selected{% endif %}>Pagado</option>
+                                        <option value="ANULADO" {% if commission.Commission.payment_status == 'ANULADO' %}selected{% endif %}>Anulado</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="4" class="table-cell font-medium">Total</td>
+                                <td class="table-cell text-right font-medium">${{ "{:,.2f}".format(total_commission) }}</td>
+                                <td colspan="3"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                
+                <!-- Botón de Guardar -->
+                <div class="flex justify-end mt-6">
+                    <input type="hidden" name="agent_id" value="{{ agent.id }}">
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-save mr-2"></i>Guardar Cambios
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
-
-{% block scripts %}
-<script>
-function updateCommissionStatus(commissionId, newStatus) {
-    if (!newStatus) return;
-
-    fetch(`/reports/update_commission_status/${commissionId}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: `status=${newStatus}`
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Recargar la página para mostrar los cambios
-            location.reload();
-        } else {
-            alert('Error al actualizar el estado: ' + data.message);
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error al actualizar el estado');
-    });
-}
-</script>
-{% endblock %}
 {% endblock %} 

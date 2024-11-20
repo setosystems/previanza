@@ -18,6 +18,7 @@ from flask_mail import Message
 from extensions import mail
 import os
 import logging
+import time
 
 bp = Blueprint('reports', __name__, url_prefix='/reports')
 
@@ -472,138 +473,166 @@ def generate_commission_report(agent_id):
     return redirect(url_for('reports.commission_report'))
 
 def create_commission_pdf(agent, commissions):
-    """Crea un PDF con el reporte de comisiones con estilo corporativo."""
-    class PDF(FPDF):
-        def header(self):
-            # Logo (puedes agregar tu logo aquí)
-            # self.image('logo.png', 10, 8, 33)
-            
-            # Línea decorativa superior
-            self.set_draw_color(26, 35, 126)  # Azul corporativo
-            self.set_line_width(0.5)
-            self.line(10, 10, 200, 10)
-            
-            # Título del reporte
-            self.set_font('Arial', 'B', 20)
-            self.set_text_color(26, 35, 126)
-            self.cell(0, 20, 'Reporte de Comisiones', 0, 1, 'C')
-            
-            # Información del agente
-            self.set_font('Arial', 'B', 12)
-            self.set_text_color(70, 70, 70)
-            self.cell(0, 8, f'Agente: {agent.name}', 0, 1, 'C')
-            self.set_font('Arial', '', 10)
-            self.cell(0, 6, f'Fecha de Corte: {datetime.now().strftime("%d/%m/%Y")}', 0, 1, 'C')
-            
-            # Línea decorativa inferior
-            self.set_draw_color(26, 35, 126)
-            self.line(10, self.get_y() + 5, 200, self.get_y() + 5)
-            self.ln(10)
-
-        def footer(self):
-            self.set_y(-15)
-            self.set_font('Arial', 'I', 8)
-            self.set_text_color(128)
-            self.cell(0, 10, f'Página {self.page_no()}/{{nb}}', 0, 0, 'C')
-            
-            # Línea decorativa en el pie de página
-            self.set_draw_color(26, 35, 126)
-            self.line(10, self.get_y() - 3, 200, self.get_y() - 3)
-
-    # Crear PDF
-    pdf = PDF()
-    pdf.alias_nb_pages()
-    pdf.add_page()
-    pdf.set_auto_page_break(auto=True, margin=15)
-
-    # Información del período
-    pdf.set_font('Arial', 'B', 11)
-    pdf.set_text_color(70, 70, 70)
-    pdf.cell(0, 10, 'Resumen de Comisiones Pendientes', 0, 1, 'L')
-    pdf.set_font('Arial', '', 10)
-    pdf.ln(5)
-
-    # Crear tabla de comisiones
-    # Encabezados
-    pdf.set_fill_color(26, 35, 126)
-    pdf.set_text_color(255, 255, 255)
-    pdf.set_font('Arial', 'B', 10)
-    
-    # Ancho de columnas
-    col_widths = [25, 35, 45, 30, 30, 25]
-    headers = ['Fecha', 'Póliza', 'Producto', 'Prima', 'Comisión', 'Tipo']
-    
-    for i, header in enumerate(headers):
-        pdf.cell(col_widths[i], 10, header, 1, 0, 'C', True)
-    pdf.ln()
-
-    # Contenido de la tabla
-    pdf.set_text_color(70, 70, 70)
-    pdf.set_font('Arial', '', 9)
-    total_commission = 0
-    fill = False
-
-    for commission in commissions:
-        policy = Policy.query.get(commission.policy_id)
-        product = Product.query.get(policy.product_id)
+    """Crea un PDF con el reporte de comisiones con diseño profesional."""
+    try:
+        pdf_filename = f"commission_report_{agent.id}_{int(time.time())}.pdf"
+        pdf_path = os.path.join('reports', pdf_filename)
         
-        # Alternar colores de fondo
-        if fill:
-            pdf.set_fill_color(240, 240, 250)
-        else:
-            pdf.set_fill_color(255, 255, 255)
-            
-        pdf.cell(col_widths[0], 8, commission.date.strftime('%d/%m/%Y'), 1, 0, 'C', fill)
-        pdf.cell(col_widths[1], 8, policy.policy_number, 1, 0, 'C', fill)
-        pdf.cell(col_widths[2], 8, product.name, 1, 0, 'L', fill)
-        pdf.cell(col_widths[3], 8, f"${float(policy.premium):,.2f}", 1, 0, 'R', fill)
-        pdf.cell(col_widths[4], 8, f"${float(commission.amount):,.2f}", 1, 0, 'R', fill)
-        pdf.cell(col_widths[5], 8, 'Directa' if commission.commission_type == 'direct' else 'Override', 1, 0, 'C', fill)
+        class PDF(FPDF):
+            def header(self):
+                # Logo de Previanza
+                logo_path = os.path.join('static', 'img', 'logo.png')  # Asegúrate de que el logo esté en esta ruta
+                if os.path.exists(logo_path):
+                    self.image(logo_path, x=10, y=8, w=60)  # Ajusta el tamaño según necesites
+                
+                # Línea decorativa superior
+                self.set_draw_color(0, 84, 159)  # Color azul de Previanza
+                self.set_line_width(0.5)
+                self.line(10, 30, 200, 30)
+                
+                # Título del reporte
+                self.ln(25)  # Espacio después del logo
+                self.set_font('Arial', 'B', 20)
+                self.set_text_color(0, 84, 159)  # Color azul de Previanza
+                self.cell(0, 20, 'Reporte de Comisiones', 0, 1, 'C')
+                
+                # Información del agente
+                self.set_font('Arial', 'B', 12)
+                self.set_text_color(70, 70, 70)
+                self.cell(0, 8, f'Agente: {agent.name}', 0, 1, 'C')
+                self.set_font('Arial', '', 10)
+                self.cell(0, 6, f'Fecha de Emisión: {datetime.now().strftime("%d/%m/%Y")}', 0, 1, 'C')
+                
+                # Línea decorativa inferior
+                self.set_draw_color(0, 84, 159)
+                self.line(10, self.get_y() + 5, 200, self.get_y() + 5)
+                self.ln(10)
+
+            def footer(self):
+                self.set_y(-15)
+                self.set_font('Arial', 'I', 8)
+                self.set_text_color(128)
+                self.cell(0, 10, f'Página {self.page_no()}/{{nb}}', 0, 0, 'C')
+                
+                # Línea decorativa en el pie de página
+                self.set_draw_color(0, 84, 159)
+                self.line(10, self.get_y() - 3, 200, self.get_y() - 3)
+
+        # Crear PDF
+        pdf = PDF()
+        pdf.alias_nb_pages()
+        pdf.add_page()
+        pdf.set_auto_page_break(auto=True, margin=15)
+
+        # Información del período
+        pdf.set_font('Arial', 'B', 11)
+        pdf.set_text_color(70, 70, 70)
+        pdf.cell(0, 10, 'Resumen de Comisiones Pendientes', 0, 1, 'L')
+        pdf.set_font('Arial', '', 10)
+        pdf.ln(5)
+
+        # Crear tabla de comisiones
+        # Encabezados
+        pdf.set_fill_color(0, 84, 159)  # Color azul de Previanza
+        pdf.set_text_color(255, 255, 255)
+        pdf.set_font('Arial', 'B', 10)
+        
+        # Ancho de columnas
+        col_widths = [25, 35, 45, 30, 30, 25]
+        headers = ['Fecha', 'Póliza', 'Producto', 'Prima', 'Comisión', 'Tipo']
+        
+        for i, header in enumerate(headers):
+            pdf.cell(col_widths[i], 10, header, 1, 0, 'C', True)
         pdf.ln()
-        
-        total_commission += float(commission.amount)
-        fill = not fill
 
-    # Total
-    pdf.set_font('Arial', 'B', 10)
-    pdf.set_text_color(26, 35, 126)
-    pdf.cell(sum(col_widths[:4]), 10, 'Total:', 1, 0, 'R')
-    pdf.cell(col_widths[4], 10, f"${total_commission:,.2f}", 1, 0, 'R')
-    pdf.cell(col_widths[5], 10, '', 1, 1, 'C')
+        # Contenido de la tabla
+        pdf.set_text_color(70, 70, 70)
+        pdf.set_font('Arial', '', 9)
+        total_commission = 0
+        fill = False
 
-    # Agregar información adicional
-    pdf.ln(10)
-    pdf.set_font('Arial', 'B', 11)
-    pdf.cell(0, 10, 'Información Adicional', 0, 1, 'L')
-    pdf.set_font('Arial', '', 10)
-    pdf.multi_cell(0, 6, (
-        'Este reporte incluye todas las comisiones pendientes de pago hasta la fecha de corte. '
-        'Las comisiones serán procesadas para pago una vez este reporte sea generado.'
-    ))
+        for commission in commissions:
+            policy = Policy.query.get(commission.policy_id)
+            product = Product.query.get(policy.product_id)
+            
+            # Alternar colores de fondo
+            if fill:
+                pdf.set_fill_color(240, 240, 250)
+            else:
+                pdf.set_fill_color(255, 255, 255)
+                
+            pdf.cell(col_widths[0], 8, commission.date.strftime('%d/%m/%Y'), 1, 0, 'C', fill)
+            pdf.cell(col_widths[1], 8, policy.policy_number, 1, 0, 'C', fill)
+            pdf.cell(col_widths[2], 8, product.name, 1, 0, 'L', fill)
+            pdf.cell(col_widths[3], 8, f"${float(policy.premium):,.2f}", 1, 0, 'R', fill)
+            pdf.cell(col_widths[4], 8, f"${float(commission.amount):,.2f}", 1, 0, 'R', fill)
+            pdf.cell(col_widths[5], 8, 'Directa' if commission.commission_type == 'direct' else 'Override', 1, 0, 'C', fill)
+            pdf.ln()
+            
+            total_commission += float(commission.amount)
+            fill = not fill
 
-    # Agregar firmas
-    pdf.ln(20)
-    pdf.set_font('Arial', '', 10)
-    pdf.cell(90, 10, '_' * 30, 0, 0, 'C')
-    pdf.cell(90, 10, '_' * 30, 0, 1, 'C')
-    pdf.cell(90, 5, 'Firma del Agente', 0, 0, 'C')
-    pdf.cell(90, 5, 'Autorizado por', 0, 1, 'C')
+        # Total
+        pdf.set_font('Arial', 'B', 10)
+        pdf.set_text_color(0, 84, 159)
+        pdf.cell(sum(col_widths[:4]), 10, 'Total:', 1, 0, 'R')
+        pdf.cell(col_widths[4], 10, f"${total_commission:,.2f}", 1, 0, 'R')
+        pdf.cell(col_widths[5], 10, '', 1, 1, 'C')
 
-    # Guardar el PDF
-    pdf_file_path = f"reports/commission_report_{agent.id}.pdf"
-    pdf.output(pdf_file_path)
+        # Agregar información adicional
+        pdf.ln(10)
+        pdf.set_font('Arial', 'B', 11)
+        pdf.cell(0, 10, 'Información Adicional', 0, 1, 'L')
+        pdf.set_font('Arial', '', 10)
+        pdf.multi_cell(0, 6, (
+            'Este reporte incluye todas las comisiones pendientes de pago hasta la fecha. '
+            'Las comisiones serán procesadas para pago una vez este reporte sea generado.'
+        ))
 
-    return pdf_file_path
+        # Agregar firmas
+        pdf.ln(20)
+        pdf.set_font('Arial', '', 10)
+        pdf.cell(90, 10, '_' * 30, 0, 0, 'C')
+        pdf.cell(90, 10, '_' * 30, 0, 1, 'C')
+        pdf.cell(90, 5, 'Firma del Agente', 0, 0, 'C')
+        pdf.cell(90, 5, 'Autorizado por', 0, 1, 'C')
+
+        pdf.output(pdf_path)
+        return pdf_path
+
+    except Exception as e:
+        logging.error(f"Error creando PDF: {str(e)}")
+        raise
 
 def send_commission_report_email(recipient_email, pdf_file_path):
     """Envía el reporte de comisiones por correo electrónico."""
-    msg = Message("Reporte de Comisiones",
-                  sender=current_app.config['MAIL_DEFAULT_SENDER'],
-                  recipients=[recipient_email])
-    msg.body = "Adjunto encontrarás tu reporte de comisiones."
-    with open(pdf_file_path, 'rb') as f:
-        msg.attach("reporte_comisiones.pdf", "application/pdf", f.read())
-    mail.send(msg)
+    try:
+        msg = Message(
+            "Reporte de Comisiones",
+            sender=current_app.config['MAIL_DEFAULT_SENDER'],
+            recipients=[recipient_email]
+        )
+        msg.body = """
+        Estimado agente,
+
+        Adjunto encontrará su reporte de comisiones.
+
+        Saludos cordiales,
+        """
+
+        with open(pdf_file_path, 'rb') as f:
+            msg.attach(
+                "reporte_comisiones.pdf",
+                "application/pdf",
+                f.read()
+            )
+
+        mail.send(msg)
+        return True
+
+    except Exception as e:
+        logging.error(f"Error enviando email: {str(e)}")
+        raise
 
 @bp.route('/update_commission_status/<int:commission_id>', methods=['POST'])
 @login_required
@@ -635,20 +664,28 @@ def mass_commission_report():
     """Vista para el reporte de comisiones masivo."""
     try:
         # Obtener agentes con comisiones pendientes
-        agent_data = db.session.query(
+        agent_data = []
+        agents_query = db.session.query(
             User,
             func.count(Commission.id).label('pending_count'),
             func.sum(Commission.amount).label('pending_amount')
         ).join(
-            Commission
+            Commission, User.id == Commission.agent_id
         ).filter(
             User.role == UserRole.AGENTE,
             Commission.payment_status == 'PENDIENTE'
         ).group_by(User.id).all()
 
+        for agent, pending_count, pending_amount in agents_query:
+            agent_data.append({
+                'agent': agent,
+                'pending_count': pending_count,
+                'pending_amount': pending_amount or 0
+            })
+
         # Calcular totales
-        total_pending_count = sum(data[1] for data in agent_data)
-        total_pending_amount = sum(float(data[2] or 0) for data in agent_data)
+        total_pending_count = sum(data['pending_count'] for data in agent_data)
+        total_pending_amount = sum(data['pending_amount'] for data in agent_data)
 
         return render_template(
             'reports/mass_commission_report.html',
@@ -659,3 +696,148 @@ def mass_commission_report():
     except Exception as e:
         logging.error(f"Error en mass_commission_report: {str(e)}")
         return render_template('errors/500.html', error=str(e)), 500
+
+@bp.route('/confirm-mass-commission-report', methods=['POST'])
+@login_required
+@admin_required
+def confirm_mass_commission_report():
+    """Confirmar el pago masivo de comisiones."""
+    try:
+        agent_ids = request.form.getlist('agent_ids')
+        if not agent_ids:
+            flash('Debe seleccionar al menos un agente.', 'warning')
+            return redirect(url_for('reports.mass_commission_report'))
+
+        agents = User.query.filter(User.id.in_(agent_ids)).all()
+        agent_commissions = {}
+
+        for agent in agents:
+            commissions = Commission.query.filter_by(
+                agent_id=agent.id,
+                payment_status='PENDIENTE'
+            ).all()
+            
+            agent_commissions[agent.id] = {
+                'count': len(commissions),
+                'total': sum(float(c.amount) for c in commissions)
+            }
+
+        return render_template(
+            'reports/confirm_mass_commission_report.html',
+            agents=agents,
+            agent_commissions=agent_commissions
+        )
+    except Exception as e:
+        logging.error(f"Error en confirm_mass_commission_report: {str(e)}")
+        return render_template('errors/500.html', error=str(e)), 500
+
+@bp.route('/process-mass-commission-report', methods=['POST'])
+@login_required
+@admin_required
+def process_mass_commission_report():
+    """Procesar el pago masivo de comisiones."""
+    try:
+        results = {
+            'success': [],
+            'errors': [],
+            'no_commissions': []
+        }
+
+        agent_ids = request.form.getlist('agent_ids')
+        if not agent_ids:
+            flash('Debe seleccionar al menos un agente.', 'warning')
+            return redirect(url_for('reports.mass_commission_report'))
+
+        for agent_id in agent_ids:
+            try:
+                agent = User.query.get(agent_id)
+                if not agent:
+                    continue
+
+                # Obtener comisiones pendientes
+                commissions = Commission.query.filter_by(
+                    agent_id=agent_id,
+                    payment_status='PENDIENTE'
+                ).all()
+
+                if not commissions:
+                    results['no_commissions'].append(agent.name)
+                    continue
+
+                # Crear directorio para reportes si no existe
+                os.makedirs('reports', exist_ok=True)
+
+                # Crear y enviar el reporte
+                try:
+                    pdf_path = create_commission_pdf(agent, commissions)
+                    if pdf_path and os.path.exists(pdf_path):
+                        send_commission_report_email(agent.email, pdf_path)
+                        
+                        # Actualizar estado de comisiones solo si el envío fue exitoso
+                        for commission in commissions:
+                            commission.payment_status = 'PAGADO'
+                        
+                        db.session.commit()
+                        results['success'].append(agent.name)
+                        
+                        # Limpiar el archivo PDF después de enviarlo
+                        try:
+                            os.remove(pdf_path)
+                        except:
+                            pass
+                    else:
+                        raise Exception("Error al generar el PDF")
+                        
+                except Exception as e:
+                    db.session.rollback()
+                    results['errors'].append({
+                        'agent_name': agent.name,
+                        'reason': f"Error al procesar el reporte: {str(e)}"
+                    })
+                    logging.error(f"Error procesando comisiones para {agent.name}: {str(e)}")
+                    continue
+
+            except Exception as e:
+                results['errors'].append({
+                    'agent_name': agent.name if agent else f"ID: {agent_id}",
+                    'reason': str(e)
+                })
+                logging.error(f"Error procesando agente {agent_id}: {str(e)}")
+                continue
+
+        return render_template('reports/mass_commission_results.html', results=results)
+
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Error en process_mass_commission_report: {str(e)}")
+        return render_template('errors/500.html', error=str(e)), 500
+
+@bp.route('/update_multiple_commission_status', methods=['POST'])
+@login_required
+@admin_required
+def update_multiple_commission_status():
+    """Actualiza el estado de múltiples comisiones."""
+    try:
+        agent_id = request.form.get('agent_id')
+        
+        # Procesar cada comisión
+        for key, new_status in request.form.items():
+            if key.startswith('status_') and new_status:
+                try:
+                    commission_id = int(key.replace('status_', ''))
+                    commission = Commission.query.get(commission_id)
+                    
+                    if commission and new_status in ['PENDIENTE', 'PAGADO', 'ANULADO']:
+                        commission.payment_status = new_status
+                except ValueError:
+                    continue
+        
+        db.session.commit()
+        flash('Estados actualizados exitosamente', 'success')
+        
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error al actualizar los estados: {str(e)}', 'error')
+        logging.error(f"Error actualizando estados de comisiones: {str(e)}")
+    
+    return redirect(url_for('reports.agent_commission_details', agent_id=agent_id))
