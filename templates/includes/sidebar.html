@@ -1,82 +1,90 @@
-<aside class="bg-primary-800 flex flex-col z-40 shadow-lg transition-all duration-300 ease-in-out fixed lg:relative" 
+<aside class="bg-primary-800 flex flex-col z-40 shadow-xl transition-all duration-300 ease-in-out fixed 
+            lg:relative m-2 rounded-2xl h-[calc(100vh-1rem)]" 
        :class="{ 'w-64': !collapsed, 'w-16': collapsed }"
        x-data="{ collapsed: false }">
     <!-- Logo y Marca -->
-    <div class="p-4 border-b border-primary-700/50 flex items-center justify-between">
-        <a href="/" class="flex items-center">
-            <img src="{{ url_for('static', filename='img/logo_black.svg') }}" alt="Logo" class="h-8">
-            <span class="text-primary-50 font-display font-semibold ml-2 transition-opacity duration-300"
-                  :class="{ 'opacity-0 hidden': collapsed }">Previanza</span>
-        </a>
-        <!-- Botón de hamburguesa -->
-        <button class="text-primary-300 hover:text-white p-1 rounded-lg transition-colors duration-200" 
+    <div class="p-4 border-b border-primary-700/50 flex items-center justify-between shrink-0">
+        <div class="flex items-center transition-all duration-300"
+             :class="{ 'opacity-100 w-auto': !collapsed, 'opacity-0 w-0 overflow-hidden': collapsed }">
+            <img src="{{ url_for('static', filename='img/logo_black.svg') }}" 
+                 alt="Logo Previanza" 
+                 class="w-8 h-8">
+            <span class="ml-2 text-primary-100 font-medium">
+                Previanza
+            </span>
+        </div>
+        <button class="text-primary-300 hover:text-white p-2 rounded-lg transition-all duration-300" 
                 type="button" 
                 id="collapse-trigger"
                 @click="collapsed = !collapsed"
-                aria-label="Toggle sidebar">
+                aria-label="Toggle sidebar"
+                :class="{ 'ml-0': collapsed, 'ml-auto': !collapsed }">
             <i class="fas fa-bars text-lg"></i>
         </button>
     </div>
 
-    <!-- Perfil del usuario -->
-    <div class="p-4 text-center border-b border-primary-700/50" x-show="!collapsed">
-        <img src="{{ url_for('static', filename='img/user.png') }}" 
-             alt="user-avatar" 
-             class="w-12 h-12 rounded-full mx-auto mb-2 border-2 border-primary-600 shadow-md">
-        <h6 class="text-primary-100 font-medium">{{ current_user.name if current_user.is_authenticated else 'Usuario' }}</h6>
-        <span class="text-primary-300 text-sm">{{ current_user.role.value if current_user.is_authenticated else 'Invitado' }}</span>
-    </div>
-
     <!-- Menú Principal -->
-    <nav class="flex-1 overflow-y-auto py-4">
-        <ul class="space-y-0.5 px-2">
-            <!-- Inicio -->
+    <nav class="flex-1 overflow-y-auto scrollbar-hide">
+        <ul class="space-y-1 py-4" :class="{ 'px-2': collapsed, 'px-3': !collapsed }">
+            <!-- Inicio (corregido) -->
             <li>
                 <a href="{{ url_for('index') }}" 
-                   class="flex items-center px-4 py-2.5 text-gray-100 hover:bg-primary-600/50 
-                          {{ 'bg-primary-600 text-white shadow-md' if request.endpoint == 'index' else '' }}
-                          rounded-lg transition-all duration-200 group">
-                    <i class="fas fa-home w-5 text-primary-300 group-hover:text-white transition-colors"></i>
-                    <span class="ml-3 transition-opacity duration-300"
-                          :class="{ 'opacity-0 hidden': collapsed }">Inicio</span>
+                   class="flex items-center px-3 py-2.5 text-gray-100 hover:bg-primary-600/50 
+                          {{ 'bg-primary-600 text-white' if request.endpoint == 'index' else '' }}
+                          rounded-xl transition-all duration-300 group">
+                    <div class="w-6 text-center flex-shrink-0">
+                        <i class="fas fa-home text-primary-300 group-hover:text-white transition-colors"></i>
+                    </div>
+                    <span class="ml-3 transition-all duration-300 whitespace-nowrap"
+                          :class="{ 'opacity-0 w-0 overflow-hidden': collapsed, 'opacity-100 w-auto': !collapsed }">
+                        Inicio
+                    </span>
+                </a>
+            </li>
+
+            <!-- Clientes (corregido) -->
+            <li>
+                <a href="{{ url_for('clients.list_clients') }}" 
+                   class="flex items-center px-3 py-2.5 text-gray-100 hover:bg-primary-600/50 
+                          {{ 'bg-primary-600 text-white' if request.endpoint.startswith('clients.') else '' }}
+                          rounded-xl transition-all duration-300 group">
+                    <div class="w-6 text-center flex-shrink-0">
+                        <i class="fas fa-users text-primary-300 group-hover:text-white transition-colors"></i>
+                    </div>
+                    <span class="ml-3 transition-all duration-300 whitespace-nowrap"
+                          :class="{ 'opacity-0 w-0 overflow-hidden': collapsed, 'opacity-100 w-auto': !collapsed }">
+                        Clientes
+                    </span>
                 </a>
             </li>
 
             {% if current_user.is_authenticated %}
                 {% if current_user.role in [UserRole.ADMIN, UserRole.DIGITADOR] %}
-                    <!-- Clientes -->
-                    <li>
-                        <a href="{{ url_for('clients.list_clients') }}" 
-                           class="flex items-center px-4 py-2.5 text-gray-100 hover:bg-primary-600/50 
-                                  {{ 'bg-primary-600 text-white shadow-md' if request.endpoint.startswith('clients.') else '' }}
-                                  rounded-lg transition-all duration-200 group">
-                            <i class="fas fa-users w-5 text-primary-300 group-hover:text-white transition-colors"></i>
-                            <span class="ml-3 transition-opacity duration-300"
-                                  :class="{ 'opacity-0 hidden': collapsed }">Clientes</span>
-                        </a>
-                    </li>
-
                     <!-- Pólizas -->
                     <li>
                         <a href="{{ url_for('policies.list_policies') }}" 
-                           class="flex items-center px-4 py-2.5 text-gray-100 hover:bg-primary-600/50 
-                                  {{ 'bg-primary-600 text-white shadow-md' if request.endpoint.startswith('policies.') else '' }}
-                                  rounded-lg transition-all duration-200 group">
-                            <i class="fas fa-file-contract w-5 text-primary-300 group-hover:text-white transition-colors"></i>
-                            <span class="ml-3 transition-opacity duration-300"
-                                  :class="{ 'opacity-0 hidden': collapsed }">Pólizas</span>
+                           class="flex items-center px-3 py-2.5 text-gray-100 hover:bg-primary-600/50 
+                                  {{ 'bg-primary-600 text-white' if request.endpoint.startswith('policies.') else '' }}
+                                  rounded-xl transition-all duration-300 group">
+                            <div class="w-6 text-center flex-shrink-0">
+                                <i class="fas fa-file-contract text-primary-300 group-hover:text-white transition-colors"></i>
+                            </div>
+                            <span class="ml-3 transition-all duration-300 whitespace-nowrap"
+                                  :class="{ 'opacity-0 w-0 overflow-hidden': collapsed, 'opacity-100 w-auto': !collapsed }">Pólizas</span>
                         </a>
                     </li>
 
                     <!-- Productos -->
                     <li>
                         <a href="{{ url_for('products.list_products') }}" 
-                           class="flex items-center px-4 py-2.5 text-gray-100 hover:bg-primary-600/50 
-                                  {{ 'bg-primary-600 text-white shadow-md' if request.endpoint.startswith('products.') else '' }}
-                                  rounded-lg transition-all duration-200 group">
-                            <i class="fas fa-box w-5 text-primary-300 group-hover:text-white transition-colors"></i>
-                            <span class="ml-3 transition-opacity duration-300"
-                                  :class="{ 'opacity-0 hidden': collapsed }">Productos</span>
+                           class="flex items-center px-3 py-2.5 text-gray-100 hover:bg-primary-600/50 
+                                  {{ 'bg-primary-600 text-white' if request.endpoint.startswith('products.') else '' }}
+                                  rounded-xl transition-all duration-300 group">
+                            <div class="w-6 text-center flex-shrink-0">
+                                <i class="fas fa-box text-primary-300 group-hover:text-white transition-colors"></i>
+                            </div>
+                            <span class="ml-3 transition-all duration-300 whitespace-nowrap"
+                                  :class="{ 'opacity-0 w-0 overflow-hidden': collapsed, 'opacity-100 w-auto': !collapsed }">Productos</span>
                         </a>
                     </li>
                 {% endif %}
@@ -85,129 +93,192 @@
                     <!-- Agentes -->
                     <li>
                         <a href="{{ url_for('agents.list_agents') }}" 
-                           class="flex items-center px-4 py-2.5 text-gray-100 hover:bg-primary-600/50 
-                                  {{ 'bg-primary-600 text-white shadow-md' if request.endpoint.startswith('agents.') else '' }}
-                                  rounded-lg transition-all duration-200 group">
-                            <i class="fas fa-user-tie w-5 text-primary-300 group-hover:text-white transition-colors"></i>
-                            <span class="ml-3 transition-opacity duration-300"
-                                  :class="{ 'opacity-0 hidden': collapsed }">Agentes</span>
+                           class="flex items-center px-3 py-2.5 text-gray-100 hover:bg-primary-600/50 
+                                  {{ 'bg-primary-600 text-white' if request.endpoint.startswith('agents.') else '' }}
+                                  rounded-xl transition-all duration-300 group">
+                            <div class="w-6 text-center flex-shrink-0">
+                                <i class="fas fa-user-tie text-primary-300 group-hover:text-white transition-colors"></i>
+                            </div>
+                            <span class="ml-3 transition-all duration-300 whitespace-nowrap"
+                                  :class="{ 'opacity-0 w-0 overflow-hidden': collapsed, 'opacity-100 w-auto': !collapsed }">Agentes</span>
                         </a>
                     </li>
 
-                    <!-- Usuarios -->
+                    <!-- Usuarios (corregido) -->
                     <li>
                         <a href="{{ url_for('auth.list_users') }}" 
-                           class="flex items-center px-4 py-2.5 text-gray-100 hover:bg-primary-600/50 
-                                  {{ 'bg-primary-600 text-white shadow-md' if request.endpoint.startswith('auth.') else '' }}
-                                  rounded-lg transition-all duration-200 group">
-                            <i class="fas fa-users-cog w-5 text-primary-300 group-hover:text-white transition-colors"></i>
-                            <span class="ml-3 transition-opacity duration-300"
-                                  :class="{ 'opacity-0 hidden': collapsed }">Usuarios</span>
+                           class="flex items-center px-3 py-2.5 text-gray-100 hover:bg-primary-600/50 
+                                  {{ 'bg-primary-600 text-white' if request.endpoint.startswith('auth.') else '' }}
+                                  rounded-xl transition-all duration-300 group">
+                            <div class="w-6 text-center flex-shrink-0">
+                                <i class="fas fa-users-cog text-primary-300 group-hover:text-white transition-colors"></i>
+                            </div>
+                            <span class="ml-3 transition-all duration-300 whitespace-nowrap"
+                                  :class="{ 'opacity-0 w-0 overflow-hidden': collapsed, 'opacity-100 w-auto': !collapsed }">Usuarios</span>
                         </a>
                     </li>
 
-                    <!-- Configuración -->
+                    <!-- Configuración (corregido) -->
                     <li>
                         <a href="{{ url_for('config.config_index') }}" 
-                           class="flex items-center px-4 py-2.5 text-gray-100 hover:bg-primary-600/50 
-                                  {{ 'bg-primary-600 text-white shadow-md' if request.endpoint.startswith('config.') else '' }}
-                                  rounded-lg transition-all duration-200 group">
-                            <i class="fas fa-cogs w-5 text-primary-300 group-hover:text-white transition-colors"></i>
-                            <span class="ml-3 transition-opacity duration-300"
-                                  :class="{ 'opacity-0 hidden': collapsed }">Configuración</span>
+                           class="flex items-center px-3 py-2.5 text-gray-100 hover:bg-primary-600/50 
+                                  {{ 'bg-primary-600 text-white' if request.endpoint.startswith('config.') else '' }}
+                                  rounded-xl transition-all duration-300 group">
+                            <div class="w-6 text-center flex-shrink-0">
+                                <i class="fas fa-cogs text-primary-300 group-hover:text-white transition-colors"></i>
+                            </div>
+                            <span class="ml-3 transition-all duration-300 whitespace-nowrap"
+                                  :class="{ 'opacity-0 w-0 overflow-hidden': collapsed, 'opacity-100 w-auto': !collapsed }">Configuración</span>
                         </a>
                     </li>
                 {% endif %}
 
                 <!-- Informes -->
-                <li class="relative">
+                <li class="relative" 
+                    x-data="{ open: false }" 
+                    @mouseleave="open = false">
                     <button type="button" 
-                            class="w-full flex items-center justify-between px-4 py-2.5 text-gray-100 
-                                   hover:bg-primary-600/50 rounded-lg transition-all duration-200 group
-                                   {{ 'bg-primary-600 text-white shadow-md' if request.endpoint.startswith('reports.') else '' }}">
-                        <div class="flex items-center">
-                            <i class="fas fa-chart-bar w-5 text-primary-300 group-hover:text-white transition-colors"></i>
-                            <span class="ml-3 transition-opacity duration-300"
-                                  :class="{ 'opacity-0 hidden': collapsed }">Informes</span>
+                            @click="open = !open"
+                            @mouseenter="collapsed && (open = true)"
+                            class="w-full flex items-center justify-between px-3 py-2.5 text-gray-100 
+                                   hover:bg-primary-600/50 rounded-xl transition-all duration-300 group
+                                   {{ 'bg-primary-600 text-white' if request.endpoint.startswith('reports.') else '' }}">
+                        <div class="flex items-center min-w-0">
+                            <div class="w-6 text-center flex-shrink-0">
+                                <i class="fas fa-chart-bar text-primary-300 group-hover:text-white transition-colors"></i>
+                            </div>
+                            <span class="ml-3 transition-all duration-300 whitespace-nowrap"
+                                  :class="{ 'opacity-0 w-0 overflow-hidden': collapsed, 'opacity-100 w-auto': !collapsed }">
+                                Informes
+                            </span>
                         </div>
-                        <i class="fas fa-chevron-down transform transition-transform duration-200 text-primary-300 group-hover:text-white"
-                           :class="{ 'opacity-0': collapsed }"></i>
+                        <i class="fas fa-chevron-down transform transition-all duration-300 text-primary-300 group-hover:text-white ml-2"
+                           :class="{ 'opacity-0 w-0': collapsed, 'opacity-100 w-auto': !collapsed, 'rotate-180': open }"></i>
                     </button>
-                    <ul class="pl-4 mt-1 space-y-0.5 hidden">
-                        <li>
+
+                    <!-- Menú desplegable para modo expandido -->
+                    <ul x-show="open && !collapsed" 
+                        x-transition:enter="transition ease-out duration-200"
+                        x-transition:enter-start="opacity-0 transform -translate-y-2"
+                        x-transition:enter-end="opacity-100 transform translate-y-0"
+                        x-transition:leave="transition ease-in duration-150"
+                        x-transition:leave-start="opacity-100 transform translate-y-0"
+                        x-transition:leave-end="opacity-0 transform -translate-y-2"
+                        class="pl-4 space-y-1">
+                        <li class="pl-4">
                             <a href="{{ url_for('reports.dashboard') }}" 
-                               class="flex items-center px-4 py-2 text-gray-200 hover:bg-primary-600/50 
-                                      {{ 'bg-primary-600 text-white shadow-md' if request.endpoint == 'reports.dashboard' else '' }}
-                                      rounded-lg transition-all duration-200 group">
-                                <i class="fas fa-tachometer-alt w-5 text-primary-300 group-hover:text-white"></i>
-                                <span class="ml-3 transition-opacity duration-300"
-                                      :class="{ 'opacity-0 hidden': collapsed }">Dashboard</span>
+                               class="flex items-center px-3 py-2.5 text-gray-200 hover:bg-primary-600/50 
+                                      {{ 'bg-primary-600 text-white' if request.endpoint == 'reports.dashboard' else '' }}
+                                      rounded-xl transition-all duration-300 group">
+                                <div class="w-6 text-center flex-shrink-0">
+                                    <i class="fas fa-tachometer-alt text-primary-300 group-hover:text-white transition-colors"></i>
+                                </div>
+                                <span class="ml-3 whitespace-nowrap">Dashboard</span>
                             </a>
                         </li>
-                        <li>
+                        <li class="pl-4">
                             <a href="{{ url_for('reports.sales_report') }}" 
-                               class="flex items-center px-4 py-2 text-gray-200 hover:bg-primary-600/50 
-                                      {{ 'bg-primary-600 text-white shadow-md' if request.endpoint == 'reports.sales_report' else '' }}
-                                      rounded-lg transition-all duration-200 group">
-                                <i class="fas fa-chart-line w-5 text-primary-300 group-hover:text-white"></i>
-                                <span class="ml-3 transition-opacity duration-300"
-                                      :class="{ 'opacity-0 hidden': collapsed }">Reporte de Ventas</span>
+                               class="flex items-center px-3 py-2.5 text-gray-200 hover:bg-primary-600/50 
+                                      {{ 'bg-primary-600 text-white' if request.endpoint == 'reports.sales_report' else '' }}
+                                      rounded-xl transition-all duration-300 group">
+                                <div class="w-6 text-center flex-shrink-0">
+                                    <i class="fas fa-chart-line text-primary-300 group-hover:text-white transition-colors"></i>
+                                </div>
+                                <span class="ml-3 whitespace-nowrap">Reporte de Ventas</span>
                             </a>
                         </li>
-                        <li>
+                        <li class="pl-4">
                             <a href="{{ url_for('reports.commission_report') }}" 
-                               class="flex items-center px-4 py-2 text-gray-200 hover:bg-primary-600/50 
-                                      {{ 'bg-primary-600 text-white shadow-md' if request.endpoint == 'reports.commission_report' else '' }}
-                                      rounded-lg transition-all duration-200 group">
-                                <i class="fas fa-percentage w-5 text-primary-300 group-hover:text-white"></i>
-                                <span class="ml-3 transition-opacity duration-300"
-                                      :class="{ 'opacity-0 hidden': collapsed }">Reporte de Comisiones</span>
+                               class="flex items-center px-3 py-2.5 text-gray-200 hover:bg-primary-600/50 
+                                      {{ 'bg-primary-600 text-white' if request.endpoint == 'reports.commission_report' else '' }}
+                                      rounded-xl transition-all duration-300 group">
+                                <div class="w-6 text-center flex-shrink-0">
+                                    <i class="fas fa-percentage text-primary-300 group-hover:text-white transition-colors"></i>
+                                </div>
+                                <span class="ml-3 whitespace-nowrap">Reporte de Comisiones</span>
                             </a>
                         </li>
-                        <li>
+                        <li class="pl-4">
                             <a href="{{ url_for('reports.client_analytics') }}" 
-                               class="flex items-center px-4 py-2 text-gray-200 hover:bg-primary-600/50 
-                                      {{ 'bg-primary-600 text-white shadow-md' if request.endpoint == 'reports.client_analytics' else '' }}
-                                      rounded-lg transition-all duration-200 group">
-                                <i class="fas fa-users-cog w-5 text-primary-300 group-hover:text-white"></i>
-                                <span class="ml-3 transition-opacity duration-300"
-                                      :class="{ 'opacity-0 hidden': collapsed }">Análisis de Clientes</span>
+                               class="flex items-center px-3 py-2.5 text-gray-200 hover:bg-primary-600/50 
+                                      {{ 'bg-primary-600 text-white' if request.endpoint == 'reports.client_analytics' else '' }}
+                                      rounded-xl transition-all duration-300 group">
+                                <div class="w-6 text-center flex-shrink-0">
+                                    <i class="fas fa-users-cog text-primary-300 group-hover:text-white transition-colors"></i>
+                                </div>
+                                <span class="ml-3 whitespace-nowrap">Análisis de Clientes</span>
                             </a>
                         </li>
-                        <li>
+                        <li class="pl-4">
                             <a href="{{ url_for('reports.policy_analytics') }}" 
-                               class="flex items-center px-4 py-2 text-gray-200 hover:bg-primary-600/50 
-                                      {{ 'bg-primary-600 text-white shadow-md' if request.endpoint == 'reports.policy_analytics' else '' }}
-                                      rounded-lg transition-all duration-200 group">
-                                <i class="fas fa-file-invoice-dollar w-5 text-primary-300 group-hover:text-white"></i>
-                                <span class="ml-3 transition-opacity duration-300"
-                                      :class="{ 'opacity-0 hidden': collapsed }">Análisis de Pólizas</span>
+                               class="flex items-center px-3 py-2.5 text-gray-200 hover:bg-primary-600/50 
+                                      {{ 'bg-primary-600 text-white' if request.endpoint == 'reports.policy_analytics' else '' }}
+                                      rounded-xl transition-all duration-300 group">
+                                <div class="w-6 text-center flex-shrink-0">
+                                    <i class="fas fa-file-invoice-dollar text-primary-300 group-hover:text-white transition-colors"></i>
+                                </div>
+                                <span class="ml-3 whitespace-nowrap">Análisis de Pólizas</span>
                             </a>
                         </li>
-                        <li>
+                        <li class="pl-4">
                             <a href="{{ url_for('reports.diagram') }}" 
-                               class="flex items-center px-4 py-2 text-gray-200 hover:bg-primary-600/50 
-                                      {{ 'bg-primary-600 text-white shadow-md' if request.endpoint == 'reports.diagram' else '' }}
-                                      rounded-lg transition-all duration-200 group">
-                                <i class="fas fa-project-diagram w-5 text-primary-300 group-hover:text-white"></i>
-                                <span class="ml-3 transition-opacity duration-300"
-                                      :class="{ 'opacity-0 hidden': collapsed }">Diagrama de Comisiones</span>
+                               class="flex items-center px-3 py-2.5 text-gray-200 hover:bg-primary-600/50 
+                                      {{ 'bg-primary-600 text-white' if request.endpoint == 'reports.diagram' else '' }}
+                                      rounded-xl transition-all duration-300 group">
+                                <div class="w-6 text-center flex-shrink-0">
+                                    <i class="fas fa-project-diagram text-primary-300 group-hover:text-white transition-colors"></i>
+                                </div>
+                                <span class="ml-3 whitespace-nowrap">Diagrama de Comisiones</span>
                             </a>
                         </li>
                     </ul>
+
+                    <!-- Popover para modo colapsado -->
+                    <div x-show="open && collapsed"
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 transform translate-x-2"
+                         x-transition:enter-end="opacity-100 transform translate-x-0"
+                         x-transition:leave="transition ease-in duration-150"
+                         x-transition:leave-start="opacity-100 transform translate-x-0"
+                         x-transition:leave-end="opacity-0 transform translate-x-2"
+                         class="absolute left-full top-0 ml-2 w-56 rounded-xl bg-primary-800 shadow-lg border border-primary-700/50 py-2"
+                         @mouseenter="open = true"
+                         @mouseleave="open = false">
+                        <!-- Dashboard -->
+                        <a href="{{ url_for('reports.dashboard') }}"
+                           class="flex items-center px-3 py-2 text-gray-200 hover:bg-primary-600/50 transition-colors">
+                            <div class="w-6 text-center flex-shrink-0">
+                                <i class="fas fa-tachometer-alt text-primary-300"></i>
+                            </div>
+                            <span class="ml-3">Dashboard</span>
+                        </a>
+
+                        <!-- Reporte de Ventas -->
+                        <a href="{{ url_for('reports.sales_report') }}"
+                           class="flex items-center px-3 py-2 text-gray-200 hover:bg-primary-600/50 transition-colors">
+                            <div class="w-6 text-center flex-shrink-0">
+                                <i class="fas fa-chart-line text-primary-300"></i>
+                            </div>
+                            <span class="ml-3">Reporte de Ventas</span>
+                        </a>
+
+                        <!-- ... resto de items con la misma estructura ... -->
+                    </div>
                 </li>
             {% endif %}
         </ul>
     </nav>
 
     <!-- Cerrar Sesión -->
-    <div class="p-4 border-t border-primary-700/50">
+    <div class="p-3 border-t border-primary-700/50 shrink-0">
         <a href="{{ url_for('auth.logout') }}" 
-           class="flex items-center px-4 py-2.5 text-gray-100 hover:bg-primary-600/50 
-                  rounded-lg transition-all duration-200 group">
-            <i class="fas fa-sign-out-alt w-5 text-primary-300 group-hover:text-white transition-colors"></i>
-            <span class="ml-3 transition-opacity duration-300"
-                  :class="{ 'opacity-0 hidden': collapsed }">Cerrar Sesión</span>
+           class="flex items-center px-3 py-2.5 text-gray-100 hover:bg-primary-600/50 
+                  rounded-xl transition-all duration-300 group">
+            <div class="w-6 text-center flex-shrink-0">
+                <i class="fas fa-sign-out-alt text-primary-300 group-hover:text-white transition-colors"></i>
+            </div>
+            <span class="ml-3 transition-all duration-300 whitespace-nowrap"
+                  :class="{ 'opacity-0 w-0 overflow-hidden': collapsed, 'opacity-100 w-auto': !collapsed }">Cerrar Sesión</span>
         </a>
     </div>
 </aside>
@@ -220,4 +291,15 @@ function toggleSubmenu(button) {
     submenu.classList.toggle('hidden');
     icon.classList.toggle('rotate-180');
 }
-</script> 
+</script>
+
+<style>
+/* Ocultar scrollbar pero mantener funcionalidad */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+.scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+</style> 
