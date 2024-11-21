@@ -125,6 +125,28 @@ module.exports = {
     },
   },
   plugins: [
-    require('@tailwindcss/forms')
+    require('@tailwindcss/forms'),
+    function({ addUtilities }) {
+      const iconUtilities = {
+        '.material-icon': {
+          'font-family': '"Material Symbols Rounded"',
+          'font-weight': 'normal',
+          'font-style': 'normal',
+          'font-size': '24px',
+          'line-height': '1',
+          'letter-spacing': 'normal',
+          'text-transform': 'none',
+          'display': 'inline-block',
+          'white-space': 'nowrap',
+          'word-wrap': 'normal',
+          'direction': 'ltr',
+          '-webkit-font-smoothing': 'antialiased'
+        },
+        '.material-icon-outlined': {
+          'font-family': '"Material Symbols Outlined"',
+        }
+      }
+      addUtilities(iconUtilities)
+    }
   ]
 }

@@ -327,28 +327,42 @@ def policy_analytics():
 @login_required
 @admin_required
 def diagram():
-    return render_template('reports/diagram.html')
+    try:
+        # Verificar que tenemos acceso a la base de datos
+        agents = User.query.filter_by(role=UserRole.AGENTE).all()
+        if not agents:
+            # Si no hay agentes, devolver una estructura básica
+            return render_template('reports/diagram.html', error_message="No hay agentes para mostrar")
+            
+        return render_template('reports/diagram.html')
+    except Exception as e:
+        # Registrar el error
+        logging.error(f"Error en la ruta /diagram: {str(e)}")
+        # Devolver una respuesta más amigable
+        return render_template('errors/500.html'), 500
 
 @bp.route('/api/agent-hierarchy')
 @login_required
 @admin_required
 def agent_hierarchy_data():
-    def get_agent_hierarchy(agent):
-        return {
-            "name": agent.username,
-            "children": [get_agent_hierarchy(subordinate) for subordinate in agent.subordinates]
-        }
-
     try:
+        def get_agent_hierarchy(agent):
+            return {
+                "id": agent.id,
+                "name": agent.username,
+                "role": agent.role.value,
+                "children": [get_agent_hierarchy(subordinate) for subordinate in agent.subordinates]
+            }
+
+        # Obtener solo los agentes raíz (sin supervisor)
         root_agents = User.query.filter_by(
             role=UserRole.AGENTE,
             parent_id=None
         ).all()
 
         if not root_agents:
-            # Si no hay agentes, devolver una estructura básica
             return jsonify({
-                "name": "No hay agentes",
+                "name": "Agentes",
                 "children": []
             })
 
