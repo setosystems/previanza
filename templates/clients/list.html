@@ -2,32 +2,48 @@
 
 {% block content %}
 <div class="container-fluid">
-    <h1 class="page-title">Lista de Clientes</h1>
-    
     <div class="card">
         <div class="card-header">
             <div class="flex justify-between items-center">
                 <h2 class="section-title">Búsqueda de Clientes</h2>
-                <a href="{{ url_for('clients.create_client') }}" class="btn-primary">
-                    <i class="fas fa-plus mr-2"></i>Nuevo Cliente
-                </a>
+                <div class="flex space-x-4">
+                    <a href="{{ url_for('clients.create_client') }}" class="btn-primary">
+                        <span class="material-symbols-outlined mr-2">person_add</span>Nuevo Cliente
+                    </a>
+                    <a href="{{ url_for('clients.bulk_upload_clients') }}" class="btn-secondary">
+                        <span class="material-symbols-outlined mr-2">upload_file</span>Carga Masiva
+                    </a>
+                </div>
             </div>
         </div>
         
         <div class="card-body">
-            <form method="GET" class="space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="form-group">
+            <form method="GET">
+                <div class="flex gap-4">
+                    <div class="form-group flex-1">
                         <label class="form-label" for="name">Nombre</label>
-                        <input type="text" id="name" name="name" class="form-input" value="{{ request.args.get('name', '') }}">
+                        <input type="text" id="name" name="name" class="form-input" 
+                               value="{{ request.args.get('name', '') }}"
+                               placeholder="Nombre del cliente">
                     </div>
-                    <!-- ... más campos ... -->
-                </div>
-                
-                <div class="flex justify-end">
-                    <button type="submit" class="btn-primary">
-                        <i class="fas fa-search mr-2"></i>Buscar
-                    </button>
+                    <div class="form-group flex-1">
+                        <label class="form-label" for="email">Email</label>
+                        <input type="email" id="email" name="email" class="form-input" 
+                               value="{{ request.args.get('email', '') }}"
+                               placeholder="Email del cliente">
+                    </div>
+                    <div class="form-group flex-1">
+                        <label class="form-label" for="document">Documento</label>
+                        <input type="text" id="document" name="document" class="form-input" 
+                               value="{{ request.args.get('document', '') }}"
+                               placeholder="Número de documento">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label opacity-0">Buscar</label>
+                        <button type="submit" class="btn-primary">
+                            <span class="material-symbols-outlined mr-2">search</span>Buscar
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -35,26 +51,59 @@
 
     <div class="section">
         <div class="table-container">
-            <table class="min-w-full divide-y divide-gray-200">
+            <table class="table">
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="table-header">Nombre</th>
                         <th class="table-header">Email</th>
+                        <th class="table-header">Documento</th>
+                        <th class="table-header">Estado</th>
                         <th class="table-header">Acciones</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200">
                     {% for client in clients %}
-                    <tr class="hover:bg-gray-50">
+                    <tr class="table-row">
                         <td class="table-cell">{{ client.name }}</td>
                         <td class="table-cell">{{ client.email }}</td>
+                        <td class="table-cell">{{ client.document_type.value }} {{ client.document_number }}</td>
                         <td class="table-cell">
-                            <div class="flex space-x-3">
-                                <a href="{{ url_for('clients.edit_client', id=client.id) }}" 
-                                   class="text-primary-600 hover:text-primary-900">
-                                    <i class="fas fa-edit"></i>
+                            <span class="badge {% if client.is_active %}badge-success{% else %}badge-danger{% endif %}">
+                                {{ "Activo" if client.is_active else "Inactivo" }}
+                            </span>
+                        </td>
+                        <td class="table-cell">
+                            <div class="flex items-center space-x-4">
+                                <a href="{{ url_for('clients.client_detail', id=client.id) }}" 
+                                   class="btn-icon text-blue-600 hover:text-blue-800"
+                                   title="Ver Detalles">
+                                    <span class="material-symbols-outlined">visibility</span>
+                                    <span class="sr-only">Ver detalles</span>
                                 </a>
-                                <!-- ... más acciones ... -->
+                                {% if current_user.role != UserRole.AGENTE %}
+                                <a href="{{ url_for('clients.edit_client', id=client.id) }}" 
+                                   class="btn-icon text-green-600 hover:text-green-800"
+                                   title="Editar Cliente">
+                                    <span class="material-symbols-outlined">edit</span>
+                                    <span class="sr-only">Editar</span>
+                                </a>
+                                {% endif %}
+                                {% if current_user.role == UserRole.ADMIN %}
+                                <button onclick="confirmDelete('{{ client.id }}', '{{ client.name }}')"
+                                        class="btn-icon text-red-600 hover:text-red-800"
+                                        title="Eliminar Cliente">
+                                    <span class="material-symbols-outlined">delete</span>
+                                    <span class="sr-only">Eliminar</span>
+                                </button>
+                                {% endif %}
+                                {% if client.policies %}
+                                <a href="{{ url_for('policies.list_policies', client_id=client.id) }}"
+                                   class="btn-icon text-purple-600 hover:text-purple-800"
+                                   title="Ver Pólizas">
+                                    <span class="material-symbols-outlined">policy</span>
+                                    <span class="sr-only">Ver pólizas</span>
+                                </a>
+                                {% endif %}
                             </div>
                         </td>
                     </tr>
@@ -63,5 +112,40 @@
             </table>
         </div>
     </div>
+
+    {% if pagination %}
+    <div class="flex justify-between items-center mt-6">
+        <div class="text-sm text-gray-700">
+            Mostrando página {{ pagination.page }} de {{ pagination.pages }}
+        </div>
+        <div class="flex space-x-2">
+            {% if pagination.has_prev %}
+            <a href="{{ url_for('clients.list_clients', page=pagination.prev_num) }}" 
+               class="btn-secondary">
+                <span class="material-symbols-outlined mr-2">chevron_left</span>Anterior
+            </a>
+            {% endif %}
+            
+            {% if pagination.has_next %}
+            <a href="{{ url_for('clients.list_clients', page=pagination.next_num) }}" 
+               class="btn-secondary">
+                Siguiente<span class="material-symbols-outlined ml-2">chevron_right</span>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
 </div>
+{% endblock %}
+
+{% block page_title %}Lista de Clientes{% endblock %}
+
+{% block scripts %}
+<script>
+function confirmDelete(clientId, clientName) {
+    if (confirm(`¿Está seguro que desea eliminar al cliente "${clientName}"?\nEsta acción no se puede deshacer.`)) {
+        window.location.href = "{{ url_for('clients.delete_client', id='') }}" + clientId;
+    }
+}
+</script>
 {% endblock %}

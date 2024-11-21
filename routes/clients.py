@@ -21,8 +21,7 @@ def list_clients():
     name = request.args.get('name', '')
     email = request.args.get('email', '')
     document_type = request.args.get('document_type', '')
-    policy_number = request.args.get('policy_number', '')
-    agent_name = request.args.get('agent_name', '')
+    document_number = request.args.get('document', '')
     
     query = Client.query
     if name:
@@ -31,22 +30,21 @@ def list_clients():
         query = query.filter(Client.email.ilike(f'%{email}%'))
     if document_type:
         query = query.filter(Client.document_type == DocumentType[document_type])
-    if policy_number:
-        query = query.join(Policy).filter(Policy.policy_number.ilike(f'%{policy_number}%'))
-    if agent_name:
-        query = query.join(Policy).join(User, Policy.agent_id == User.id).filter(
-            or_(User.username.ilike(f'%{agent_name}%'), User.name.ilike(f'%{agent_name}%'))
-        )
+    if document_number:
+        query = query.filter(Client.document_number.ilike(f'%{document_number}%'))
     
-    # Añadir paginación
+    query = query.order_by(Client.name)
+    
     page = request.args.get('page', 1, type=int)
-    per_page = 10  # Número de clientes por página
+    per_page = 10
     clients = query.paginate(page=page, per_page=per_page, error_out=False)
     
-    return render_template('clients/list.html', clients=clients.items, document_types=DocumentType, pagination=clients)
-
-    #clients = query.all()
-    #return render_template('clients/list.html', clients=clients, document_types=DocumentType)
+    return render_template('clients/list.html', 
+                         clients=clients.items, 
+                         document_types=DocumentType, 
+                         pagination=clients,
+                         title="Lista de Clientes",
+                         show_client_actions=True)
 
 @bp.route('/create', methods=['GET', 'POST'])
 @login_required
@@ -68,7 +66,9 @@ def create_client():
         db.session.commit()
         flash('Cliente creado exitosamente.')
         return redirect(url_for('clients.list_clients'))
-    return render_template('clients/create.html', form=form)
+    return render_template('clients/create.html', 
+                         form=form,
+                         title="Crear Nuevo Cliente")
 
 @bp.route('/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -90,23 +90,19 @@ def edit_client(id):
 def delete_client(id):
     client = Client.query.get_or_404(id)
     
-    associated_policies = Policy.query.filter_by(client_id=client.id).first()
-    
-    if associated_policies:
-        flash('No se puede eliminar el cliente porque tiene pólizas asociadas. Por favor, elimine primero las pólizas asociadas.', 'error')
-        return redirect(url_for('clients.list_clients'))
-    
     try:
+        if client.policies:
+            flash('No se puede eliminar el cliente porque tiene pólizas asociadas.', 'error')
+            return redirect(url_for('clients.list_clients'))
+        
         db.session.delete(client)
         db.session.commit()
         flash('Cliente eliminado exitosamente.', 'success')
-    except IntegrityError:
-        db.session.rollback()
-        flash('No se pudo eliminar el cliente debido a restricciones de integridad de la base de datos.', 'error')
+        
     except Exception as e:
         db.session.rollback()
-        logging.error(f"Error al eliminar el cliente: {str(e)}")
-        flash('Ocurrió un error al intentar eliminar el cliente.', 'error')
+        logging.error(f"Error al eliminar cliente {id}: {str(e)}")
+        flash('Error al eliminar el cliente.', 'error')
     
     return redirect(url_for('clients.list_clients'))
 
@@ -213,7 +209,8 @@ def bulk_upload_clients():
                             'created': created_count,
                             'errors': error_count,
                             'error_details': error_details
-                        })
+                        },
+                        title="Carga Masiva de Clientes")
                 else:
                     flash(f'Carga masiva completada exitosamente. Actualizados: {updated_count}, Creados: {created_count}')
                     return redirect(url_for('clients.list_clients'))
@@ -228,7 +225,7 @@ def bulk_upload_clients():
         else:
             flash('Formato de archivo inválido. Por favor, suba un archivo XLSX.', 'error')
             
-    return render_template('clients/bulk_upload.html')
+    return render_template('clients/bulk_upload.html', title="Carga Masiva de Clientes")
 
 @bp.route('/download_sample')
 @login_required
@@ -240,6 +237,18 @@ def download_client_sample():
 @login_required
 @admin_or_digitador_required
 def client_detail(id):
-    client = Client.query.get_or_404(id)
-    policies = Policy.query.filter_by(client_id=client.id).all()
-    return render_template('clients/detail.html', client=client, policies=policies)
+    try:
+        client = Client.query.get_or_404(id)
+        policies = Policy.query.filter_by(client_id=client.id)\
+            .order_by(Policy.start_date.desc())\
+            .all()
+        
+        return render_template('clients/detail.html', 
+                             client=client, 
+                             policies=policies,
+                             document_types=DocumentType,
+                             title=f"Cliente: {client.name}")
+    except Exception as e:
+        logging.error(f"Error al mostrar detalle del cliente {id}: {str(e)}")
+        flash('Error al cargar los detalles del cliente.', 'error')
+        return redirect(url_for('clients.list_clients'))

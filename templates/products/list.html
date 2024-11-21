@@ -2,49 +2,39 @@
 
 {% block content %}
 <div class="container-fluid">
-    <div class="flex-between mb-6">
-        <div>
-            <h1 class="page-title">Lista de Productos</h1>
-            <p class="subtitle">Gestione los productos del sistema</p>
-        </div>
-        <a href="{{ url_for('products.create_product') }}" class="btn-primary">
-            <i class="fas fa-plus mr-2"></i>Nuevo Producto
-        </a>
-    </div>
-
     <div class="card">
         <div class="card-header">
-            <h2 class="section-title">Búsqueda de Productos</h2>
+            <div class="flex justify-between items-center">
+                <h2 class="section-title">Búsqueda de Productos</h2>
+                <div class="flex space-x-4">
+                    <a href="{{ url_for('products.create_product') }}" class="btn-primary">
+                        <span class="material-symbols-outlined mr-2">add_box</span>Nuevo Producto
+                    </a>
+                </div>
+            </div>
         </div>
         
         <div class="card-body">
-            <form method="GET" class="space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="form-group">
+            <form method="GET">
+                <div class="flex gap-4">
+                    <div class="form-group flex-1">
                         <label class="form-label" for="name">Nombre del Producto</label>
-                        <input type="text" 
-                               id="name" 
-                               name="name" 
-                               class="form-input" 
+                        <input type="text" id="name" name="name" class="form-input" 
                                value="{{ request.args.get('name', '') }}"
                                placeholder="Buscar por nombre">
                     </div>
-
-                    <div class="form-group">
+                    <div class="form-group flex-1">
                         <label class="form-label" for="aseguradora">Aseguradora</label>
-                        <input type="text" 
-                               id="aseguradora" 
-                               name="aseguradora" 
-                               class="form-input" 
+                        <input type="text" id="aseguradora" name="aseguradora" class="form-input" 
                                value="{{ request.args.get('aseguradora', '') }}"
                                placeholder="Nombre de la aseguradora">
                     </div>
-                </div>
-
-                <div class="flex justify-end">
-                    <button type="submit" class="btn-primary">
-                        <i class="fas fa-search mr-2"></i>Buscar
-                    </button>
+                    <div class="form-group">
+                        <label class="form-label opacity-0">Buscar</label>
+                        <button type="submit" class="btn-primary">
+                            <span class="material-symbols-outlined mr-2">search</span>Buscar
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -72,8 +62,8 @@
                                  alt="{{ product.name }}"
                                  class="h-12 w-12 object-cover rounded-lg">
                             {% else %}
-                            <div class="h-12 w-12 bg-gray-100 rounded-lg flex-center">
-                                <i class="fas fa-box text-gray-400"></i>
+                            <div class="h-12 w-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                                <span class="material-symbols-outlined text-gray-400">image_not_supported</span>
                             </div>
                             {% endif %}
                         </td>
@@ -95,19 +85,20 @@
                             </span>
                         </td>
                         <td class="table-cell">
-                            <div class="flex space-x-3">
+                            <div class="flex items-center space-x-4">
                                 <a href="{{ url_for('products.edit_product', id=product.id) }}" 
-                                   class="text-primary-600 hover:text-primary-900"
-                                   title="Editar">
-                                    <i class="fas fa-edit"></i>
+                                   class="btn-icon text-green-600 hover:text-green-800"
+                                   title="Editar Producto">
+                                    <span class="material-symbols-outlined">edit</span>
+                                    <span class="sr-only">Editar</span>
                                 </a>
                                 {% if current_user.role == UserRole.ADMIN %}
-                                <a href="{{ url_for('products.delete_product', id=product.id) }}" 
-                                   class="text-danger-500 hover:text-danger-700"
-                                   onclick="return confirm('¿Está seguro de que desea eliminar este producto?')"
-                                   title="Eliminar">
-                                    <i class="fas fa-trash"></i>
-                                </a>
+                                <button onclick="confirmDelete('{{ product.id }}', '{{ product.name }}')"
+                                        class="btn-icon text-red-600 hover:text-red-800"
+                                        title="Eliminar Producto">
+                                    <span class="material-symbols-outlined">delete</span>
+                                    <span class="sr-only">Eliminar</span>
+                                </button>
                                 {% endif %}
                             </div>
                         </td>
@@ -127,18 +118,28 @@
             {% if pagination.has_prev %}
             <a href="{{ url_for('products.list_products', page=pagination.prev_num) }}" 
                class="btn-secondary">
-                <i class="fas fa-chevron-left mr-2"></i>Anterior
+                <span class="material-symbols-outlined mr-2">chevron_left</span>Anterior
             </a>
             {% endif %}
             
             {% if pagination.has_next %}
             <a href="{{ url_for('products.list_products', page=pagination.next_num) }}" 
                class="btn-secondary">
-                Siguiente<i class="fas fa-chevron-right ml-2"></i>
+                Siguiente<span class="material-symbols-outlined ml-2">chevron_right</span>
             </a>
             {% endif %}
         </div>
     </div>
     {% endif %}
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function confirmDelete(productId, productName) {
+    if (confirm(`¿Está seguro que desea eliminar el producto "${productName}"?\nEsta acción no se puede deshacer.`)) {
+        window.location.href = "{{ url_for('products.delete_product', id='') }}" + productId;
+    }
+}
+</script>
 {% endblock %}

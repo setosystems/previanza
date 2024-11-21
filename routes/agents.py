@@ -20,7 +20,7 @@ def list_agents():
         query = query.filter(User.email.ilike(f'%{email}%'))
     
     agents = query.all()
-    return render_template('agents/list.html', agents=agents)
+    return render_template('agents/list.html', agents=agents, title="Lista de Agentes")
 
 @bp.route('/create', methods=['GET', 'POST'])
 @login_required

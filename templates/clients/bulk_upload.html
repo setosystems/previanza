@@ -3,16 +3,11 @@
 {% block content %}
 <div class="container-fluid">
     <div class="max-w-2xl mx-auto">
-        <div class="mb-6">
-            <h1 class="page-title">Carga Masiva de Clientes</h1>
-            <p class="subtitle">Importe múltiples clientes usando un archivo Excel</p>
-        </div>
-
         {% if summary %}
         <div class="card mb-8">
             <div class="card-header">
                 <h3 class="section-title flex items-center">
-                    <i class="fas fa-chart-bar text-primary-600 mr-2"></i>
+                    <span class="material-symbols-outlined text-primary-600 mr-2">analytics</span>
                     Resumen de la Carga
                 </h3>
             </div>
@@ -21,7 +16,7 @@
                     <div class="stat-card">
                         <div class="flex items-center">
                             <div class="w-10 h-10 bg-success-50 rounded-full flex-center mr-3">
-                                <i class="fas fa-plus text-success-500"></i>
+                                <span class="material-symbols-outlined text-success-500">add_circle</span>
                             </div>
                             <div>
                                 <p class="stat-title">Creados</p>
@@ -33,7 +28,7 @@
                     <div class="stat-card">
                         <div class="flex items-center">
                             <div class="w-10 h-10 bg-primary-50 rounded-full flex-center mr-3">
-                                <i class="fas fa-sync text-primary-500"></i>
+                                <span class="material-symbols-outlined text-primary-500">update</span>
                             </div>
                             <div>
                                 <p class="stat-title">Actualizados</p>
@@ -45,7 +40,7 @@
                     <div class="stat-card">
                         <div class="flex items-center">
                             <div class="w-10 h-10 bg-danger-50 rounded-full flex-center mr-3">
-                                <i class="fas fa-times text-danger-500"></i>
+                                <span class="material-symbols-outlined text-danger-500">error</span>
                             </div>
                             <div>
                                 <p class="stat-title">Errores</p>
@@ -111,16 +106,16 @@
                 </div>
 
                 <div class="alert alert-warning">
-                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    <span class="material-symbols-outlined mr-2">warning</span>
                     <span>Si un cliente con el mismo correo electrónico ya existe, sus datos serán actualizados.</span>
                 </div>
             
                 <div class="flex justify-end space-x-4">
                     <a href="{{ url_for('clients.download_client_sample') }}" class="btn-secondary">
-                        <i class="fas fa-download mr-2"></i>Descargar plantilla
+                        <span class="material-symbols-outlined mr-2">download</span>Descargar plantilla
                     </a>
                     <button type="submit" class="btn-primary">
-                        <i class="fas fa-upload mr-2"></i>Subir Archivo
+                        <span class="material-symbols-outlined mr-2">upload</span>Subir Archivo
                     </button>
                 </div>
             </form>
@@ -128,7 +123,7 @@
 
         <div class="flex justify-center mt-6">
             <a href="{{ url_for('clients.list_clients') }}" class="btn-secondary">
-                <i class="fas fa-arrow-left mr-2"></i>Volver a la Lista de Clientes
+                <span class="material-symbols-outlined mr-2">arrow_back</span>Volver a la Lista de Clientes
             </a>
         </div>
     </div>

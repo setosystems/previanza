@@ -3,87 +3,76 @@
 {% block content %}
 <div class="container-fluid">
     <div class="max-w-4xl mx-auto">
-        <div class="mb-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="page-title">{{ client.name }}</h1>
-                    <p class="subtitle">Detalles del Cliente</p>
-                </div>
-                <div class="flex space-x-4">
-                    <a href="{{ url_for('clients.edit_client', id=client.id) }}" class="btn-primary">
-                        <i class="fas fa-edit mr-2"></i>Editar Cliente
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Información del Cliente -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <!-- Información Personal -->
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="section-title flex items-center">
-                        <i class="fas fa-user text-primary-600 mr-2"></i>
-                        Información Personal
-                    </h3>
-                </div>
-                <div class="card-body space-y-4">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <p class="text-sm font-medium text-gray-500">Email</p>
-                            <p class="text-gray-900">{{ client.email }}</p>
-                        </div>
-                        <div>
-                            <p class="text-sm font-medium text-gray-500">Teléfono</p>
-                            <p class="text-gray-900">{{ client.phone or 'No especificado' }}</p>
-                        </div>
-                        <div>
-                            <p class="text-sm font-medium text-gray-500">Fecha de Nacimiento</p>
-                            <p class="text-gray-900">{{ client.birthdate.strftime('%d/%m/%Y') if client.birthdate else 'No especificada' }}</p>
-                        </div>
+        <div class="card">
+            <div class="card-header">
+                <div class="flex justify-between items-center">
+                    <h2 class="section-title">Detalles del Cliente</h2>
+                    <div class="flex space-x-4">
+                        <a href="{{ url_for('clients.edit_client', id=client.id) }}" class="btn-primary">
+                            <span class="material-symbols-outlined mr-2">edit</span>Editar Cliente
+                        </a>
                     </div>
                 </div>
             </div>
 
-            <!-- Documentación -->
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="section-title flex items-center">
-                        <i class="fas fa-id-card text-primary-600 mr-2"></i>
-                        Documentación
-                    </h3>
-                </div>
-                <div class="card-body space-y-4">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <p class="text-sm font-medium text-gray-500">Tipo de Documento</p>
-                            <p class="text-gray-900">{{ client.document_type.value if client.document_type else 'No especificado' }}</p>
-                        </div>
-                        <div>
-                            <p class="text-sm font-medium text-gray-500">Número de Documento</p>
-                            <p class="text-gray-900">{{ client.document_number }}</p>
+            <!-- Información del Cliente -->
+            <div class="card-body">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Información Personal -->
+                    <div class="space-y-4">
+                        <h3 class="section-title flex items-center">
+                            <span class="material-symbols-outlined text-primary-600 mr-2">person</span>
+                            Información Personal
+                        </h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Email</p>
+                                <p class="text-gray-900">{{ client.email }}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Teléfono</p>
+                                <p class="text-gray-900">{{ client.phone or 'No especificado' }}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Fecha de Nacimiento</p>
+                                <p class="text-gray-900">{{ client.birthdate.strftime('%d/%m/%Y') if client.birthdate else 'No especificada' }}</p>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- Dirección -->
-            <div class="card md:col-span-2">
-                <div class="card-header">
-                    <h3 class="section-title flex items-center">
-                        <i class="fas fa-map-marker-alt text-primary-600 mr-2"></i>
-                        Dirección
-                    </h3>
-                </div>
-                <div class="card-body space-y-4">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="col-span-2">
-                            <p class="text-sm font-medium text-gray-500">Dirección Completa</p>
-                            <p class="text-gray-900">{{ client.address }}</p>
+                    <!-- Documentación -->
+                    <div class="space-y-4">
+                        <h3 class="section-title flex items-center">
+                            <span class="material-symbols-outlined text-primary-600 mr-2">badge</span>
+                            Documentación
+                        </h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Tipo de Documento</p>
+                                <p class="text-gray-900">{{ client.document_type.value if client.document_type else 'No especificado' }}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Número de Documento</p>
+                                <p class="text-gray-900">{{ client.document_number }}</p>
+                            </div>
                         </div>
-                        <div>
-                            <p class="text-sm font-medium text-gray-500">Ciudad</p>
-                            <p class="text-gray-900">{{ client.city }}</p>
+                    </div>
+
+                    <!-- Dirección -->
+                    <div class="md:col-span-2 space-y-4">
+                        <h3 class="section-title flex items-center">
+                            <span class="material-symbols-outlined text-primary-600 mr-2">location_on</span>
+                            Dirección
+                        </h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="col-span-2">
+                                <p class="text-sm font-medium text-gray-500">Dirección Completa</p>
+                                <p class="text-gray-900">{{ client.address }}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Ciudad</p>
+                                <p class="text-gray-900">{{ client.city }}</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -91,15 +80,15 @@
         </div>
 
         <!-- Pólizas Asociadas -->
-        <div class="card">
+        <div class="card mt-6">
             <div class="card-header">
                 <div class="flex justify-between items-center">
                     <h3 class="section-title flex items-center">
-                        <i class="fas fa-file-contract text-primary-600 mr-2"></i>
+                        <span class="material-symbols-outlined text-primary-600 mr-2">policy</span>
                         Pólizas Asociadas
                     </h3>
                     <a href="{{ url_for('policies.create_policy', client_id=client.id) }}" class="btn-primary">
-                        <i class="fas fa-plus mr-2"></i>Nueva Póliza
+                        <span class="material-symbols-outlined mr-2">add</span>Nueva Póliza
                     </a>
                 </div>
             </div>
@@ -132,16 +121,18 @@
                                     </span>
                                 </td>
                                 <td class="table-cell">
-                                    <div class="flex space-x-3">
+                                    <div class="flex items-center space-x-4">
                                         <a href="{{ url_for('policies.policy_detail', id=policy.id) }}" 
-                                           class="text-primary-600 hover:text-primary-900"
+                                           class="btn-icon text-blue-600 hover:text-blue-800"
                                            title="Ver Detalles">
-                                            <i class="fas fa-eye"></i>
+                                            <span class="material-symbols-outlined">visibility</span>
+                                            <span class="sr-only">Ver detalles</span>
                                         </a>
                                         <a href="{{ url_for('policies.edit_policy', id=policy.id) }}" 
-                                           class="text-primary-600 hover:text-primary-900"
-                                           title="Editar">
-                                            <i class="fas fa-edit"></i>
+                                           class="btn-icon text-green-600 hover:text-green-800"
+                                           title="Editar Póliza">
+                                            <span class="material-symbols-outlined">edit</span>
+                                            <span class="sr-only">Editar</span>
                                         </a>
                                     </div>
                                 </td>
@@ -152,10 +143,8 @@
                 </div>
                 {% else %}
                 <div class="text-center py-8">
-                    <div class="mb-4">
-                        <i class="fas fa-file-contract text-gray-400 text-4xl"></i>
-                    </div>
-                    <p class="text-gray-500">Este cliente no tiene pólizas asociadas.</p>
+                    <span class="material-symbols-outlined text-gray-400 text-4xl">policy_off</span>
+                    <p class="text-gray-500 mt-2">Este cliente no tiene pólizas asociadas.</p>
                 </div>
                 {% endif %}
             </div>
@@ -163,7 +152,7 @@
 
         <div class="flex justify-center mt-6">
             <a href="{{ url_for('clients.list_clients') }}" class="btn-secondary">
-                <i class="fas fa-arrow-left mr-2"></i>Volver a la Lista de Clientes
+                <span class="material-symbols-outlined mr-2">arrow_back</span>Volver a la Lista de Clientes
             </a>
         </div>
     </div>

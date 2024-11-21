@@ -2,49 +2,39 @@
 
 {% block content %}
 <div class="container-fluid">
-    <div class="flex-between mb-6">
-        <div>
-            <h1 class="page-title">Lista de Agentes</h1>
-            <p class="subtitle">Gestione los agentes del sistema</p>
-        </div>
-        <a href="{{ url_for('agents.create_agent') }}" class="btn-primary">
-            <i class="fas fa-user-plus mr-2"></i>Nuevo Agente
-        </a>
-    </div>
-
     <div class="card">
         <div class="card-header">
-            <h2 class="section-title">Búsqueda de Agentes</h2>
+            <div class="flex justify-between items-center">
+                <h2 class="section-title">Búsqueda de Agentes</h2>
+                <div class="flex space-x-4">
+                    <a href="{{ url_for('agents.create_agent') }}" class="btn-primary">
+                        <span class="material-symbols-outlined mr-2">person_add</span>Nuevo Agente
+                    </a>
+                </div>
+            </div>
         </div>
         
         <div class="card-body">
-            <form method="GET" class="space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="form-group">
+            <form method="GET">
+                <div class="flex gap-4">
+                    <div class="form-group flex-1">
                         <label class="form-label" for="username">Usuario</label>
-                        <input type="text" 
-                               id="username" 
-                               name="username" 
-                               class="form-input" 
+                        <input type="text" id="username" name="username" class="form-input" 
                                value="{{ request.args.get('username', '') }}"
                                placeholder="Nombre de usuario">
                     </div>
-
-                    <div class="form-group">
+                    <div class="form-group flex-1">
                         <label class="form-label" for="email">Email</label>
-                        <input type="email" 
-                               id="email" 
-                               name="email" 
-                               class="form-input" 
+                        <input type="email" id="email" name="email" class="form-input" 
                                value="{{ request.args.get('email', '') }}"
                                placeholder="correo@ejemplo.com">
                     </div>
-                </div>
-
-                <div class="flex justify-end">
-                    <button type="submit" class="btn-primary">
-                        <i class="fas fa-search mr-2"></i>Buscar
-                    </button>
+                    <div class="form-group">
+                        <label class="form-label opacity-0">Buscar</label>
+                        <button type="submit" class="btn-primary">
+                            <span class="material-symbols-outlined mr-2">search</span>Buscar
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -70,18 +60,19 @@
                         <td class="table-cell">{{ agent.name }}</td>
                         <td class="table-cell">{{ agent.parent.username if agent.parent else 'N/A' }}</td>
                         <td class="table-cell">
-                            <div class="flex space-x-3">
+                            <div class="flex items-center space-x-4">
                                 <a href="{{ url_for('agents.edit_agent', id=agent.id) }}" 
-                                   class="text-primary-600 hover:text-primary-900"
-                                   title="Editar">
-                                    <i class="fas fa-edit"></i>
+                                   class="btn-icon text-green-600 hover:text-green-800"
+                                   title="Editar Agente">
+                                    <span class="material-symbols-outlined">edit</span>
+                                    <span class="sr-only">Editar</span>
                                 </a>
-                                <a href="{{ url_for('agents.delete_agent', id=agent.id) }}" 
-                                   class="text-danger-500 hover:text-danger-700"
-                                   onclick="return confirm('¿Está seguro de que desea eliminar este agente?')"
-                                   title="Eliminar">
-                                    <i class="fas fa-trash"></i>
-                                </a>
+                                <button onclick="confirmDelete('{{ agent.id }}', '{{ agent.username }}')"
+                                        class="btn-icon text-red-600 hover:text-red-800"
+                                        title="Eliminar Agente">
+                                    <span class="material-symbols-outlined">delete</span>
+                                    <span class="sr-only">Eliminar</span>
+                                </button>
                             </div>
                         </td>
                     </tr>
@@ -90,5 +81,40 @@
             </table>
         </div>
     </div>
+
+    {% if pagination %}
+    <div class="flex justify-between items-center mt-6">
+        <div class="text-sm text-gray-700">
+            Mostrando página {{ pagination.page }} de {{ pagination.pages }}
+        </div>
+        <div class="flex space-x-2">
+            {% if pagination.has_prev %}
+            <a href="{{ url_for('agents.list_agents', page=pagination.prev_num) }}" 
+               class="btn-secondary">
+                <span class="material-symbols-outlined mr-2">chevron_left</span>Anterior
+            </a>
+            {% endif %}
+            
+            {% if pagination.has_next %}
+            <a href="{{ url_for('agents.list_agents', page=pagination.next_num) }}" 
+               class="btn-secondary">
+                Siguiente<span class="material-symbols-outlined ml-2">chevron_right</span>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
 </div>
+{% endblock %}
+
+{% block page_title %}Lista de Agentes{% endblock %}
+
+{% block scripts %}
+<script>
+function confirmDelete(agentId, agentName) {
+    if (confirm(`¿Está seguro que desea eliminar al agente "${agentName}"?\nEsta acción no se puede deshacer.`)) {
+        window.location.href = "{{ url_for('agents.delete_agent', id='') }}" + agentId;
+    }
+}
+</script>
 {% endblock %}

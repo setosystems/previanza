@@ -3,11 +3,6 @@
 {% block content %}
 <div class="container-fluid">
     <div class="max-w-2xl mx-auto">
-        <div class="mb-6">
-            <h1 class="page-title">Crear Nuevo Cliente</h1>
-            <p class="subtitle">Complete la información del cliente</p>
-        </div>
-
         <div class="card">
             <form method="POST" class="space-y-6">
                 {{ form.hidden_tag() }}
@@ -107,9 +102,11 @@
 
                 <div class="card-footer flex justify-end space-x-4">
                     <a href="{{ url_for('clients.list_clients') }}" class="btn-secondary">
-                        <i class="fas fa-times mr-2"></i>Cancelar
+                        <span class="material-symbols-outlined mr-2">close</span>Cancelar
                     </a>
-                    {{ form.submit(class="btn-primary") }}
+                    <button type="submit" class="btn-primary">
+                        <span class="material-symbols-outlined mr-2">save</span>Guardar
+                    </button>
                 </div>
             </form>
         </div>

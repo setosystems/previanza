@@ -33,7 +33,9 @@ def list_policies():
         query = query.filter_by(agent_id=current_user.id)
     
     policies = query.all()
-    return render_template('policies/list.html', policies=policies)
+    return render_template('policies/list.html', 
+                         policies=policies,
+                         title="Lista de Pólizas")
 
 @bp.route('/create', methods=['GET', 'POST'])
 @login_required

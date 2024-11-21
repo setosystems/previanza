@@ -47,7 +47,9 @@ def list_products():
         query = query.filter(Product.name.ilike(f'%{name}%'))
     
     products = query.all()
-    return render_template('products/list.html', products=products)
+    return render_template('products/list.html', 
+                         products=products,
+                         title="Lista de Productos")
 
 @bp.route('/create', methods=['GET', 'POST'])
 @login_required
