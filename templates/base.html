@@ -8,8 +8,8 @@
     <!-- Estilos compilados de Tailwind -->
     <link href="{{ url_for('static', filename='css/output.css') }}" rel="stylesheet">
     
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Uicons by Flowbite -->
+    <link href="https://cdn.jsdelivr.net/npm/@iconscout/unicons@4.0.8/css/line.min.css" rel="stylesheet">
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -76,8 +76,8 @@
                 }
             });
 
-            // Manejar clicks en los botones dropdown
-            const dropdownButtons = document.querySelectorAll('button[type="button"]');
+            // Manejar clicks en los botones dropdown (excluyendo el botón de Informes)
+            const dropdownButtons = document.querySelectorAll('button[type="button"]:not([data-menu="informes"])');
             dropdownButtons.forEach(button => {
                 button.addEventListener('click', function() {
                     const submenu = this.nextElementSibling;
