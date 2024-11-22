@@ -52,6 +52,7 @@ def list_clients():
 def create_client():
     form = ClientForm()
     if form.validate_on_submit():
+<<<<<<< HEAD
         client = Client(
             name=form.name.data,
             email=form.email.data,
@@ -69,6 +70,32 @@ def create_client():
     return render_template('clients/create.html', 
                          form=form,
                          title="Crear Nuevo Cliente")
+=======
+        try:
+            client = Client(
+                name=form.name.data,
+                email=form.email.data,
+                phone=form.phone.data,
+                address=form.address.data,
+                city=form.city.data,
+                document_type=DocumentType[form.document_type.data],
+                document_number=form.document_number.data,
+                birthdate=form.birthdate.data
+            )
+            db.session.add(client)
+            db.session.commit()
+            flash('Cliente creado exitosamente.')
+            return redirect(url_for('clients.list_clients'))
+        except IntegrityError as e:
+            db.session.rollback()
+            if 'uq_client_document' in str(e):
+                flash('Ya existe un cliente con ese número de documento.', 'error')
+            elif 'email' in str(e):
+                flash('Ya existe un cliente con ese correo electrónico.', 'error')
+            else:
+                flash('Error al crear el cliente: Datos duplicados.', 'error')
+    return render_template('clients/create.html', form=form)
+>>>>>>> origin/debug-paul
 
 @bp.route('/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -77,11 +104,23 @@ def edit_client(id):
     client = Client.query.get_or_404(id)
     form = ClientForm(obj=client)
     if form.validate_on_submit():
-        form.populate_obj(client)
-        client.document_type = DocumentType[form.document_type.data]
-        db.session.commit()
-        flash('Cliente actualizado exitosamente.')
-        return redirect(url_for('clients.list_clients'))
+        try:
+            form.populate_obj(client)
+            client.document_type = DocumentType[form.document_type.data]
+            db.session.commit()
+            flash('Cliente actualizado exitosamente.')
+            return redirect(url_for('clients.list_clients'))
+        except IntegrityError as e:
+            db.session.rollback()
+            if 'uq_client_document' in str(e):
+                flash('Ya existe un cliente con ese número de documento.', 'error')
+            elif 'email' in str(e):
+                flash('El correo electrónico ya está en uso.', 'error')
+            else:
+                flash('Error al actualizar el cliente: Datos duplicados.', 'error')
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al actualizar el cliente: {str(e)}', 'error')
     return render_template('clients/edit.html', form=form, client=client)
 
 @bp.route('/delete/<int:id>')
@@ -156,6 +195,15 @@ def bulk_upload_clients():
                             birthdate = parser.parse(str(birthdate)).date() if birthdate else None
                         except ValueError:
                             raise ValueError(f"El formato de fecha de nacimiento '{birthdate}' no es válido. Use YYYY-MM-DD")
+                        
+                        # Verificar si ya existe un cliente con el mismo documento
+                        existing_client_doc = Client.query.filter_by(
+                            document_type=DocumentType[document_type] if document_type else None,
+                            document_number=document_number
+                        ).first()
+                        
+                        if existing_client_doc:
+                            raise ValueError(f"Ya existe un cliente con el documento {document_type}: {document_number}")
                         
                         existing_client = Client.query.filter_by(email=email).first()
                         if existing_client:

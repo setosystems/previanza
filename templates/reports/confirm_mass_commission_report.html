@@ -2,40 +2,40 @@
 
 {% block content %}
 <div class="container-fluid">
-    <div class="max-w-2xl mx-auto">
-        <div class="mb-6">
-            <div class="flex items-center gap-3">
-                <i class="fas fa-exclamation-triangle text-warning-500 text-2xl"></i>
-                <div>
-                    <h1 class="page-title">Confirmar Envío de Reportes</h1>
-                    <p class="subtitle">Revise la información antes de proceder</p>
-                </div>
+    <div class="mb-6">
+        <div class="flex items-center gap-3">
+            <i class="fas fa-exclamation-triangle text-warning-500 text-2xl"></i>
+            <div>
+                <h1 class="page-title">Confirmar Envío de Reportes</h1>
+                <p class="subtitle">Revise la información antes de proceder</p>
             </div>
         </div>
+    </div>
 
-        <!-- Alerta de Advertencia -->
-        <div class="alert alert-warning mb-8">
-            <div class="flex items-start">
-                <div class="flex-shrink-0">
-                    <i class="fas fa-exclamation-circle text-warning-500"></i>
-                </div>
-                <div class="ml-3">
-                    <p class="font-medium">¡Atención! Al confirmar esta acción:</p>
-                    <ul class="mt-2 list-disc list-inside space-y-1">
-                        <li>Se enviarán reportes de comisión a todos los agentes seleccionados.</li>
-                        <li>Las comisiones incluidas quedarán marcadas como PAGADAS.</li>
-                        <li>Esta acción no se puede deshacer.</li>
-                    </ul>
-                </div>
+    <!-- Alerta de Advertencia -->
+    <div class="alert alert-warning mb-8">
+        <div class="flex items-start">
+            <div class="flex-shrink-0">
+                <i class="fas fa-exclamation-circle text-warning-500"></i>
+            </div>
+            <div class="ml-3">
+                <p class="font-medium">¡Atención! Al confirmar esta acción:</p>
+                <ul class="mt-2 list-disc list-inside space-y-1">
+                    <li>Se enviarán reportes de comisión a todos los agentes seleccionados.</li>
+                    <li>Las comisiones incluidas quedarán marcadas como PAGADAS.</li>
+                    <li>Esta acción no se puede deshacer.</li>
+                </ul>
             </div>
         </div>
+    </div>
 
-        <!-- Detalles de Envío -->
-        <div class="card">
-            <div class="card-header">
-                <h3 class="section-title">Resumen de envío</h3>
-            </div>
-            
+    <!-- Detalles de Envío -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="section-title">Resumen de envío</h3>
+        </div>
+        
+        <form method="POST" action="{{ url_for('reports.process_mass_commission_report') }}">
             <div class="card-body">
                 <div class="space-y-4">
                     {% for agent in agents %}
@@ -54,6 +54,8 @@
                                 </span>
                             </div>
                         </div>
+                        <!-- Campo oculto para mantener los IDs de los agentes -->
+                        <input type="hidden" name="agent_ids" value="{{ agent.id }}">
                     </div>
                     {% endfor %}
                 </div>
@@ -65,13 +67,11 @@
                    class="btn-secondary">
                     <i class="fas fa-times mr-2"></i>Cancelar
                 </a>
-                <form method="POST" action="{{ url_for('reports.process_mass_commission_report') }}" class="inline">
-                    <button type="submit" class="btn-primary">
-                        <i class="fas fa-paper-plane mr-2"></i>Confirmar y Enviar
-                    </button>
-                </form>
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-paper-plane mr-2"></i>Confirmar y Enviar
+                </button>
             </div>
-        </div>
+        </form>
     </div>
 </div>
 {% endblock %} 

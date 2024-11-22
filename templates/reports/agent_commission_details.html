@@ -8,86 +8,9 @@
                 <h1 class="page-title">Comisiones de {{ agent.name }}</h1>
                 <p class="subtitle">Detalle de comisiones del agente</p>
             </div>
-            <div class="flex space-x-4">
-                <button type="button" 
-                        onclick="generateReport({{ agent.id }})"
-                        class="btn-primary">
-                    <i class="fas fa-file-pdf mr-2"></i>Generar Reporte
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Filtros -->
-    <div class="card mb-8">
-        <div class="card-header">
-            <h3 class="section-title">Filtros</h3>
-        </div>
-        <div class="card-body">
-            <form method="GET" class="space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="form-group">
-                        <label class="form-label" for="start_date">Fecha Inicio</label>
-                        <input type="date" 
-                               id="start_date" 
-                               name="start_date" 
-                               class="form-input"
-                               value="{{ start_date or '' }}">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="end_date">Fecha Fin</label>
-                        <input type="date" 
-                               id="end_date" 
-                               name="end_date" 
-                               class="form-input"
-                               value="{{ end_date or '' }}">
-                    </div>
-                </div>
-                <div class="flex justify-end">
-                    <button type="submit" class="btn-primary">
-                        <i class="fas fa-filter mr-2"></i>Aplicar Filtros
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Resumen -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div class="stat-card">
-            <div class="flex items-center">
-                <div class="w-12 h-12 bg-warning-50 rounded-full flex-center mr-3">
-                    <i class="fas fa-clock text-warning-500"></i>
-                </div>
-                <div>
-                    <p class="stat-title">Comisiones Pendientes</p>
-                    <p class="stat-value">${{ "{:,.2f}".format(total_pending) }}</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="stat-card">
-            <div class="flex items-center">
-                <div class="w-12 h-12 bg-success-50 rounded-full flex-center mr-3">
-                    <i class="fas fa-check-circle text-success-500"></i>
-                </div>
-                <div>
-                    <p class="stat-title">Comisiones Pagadas</p>
-                    <p class="stat-value">${{ "{:,.2f}".format(total_paid) }}</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="stat-card">
-            <div class="flex items-center">
-                <div class="w-12 h-12 bg-primary-50 rounded-full flex-center mr-3">
-                    <i class="fas fa-calculator text-primary-500"></i>
-                </div>
-                <div>
-                    <p class="stat-title">Total Comisiones</p>
-                    <p class="stat-value">${{ "{:,.2f}".format(total_commission) }}</p>
-                </div>
-            </div>
+            <a href="{{ url_for('reports.commission_report') }}" class="btn-secondary">
+                <i class="fas fa-arrow-left mr-2"></i>Volver
+            </a>
         </div>
     </div>
 
@@ -97,53 +20,65 @@
             <h3 class="section-title">Detalle de Comisiones</h3>
         </div>
         <div class="card-body">
-            <div class="table-container">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th class="table-header">Fecha</th>
-                            <th class="table-header">Póliza</th>
-                            <th class="table-header">Producto</th>
-                            <th class="table-header text-right">Prima</th>
-                            <th class="table-header text-right">Comisión</th>
-                            <th class="table-header">Tipo</th>
-                            <th class="table-header">Estado</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for commission in commissions %}
-                        <tr class="table-row">
-                            <td class="table-cell">{{ commission.Commission.date.strftime('%Y-%m-%d') }}</td>
-                            <td class="table-cell">{{ commission.Policy.policy_number }}</td>
-                            <td class="table-cell">{{ commission.Product.name }}</td>
-                            <td class="table-cell text-right">${{ "{:,.2f}".format(commission.Policy.premium) }}</td>
-                            <td class="table-cell text-right">${{ "{:,.2f}".format(commission.Commission.amount) }}</td>
-                            <td class="table-cell">
-                                <span class="badge {% if commission.Commission.commission_type == 'direct' %}badge-primary{% else %}badge-secondary{% endif %}">
-                                    {{ "Directa" if commission.Commission.commission_type == 'direct' else "Sobrecomisión" }}
-                                </span>
-                            </td>
-                            <td class="table-cell">
-                                <span class="badge {% if commission.Commission.payment_status == 'PAGADO' %}badge-success{% elif commission.Commission.payment_status == 'PENDIENTE' %}badge-warning{% else %}badge-danger{% endif %}">
-                                    {{ commission.Commission.payment_status }}
-                                </span>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+            <form method="POST" action="{{ url_for('reports.update_multiple_commission_status') }}">
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th class="table-header">Fecha</th>
+                                <th class="table-header">Póliza</th>
+                                <th class="table-header">Producto</th>
+                                <th class="table-header text-right">Prima</th>
+                                <th class="table-header text-right">Comisión</th>
+                                <th class="table-header">Tipo</th>
+                                <th class="table-header">Estado</th>
+                                <th class="table-header">Nuevo Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for commission in commissions %}
+                            <tr class="table-row">
+                                <td class="table-cell">{{ commission.Commission.date.strftime('%Y-%m-%d') }}</td>
+                                <td class="table-cell">{{ commission.Policy.policy_number }}</td>
+                                <td class="table-cell">{{ commission.Product.name }}</td>
+                                <td class="table-cell text-right">${{ "{:,.2f}".format(commission.Policy.premium) }}</td>
+                                <td class="table-cell text-right">${{ "{:,.2f}".format(commission.Commission.amount) }}</td>
+                                <td class="table-cell">{{ "Directa" if commission.Commission.commission_type == 'direct' else "Sobrecomisión" }}</td>
+                                <td class="table-cell">
+                                    <span class="badge {{ 'badge-success' if commission.Commission.payment_status == 'PAGADO' else 'badge-warning' }}">
+                                        {{ commission.Commission.payment_status }}
+                                    </span>
+                                </td>
+                                <td class="table-cell">
+                                    <select name="status_{{ commission.Commission.id }}" class="form-select form-select-sm">
+                                        <option value="">Seleccionar estado</option>
+                                        <option value="PENDIENTE" {% if commission.Commission.payment_status == 'PENDIENTE' %}selected{% endif %}>Pendiente</option>
+                                        <option value="PAGADO" {% if commission.Commission.payment_status == 'PAGADO' %}selected{% endif %}>Pagado</option>
+                                        <option value="ANULADO" {% if commission.Commission.payment_status == 'ANULADO' %}selected{% endif %}>Anulado</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="4" class="table-cell font-medium">Total</td>
+                                <td class="table-cell text-right font-medium">${{ "{:,.2f}".format(total_commission) }}</td>
+                                <td colspan="3"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                
+                <!-- Botón de Guardar -->
+                <div class="flex justify-end mt-6">
+                    <input type="hidden" name="agent_id" value="{{ agent.id }}">
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-save mr-2"></i>Guardar Cambios
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
-
-{% block extra_js %}
-<script>
-function generateReport(agentId) {
-    if (confirm('¿Desea generar el reporte de comisiones para este agente?')) {
-        window.location.href = "{{ url_for('reports.generate_commission_report', agent_id='') }}" + agentId;
-    }
-}
-</script>
-{% endblock %}
 {% endblock %} 
