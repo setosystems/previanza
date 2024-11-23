@@ -214,20 +214,49 @@ def get_sales_by_region():
 @login_required
 @admin_or_digitador_or_agent_required
 def sales_report():
-    start_date = request.args.get('start_date', default=(datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d'), type=str)
-    end_date = request.args.get('end_date', default=datetime.now().strftime('%Y-%m-%d'), type=str)
-    
-    query = Policy.query.filter(Policy.start_date.between(start_date, end_date))
-    
-    if current_user.role == UserRole.AGENTE:
-        query = query.filter(Policy.agent_id == current_user.id)
-    
-    sales = query.with_entities(
-        func.date_trunc('day', Policy.start_date).label('date'),
-        func.sum(Policy.premium).label('total_sales')
-    ).group_by(func.date_trunc('day', Policy.start_date)).order_by('date').all()
-    
-    return render_template('reports/sales.html', sales=sales, start_date=start_date, end_date=end_date)
+    try:
+        # Obtener fechas del filtro
+        start_date = request.args.get('start_date', 
+            default=(datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d'))
+        end_date = request.args.get('end_date', 
+            default=datetime.now().strftime('%Y-%m-%d'))
+
+        # Construir la consulta base
+        query = db.session.query(
+            func.date_trunc('day', Policy.start_date).label('date'),
+            func.sum(Policy.premium).label('total_sales'),
+            func.count(Policy.id).label('policy_count')
+        )
+
+        # Aplicar filtros
+        query = query.filter(Policy.start_date.between(start_date, end_date))
+
+        # Si es agente, filtrar solo sus pólizas
+        if current_user.role == UserRole.AGENTE:
+            query = query.filter(Policy.agent_id == current_user.id)
+
+        # Agrupar y ordenar
+        sales = query.group_by(
+            func.date_trunc('day', Policy.start_date)
+        ).order_by('date').all()
+
+        # Calcular totales
+        total_sales = sum(sale.total_sales for sale in sales)
+        total_policies = sum(sale.policy_count for sale in sales)
+
+        return render_template(
+            'reports/sales.html',
+            sales=sales,
+            start_date=start_date,
+            end_date=end_date,
+            total_sales=total_sales,
+            total_policies=total_policies
+        )
+        
+    except Exception as e:
+        logging.error(f"Error en sales_report: {str(e)}")
+        flash('Error al generar el reporte de ventas', 'error')
+        return redirect(url_for('reports.dashboard'))
 
 @bp.route('/commissions')
 @login_required
@@ -323,23 +352,52 @@ def client_analytics():
 @login_required
 @admin_or_digitador_required
 def policy_analytics():
-    policy_distribution = db.session.query(
-        Product.name, func.count(Policy.id).label('policy_count')
-    ).join(Policy).group_by(Product.name).all()
-    
-    policy_trend = db.session.query(
-        func.date_trunc('month', Policy.start_date).label('month'),
-        func.count(Policy.id).label('policy_count')
-    ).group_by('month').order_by('month').all()
-    
-    avg_premium_by_product = db.session.query(
-        Product.name, func.avg(Policy.premium).label('avg_premium')
-    ).join(Policy).group_by(Product.name).all()
-    
-    return render_template('reports/policy_analytics.html',
-                           policy_distribution=policy_distribution,
-                           policy_trend=policy_trend,
-                           avg_premium_by_product=avg_premium_by_product)
+    try:
+        # Obtener distribución de pólizas por producto
+        policy_distribution = db.session.query(
+            Product.name.label('name'), 
+            func.count(Policy.id).label('policy_count')
+        ).outerjoin(
+            Policy, 
+            Product.id == Policy.product_id
+        ).group_by(Product.id, Product.name).all()
+
+        # Obtener tendencia mensual de pólizas (últimos 12 meses)
+        twelve_months_ago = datetime.now() - timedelta(days=365)
+        policy_trend = db.session.query(
+            func.date_trunc('month', Policy.start_date).label('month'),
+            func.count(Policy.id).label('policy_count')
+        ).filter(
+            Policy.start_date >= twelve_months_ago
+        ).group_by(
+            func.date_trunc('month', Policy.start_date)
+        ).order_by('month').all()
+
+        # Obtener prima promedio por producto
+        avg_premium_by_product = db.session.query(
+            Product.name.label('name'),
+            func.round(func.avg(Policy.premium), 2).label('avg_premium')
+        ).outerjoin(
+            Policy,
+            Product.id == Policy.product_id
+        ).group_by(Product.id, Product.name).all()
+
+        # Convertir los resultados a diccionarios para facilitar la serialización
+        distribution_data = [{'name': d.name, 'policy_count': d.policy_count} for d in policy_distribution]
+        trend_data = [{'month': t.month.strftime('%Y-%m'), 'policy_count': t.policy_count} for t in policy_trend]
+        premium_data = [{'name': p.name, 'avg_premium': float(p.avg_premium or 0)} for p in avg_premium_by_product]
+
+        return render_template(
+            'reports/policy_analytics.html',
+            policy_distribution=distribution_data,
+            policy_trend=trend_data,
+            avg_premium_by_product=premium_data
+        )
+        
+    except Exception as e:
+        logging.error(f"Error en policy_analytics: {str(e)}")
+        flash('Error al generar el reporte de análisis de pólizas', 'error')
+        return redirect(url_for('reports.dashboard'))
 
 @bp.route('/diagram')
 @login_required

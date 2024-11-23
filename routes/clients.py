@@ -52,25 +52,6 @@ def list_clients():
 def create_client():
     form = ClientForm()
     if form.validate_on_submit():
-<<<<<<< HEAD
-        client = Client(
-            name=form.name.data,
-            email=form.email.data,
-            phone=form.phone.data,
-            address=form.address.data,
-            city=form.city.data,
-            document_type=DocumentType[form.document_type.data],
-            document_number=form.document_number.data,
-            birthdate=form.birthdate.data
-        )
-        db.session.add(client)
-        db.session.commit()
-        flash('Cliente creado exitosamente.')
-        return redirect(url_for('clients.list_clients'))
-    return render_template('clients/create.html', 
-                         form=form,
-                         title="Crear Nuevo Cliente")
-=======
         try:
             client = Client(
                 name=form.name.data,
@@ -95,7 +76,6 @@ def create_client():
             else:
                 flash('Error al crear el cliente: Datos duplicados.', 'error')
     return render_template('clients/create.html', form=form)
->>>>>>> origin/debug-paul
 
 @bp.route('/edit/<int:id>', methods=['GET', 'POST'])
 @login_required

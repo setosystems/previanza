@@ -1,15 +1,17 @@
 import logging
 import click
-from flask import Flask, render_template, redirect, url_for, send_from_directory
+from flask import Flask, render_template, redirect, url_for, send_from_directory, flash
 from flask_login import LoginManager, current_user
 from flask_migrate import Migrate
 from config import Config, basedir
-from models import DocumentType, db, User, UserRole
+from models import DocumentType, db, User, UserRole, Policy, Commission, Client, Product
 from sqlalchemy.exc import OperationalError
 import time
 from extensions import mail
 import os
 from dotenv import load_dotenv
+from datetime import datetime, timedelta
+from sqlalchemy.sql import func
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -51,8 +53,124 @@ def create_app():
         # Redirigir a login si no está autenticado
         if not current_user.is_authenticated:
             return redirect(url_for('auth.login'))
-        # Si está autenticado, mostrar el dashboard
-        return render_template('index.html')
+        
+        try:
+            # Obtener fechas para filtrado
+            end_date = datetime.now()
+            start_date = end_date - timedelta(days=30)
+            previous_start = start_date - timedelta(days=30)
+
+            # Estadísticas generales
+            total_policies = Policy.query.count()
+            total_premium = db.session.query(func.sum(Policy.premium)).scalar() or 0
+            total_commissions = db.session.query(func.sum(Commission.amount)).scalar() or 0
+            
+            # Cálculo de crecimiento de pólizas
+            current_period_policies = Policy.query.filter(
+                Policy.start_date.between(start_date, end_date)
+            ).count()
+            previous_period_policies = Policy.query.filter(
+                Policy.start_date.between(previous_start, start_date)
+            ).count()
+            policy_growth = (
+                ((current_period_policies - previous_period_policies) / previous_period_policies * 100)
+                if previous_period_policies > 0 else 0
+            )
+
+            # Clientes activos y nuevos
+            active_clients = Client.query.count()
+            new_clients = Client.query.filter(
+                Client.id.in_(
+                    db.session.query(Policy.client_id).filter(
+                        Policy.start_date.between(start_date, end_date)
+                    )
+                )
+            ).count()
+
+            # Actividad semanal
+            today = datetime.now()
+            week_start = today - timedelta(days=today.weekday())
+            daily_counts = db.session.query(
+                func.date_trunc('day', Policy.start_date).label('day'),
+                func.count(Policy.id).label('count')
+            ).filter(
+                Policy.start_date >= week_start
+            ).group_by('day').all()
+
+            weekly_activity = {
+                'L': 0, 'M': 0, 'X': 0, 'J': 0, 'V': 0, 'S': 0, 'D': 0
+            }
+            for day_data in daily_counts:
+                weekly_activity[day_data.day.strftime('%a')[0]] = day_data.count
+
+            # Ventas diarias
+            daily_sales = db.session.query(
+                func.date_trunc('day', Policy.start_date).label('date'),
+                func.sum(Policy.premium).label('total')
+            ).filter(
+                Policy.start_date.between(start_date, end_date)
+            ).group_by('date').order_by('date').all()
+
+            sales_data = {
+                'dates': [d.date.strftime('%d/%m') for d in daily_sales],
+                'totals': [float(d.total) if d.total else 0 for d in daily_sales]
+            }
+
+            # Rendimiento de productos
+            products_performance = db.session.query(
+                Product.name,
+                Product.description,
+                Product.image_url,
+                func.count(Policy.id).label('policy_count'),
+                func.sum(Policy.premium).label('total_premium')
+            ).outerjoin(
+                Policy, 
+                db.and_(
+                    Policy.product_id == Product.id,
+                    Policy.start_date.between(start_date, end_date)
+                )
+            ).group_by(Product.id, Product.name, Product.description, Product.image_url)\
+            .order_by(func.sum(Policy.premium).desc())\
+            .all()
+
+            # Top clientes
+            top_clients = db.session.query(
+                Client.name,
+                func.count(Policy.id).label('policy_count'),
+                func.sum(Policy.premium).label('total_premium')
+            ).join(Policy).group_by(Client.id, Client.name)\
+            .order_by(func.sum(Policy.premium).desc())\
+            .limit(5).all()
+
+            # Top agentes
+            top_agents = db.session.query(
+                User.name,
+                func.count(Policy.id).label('policy_count'),
+                func.sum(Policy.premium).label('total_premium')
+            ).join(Policy, User.id == Policy.agent_id)\
+            .filter(User.role == UserRole.AGENTE)\
+            .group_by(User.id, User.name)\
+            .order_by(func.sum(Policy.premium).desc())\
+            .limit(5).all()
+
+            return render_template('index.html',
+                total_policies=total_policies,
+                total_premium=total_premium,
+                total_commissions=total_commissions,
+                active_clients=active_clients,
+                new_clients=new_clients,
+                policy_growth=policy_growth,
+                weekly_activity=weekly_activity,
+                daily_sales=sales_data,
+                products_performance=products_performance,
+                top_clients=top_clients,
+                top_agents=top_agents
+            )
+
+        except Exception as e:
+            logging.error(f"Error en dashboard: {str(e)}")
+            flash('Error al cargar el dashboard', 'error')
+            return render_template('index.html', error=True)
 
     @app.errorhandler(401)
     def unauthorized(error):

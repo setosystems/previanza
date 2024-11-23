@@ -19,38 +19,116 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
+.pytest_cache/
+.coverage
+htmlcov/
 
 # Virtual Environment
 .venv/
 venv/
+ENV/
 .env
-
-# Docker
-.docker/
-docker-compose.override.yml
-
-# Application
-static/uploads/*
-static/img/products/*
-!static/uploads/.gitkeep
-!static/img/products/.gitkeep
-reports/*
-!reports/.gitkeep
-
-# Database
-*.sqlite3
-*.db
-
-# Logs
-*.log
-logs/
+.env.local
+.env.*.local
 
 # IDE
 .idea/
 .vscode/
 *.swp
 *.swo
-
-# OS
 .DS_Store
 Thumbs.db
+
+# Application specific
+static/uploads/*
+static/img/products/*
+!static/uploads/.gitkeep
+!static/img/products/.gitkeep
+reports/*
+!reports/.gitkeep
+logs/*
+!logs/.gitkeep
+
+# Database
+*.sqlite3
+*.db
+*.sql
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Docker
+.docker/
+docker-compose.override.yml
+
+# Node
+node_modules/
+package-lock.json
+yarn.lock
+
+# Compiled files
+static/css/output.css
+static/js/*.min.js
+static/css/*.min.css
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+tmp/
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# System files
+.directory
+.Trash-*
+$RECYCLE.BIN/
+Desktop.ini
+
+# SSL/TLS certificates
+*.pem
+*.key
+*.crt
+*.cer
+*.der
+*.priv
+
+# Compiled Python files
+*.pyc
+*.pyo
+*.pyd
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Flask stuff
+instance/
+.webassets-cache
+
+# Coverage reports
+.coverage
+.coverage.*
+coverage.xml
+*.cover

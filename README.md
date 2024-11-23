@@ -6,65 +6,21 @@
 [![Flask](https://img.shields.io/badge/Flask-2.0+-green.svg)](https://flask.palletsprojects.com)
 [![License](https://img.shields.io/badge/License-Custom-blue.svg)](#licencia)
 
-Sistema web profesional para la gestión integral de seguros, desarrollado con Flask y diseñado específicamente para empresas aseguradoras. Permite gestionar pólizas, clientes, agentes y comisiones de manera eficiente y segura.
+Sistema web profesional para la gestión integral de seguros, desarrollado con Flask y diseñado específicamente para empresas aseguradoras.
 
 </div>
 
-## ✨ Características Principales
+## 📋 Requisitos Previos
 
-### 👥 Gestión de Usuarios y Roles
-- Sistema de roles jerárquico (Administrador, Digitador, Agente)
-- Autenticación segura con recuperación de contraseña
-- Control de acceso basado en roles (RBAC)
-- Gestión de perfiles y permisos
-
-### 👥 Gestión de Clientes
-- CRUD completo de clientes
-- Validación de documentos ecuatorianos
-- Carga masiva desde Excel
-- Búsqueda avanzada con filtros
-- Historial de pólizas por cliente
-
-### 📄 Gestión de Pólizas
-- Creación y seguimiento de pólizas
-- Control de estados (emisión y pagos)
-- Cálculo automático de comisiones
-- Carga masiva de pólizas
-- Validaciones automáticas
-
-### 💰 Sistema de Comisiones
-- Cálculo automático multinivel
-- Sobrecomisiones para supervisores
-- Notificaciones por email
-- Reportes detallados
-- Configuración flexible de porcentajes
-
-### 📊 Reportes y Análisis
-- Dashboard interactivo
-- Reportes personalizables
-- Exportación a PDF y Excel
-- Análisis de rendimiento
-- Visualización de jerarquía de agentes
-
-## 🛠️ Tecnologías Utilizadas
-
-- **Backend**: Python 3.8+, Flask 3.0
-- **Base de Datos**: PostgreSQL 13
-- **Frontend**: TailwindCSS, AlpineJS
-- **Contenedores**: Docker, Docker Compose
-- **Cache**: Redis
-- **Servidor Web**: Nginx, Gunicorn
-
-## 📋 Requisitos del Sistema
-
+- Python 3.8+
+- PostgreSQL 13+
+- Node.js 20+
 - Docker y Docker Compose
-- 2GB RAM mínimo
-- 10GB espacio en disco
-- Conexión a Internet
+- Git
 
 ## 🚀 Instalación
 
-1. **Clonar el repositorio**
+### 1. Clonar el Repositorio
 ```bash
 git clone <repositorio>
 cd <directorio>

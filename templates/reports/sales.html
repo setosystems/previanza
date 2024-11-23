@@ -2,142 +2,71 @@
 
 {% block content %}
 <div class="container-fluid">
-    <div class="mb-6">
-        <h1 class="page-title">Reporte de Ventas</h1>
-        <p class="subtitle">Análisis y métricas de ventas</p>
-    </div>
-
-    <!-- Filtros -->
-    <div class="card mb-8">
+    <div class="card">
         <div class="card-header">
-            <h3 class="section-title">Filtros</h3>
+            <h2 class="section-title">Reporte de Ventas</h2>
         </div>
         
         <div class="card-body">
-            <form method="GET" class="space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Filtros -->
+            <form method="GET" class="mb-6">
+                <div class="flex gap-4">
                     <div class="form-group">
-                        <label class="form-label" for="start_date">Fecha Inicio</label>
-                        <input type="date" 
-                               id="start_date" 
-                               name="start_date" 
-                               class="form-input"
-                               value="{{ start_date }}">
+                        <label class="form-label">Fecha Inicio</label>
+                        <input type="date" name="start_date" 
+                               value="{{ start_date }}" 
+                               class="form-input">
                     </div>
-                    
                     <div class="form-group">
-                        <label class="form-label" for="end_date">Fecha Fin</label>
-                        <input type="date" 
-                               id="end_date" 
-                               name="end_date" 
-                               class="form-input"
-                               value="{{ end_date }}">
+                        <label class="form-label">Fecha Fin</label>
+                        <input type="date" name="end_date" 
+                               value="{{ end_date }}" 
+                               class="form-input">
                     </div>
-                </div>
-
-                <div class="flex justify-end">
-                    <button type="submit" class="btn-primary">
-                        <i class="fas fa-filter mr-2"></i>Aplicar Filtros
-                    </button>
+                    <div class="form-group">
+                        <label class="form-label opacity-0">Buscar</label>
+                        <button type="submit" class="btn-primary">
+                            <span class="material-symbols-outlined mr-2">search</span>
+                            Filtrar
+                        </button>
+                    </div>
                 </div>
             </form>
-        </div>
-    </div>
 
-    <!-- Gráfico de Ventas -->
-    <div class="card mb-8">
-        <div class="card-header">
-            <h3 class="section-title flex items-center">
-                <i class="fas fa-chart-line text-primary-600 mr-2"></i>
-                Tendencia de Ventas
-            </h3>
-        </div>
-        <div class="card-body">
-            <div class="h-80">
-                <canvas id="sales-chart"></canvas>
+            <!-- Resumen -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div class="stat-card">
+                    <div class="stat-title">Total Ventas</div>
+                    <div class="stat-value">${{ "{:,.2f}".format(total_sales) }}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Total Pólizas</div>
+                    <div class="stat-value">{{ total_policies }}</div>
+                </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Tabla de Ventas -->
-    <div class="card">
-        <div class="card-header">
-            <h3 class="section-title flex items-center">
-                <i class="fas fa-table text-primary-600 mr-2"></i>
-                Detalle de Ventas
-            </h3>
-        </div>
-        <div class="card-body">
+            <!-- Tabla de Ventas -->
             <div class="table-container">
                 <table class="table">
                     <thead>
                         <tr>
                             <th class="table-header">Fecha</th>
-                            <th class="table-header text-right">Total Ventas</th>
+                            <th class="table-header">Ventas</th>
+                            <th class="table-header">Pólizas</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for sale in sales %}
                         <tr class="table-row">
-                            <td class="table-cell">{{ sale.date.strftime('%Y-%m-%d') }}</td>
-                            <td class="table-cell text-right">${{ "{:,.2f}".format(sale.total_sales) }}</td>
+                            <td class="table-cell">{{ sale.date.strftime('%d/%m/%Y') }}</td>
+                            <td class="table-cell">${{ "{:,.2f}".format(sale.total_sales) }}</td>
+                            <td class="table-cell">{{ sale.policy_count }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
-                    <tfoot class="bg-gray-50">
-                        <tr>
-                            <td class="table-cell font-medium">Total General</td>
-                            <td class="table-cell text-right font-medium">
-                                ${{ "{:,.2f}".format(sales|sum(attribute='total_sales')) }}
-                            </td>
-                        </tr>
-                    </tfoot>
                 </table>
             </div>
         </div>
     </div>
 </div>
-
-{% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const salesData = {
-        labels: {{ sales|map(attribute='date')|map('strftime', '%Y-%m-%d')|list|tojson|safe }},
-        datasets: [{
-            label: 'Ventas Diarias',
-            data: {{ sales|map(attribute='total_sales')|list|tojson|safe }},
-            borderColor: 'rgb(14, 165, 233)',
-            backgroundColor: 'rgba(14, 165, 233, 0.1)',
-            tension: 0.4,
-            fill: true
-        }]
-    };
-
-    new Chart(document.getElementById('sales-chart'), {
-        type: 'line',
-        data: salesData,
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom'
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        callback: function(value) {
-                            return '$' + value.toLocaleString();
-                        }
-                    }
-                }
-            }
-        }
-    });
-});
-</script>
-{% endblock %}
 {% endblock %}

@@ -2,103 +2,198 @@
 
 {% block content %}
 <div class="container-fluid">
-    <div class="mb-6">
-        <h1 class="page-title">Panel de Control</h1>
-        <p class="subtitle">Gestione las configuraciones generales del sistema</p>
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <!-- Configuración de Comisiones -->
-        <div class="card hover:shadow-lg transition-shadow duration-300">
-            <div class="card-body p-6 text-center">
-                <div class="w-16 h-16 bg-primary-50 rounded-full flex-center mx-auto mb-4">
-                    <i class="fas fa-percentage text-primary-600 text-2xl"></i>
-                </div>
-                <h3 class="text-lg font-medium text-gray-900 mb-2">Configuración de Comisiones</h3>
-                <p class="text-gray-600 mb-6">Configure las reglas de comisiones para los agentes.</p>
-                <a href="{{ url_for('config.commission_settings') }}" class="btn-primary w-full">
-                    <i class="fas fa-cog mr-2"></i>Ir a Comisiones
-                </a>
-            </div>
+    <!-- Header Section -->
+    <div class="flex-between mb-6">
+        <div>
+            <h1 class="page-title">Panel de Control</h1>
+            <p class="subtitle">Resumen general del sistema</p>
         </div>
-
-        <!-- Configuración de Notificaciones -->
-        <div class="card hover:shadow-lg transition-shadow duration-300">
-            <div class="card-body p-6 text-center">
-                <div class="w-16 h-16 bg-warning-50 rounded-full flex-center mx-auto mb-4">
-                    <i class="fas fa-bell text-warning-500 text-2xl"></i>
-                </div>
-                <h3 class="text-lg font-medium text-gray-900 mb-2">Configuración de Notificaciones</h3>
-                <p class="text-gray-600 mb-6">Gestione las notificaciones del sistema.</p>
-                <a href="{{ url_for('config.config_index') }}" class="btn-primary w-full">
-                    <i class="fas fa-cog mr-2"></i>Ir a Notificaciones
-                </a>
-            </div>
-        </div>
-
-        <!-- Gestión de Roles de Usuario -->
-        <div class="card hover:shadow-lg transition-shadow duration-300">
-            <div class="card-body p-6 text-center">
-                <div class="w-16 h-16 bg-success-50 rounded-full flex-center mx-auto mb-4">
-                    <i class="fas fa-users-cog text-success-500 text-2xl"></i>
-                </div>
-                <h3 class="text-lg font-medium text-gray-900 mb-2">Gestión de Roles</h3>
-                <p class="text-gray-600 mb-6">Administre los roles y permisos de los usuarios.</p>
-                <a href="{{ url_for('config.config_index') }}" class="btn-primary w-full">
-                    <i class="fas fa-cog mr-2"></i>Ir a Roles
-                </a>
-            </div>
-        </div>
-
-        <!-- Configuración SMTP -->
-        <div class="card hover:shadow-lg transition-shadow duration-300">
-            <div class="card-body p-6 text-center">
-                <div class="w-16 h-16 bg-secondary-100 rounded-full flex-center mx-auto mb-4">
-                    <i class="fas fa-envelope-open-text text-secondary-600 text-2xl"></i>
-                </div>
-                <h3 class="text-lg font-medium text-gray-900 mb-2">Configuración SMTP</h3>
-                <p class="text-gray-600 mb-6">Configure los ajustes del servidor de correo saliente.</p>
-                <a href="{{ url_for('config.smtp_config') }}" class="btn-primary w-full">
-                    <i class="fas fa-cog mr-2"></i>Ir a SMTP
-                </a>
-            </div>
+        <div class="flex space-x-4">
+            <button class="btn-secondary">
+                <i class="fas fa-download mr-2"></i>
+                Exportar Datos
+            </button>
+            <button class="btn-primary">
+                <i class="fas fa-sync-alt mr-2"></i>
+                Actualizar
+            </button>
         </div>
     </div>
 
-    <!-- Estadísticas Rápidas -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Total Policies Card -->
         <div class="stat-card">
-            <div class="flex items-center">
-                <div class="w-12 h-12 bg-primary-50 rounded-full flex-center mr-3">
-                    <i class="fas fa-users text-primary-500"></i>
-                </div>
+            <div class="flex-between">
                 <div>
-                    <p class="stat-title">Usuarios Activos</p>
-                    <p class="stat-value">{{ stats.active_users if stats else 0 }}</p>
+                    <p class="stat-title">Total Pólizas</p>
+                    <p class="stat-value">{{ total_policies }}</p>
+                    <p class="stat-desc">
+                        {% if policy_growth > 0 %}
+                        <span class="text-success-500">
+                            <i class="fas fa-arrow-up"></i> {{ "%.1f"|format(policy_growth) }}%
+                        </span>
+                        {% else %}
+                        <span class="text-danger-500">
+                            <i class="fas fa-arrow-down"></i> {{ "%.1f"|format(policy_growth|abs) }}%
+                        </span>
+                        {% endif %}
+                        vs mes anterior
+                    </p>
+                </div>
+                <div class="w-12 h-12 bg-primary-100 rounded-full flex-center">
+                    <i class="fas fa-file-contract text-primary-600 text-xl"></i>
                 </div>
             </div>
         </div>
 
+        <!-- Total Premium Card -->
         <div class="stat-card">
-            <div class="flex items-center">
-                <div class="w-12 h-12 bg-success-50 rounded-full flex-center mr-3">
-                    <i class="fas fa-file-contract text-success-500"></i>
-                </div>
+            <div class="flex-between">
                 <div>
-                    <p class="stat-title">Pólizas Activas</p>
-                    <p class="stat-value">{{ stats.active_policies if stats else 0 }}</p>
+                    <p class="stat-title">Prima Total</p>
+                    <p class="stat-value">${{ "{:,.2f}".format(total_premium) }}</p>
+                    <p class="stat-desc">Acumulado del período</p>
+                </div>
+                <div class="w-12 h-12 bg-success-50 rounded-full flex-center">
+                    <i class="fas fa-dollar-sign text-success-500 text-xl"></i>
                 </div>
             </div>
         </div>
 
+        <!-- Active Clients Card -->
         <div class="stat-card">
-            <div class="flex items-center">
-                <div class="w-12 h-12 bg-warning-50 rounded-full flex-center mr-3">
-                    <i class="fas fa-clock text-warning-500"></i>
-                </div>
+            <div class="flex-between">
                 <div>
-                    <p class="stat-title">Pendientes de Revisión</p>
-                    <p class="stat-value">{{ stats.pending_reviews if stats else 0 }}</p>
+                    <p class="stat-title">Clientes Activos</p>
+                    <p class="stat-value">{{ active_clients }}</p>
+                    <p class="stat-desc">
+                        <span class="text-success-500">+{{ new_clients }}</span> nuevos este mes
+                    </p>
+                </div>
+                <div class="w-12 h-12 bg-warning-50 rounded-full flex-center">
+                    <i class="fas fa-users text-warning-500 text-xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Commissions Card -->
+        <div class="stat-card">
+            <div class="flex-between">
+                <div>
+                    <p class="stat-title">Comisiones Totales</p>
+                    <p class="stat-value">${{ "{:,.2f}".format(total_commissions) }}</p>
+                    <p class="stat-desc">Período actual</p>
+                </div>
+                <div class="w-12 h-12 bg-secondary-100 rounded-full flex-center">
+                    <i class="fas fa-percentage text-secondary-600 text-xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <!-- Sales Chart -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="section-title">Ventas Diarias</h3>
+            </div>
+            <div class="card-body">
+                <canvas id="salesChart" class="w-full h-64"></canvas>
+            </div>
+        </div>
+
+        <!-- Activity Chart -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="section-title">Actividad Semanal</h3>
+            </div>
+            <div class="card-body">
+                <canvas id="activityChart" class="w-full h-64"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Products Performance -->
+    <div class="card mb-8">
+        <div class="card-header">
+            <h3 class="section-title">Rendimiento de Productos</h3>
+        </div>
+        <div class="card-body">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for product in products_performance %}
+                <div class="flex items-start space-x-4">
+                    {% if product.image_url %}
+                    <img src="{{ url_for('static', filename=product.image_url) }}" 
+                         alt="{{ product.name }}" 
+                         class="w-16 h-16 object-cover rounded-lg">
+                    {% else %}
+                    <div class="w-16 h-16 bg-gray-100 rounded-lg flex-center">
+                        <i class="fas fa-box text-gray-400 text-2xl"></i>
+                    </div>
+                    {% endif %}
+                    <div>
+                        <h4 class="font-medium text-gray-900">{{ product.name }}</h4>
+                        <p class="text-sm text-gray-500">{{ product.policy_count }} pólizas</p>
+                        <p class="text-sm font-medium text-primary-600">
+                            ${{ "{:,.2f}".format(product.total_premium or 0) }}
+                        </p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Performers -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Top Clients -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="section-title">Top Clientes</h3>
+            </div>
+            <div class="card-body">
+                <div class="space-y-4">
+                    {% for client in top_clients %}
+                    <div class="flex-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 bg-primary-100 rounded-full flex-center">
+                                <span class="text-primary-600 font-medium">{{ loop.index }}</span>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900">{{ client.name }}</p>
+                                <p class="text-sm text-gray-500">{{ client.policy_count }} pólizas</p>
+                            </div>
+                        </div>
+                        <p class="font-medium text-primary-600">${{ "{:,.2f}".format(client.total_premium) }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Agents -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="section-title">Top Agentes</h3>
+            </div>
+            <div class="card-body">
+                <div class="space-y-4">
+                    {% for agent in top_agents %}
+                    <div class="flex-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 bg-secondary-100 rounded-full flex-center">
+                                <span class="text-secondary-600 font-medium">{{ loop.index }}</span>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900">{{ agent.name }}</p>
+                                <p class="text-sm text-gray-500">{{ agent.policy_count }} pólizas</p>
+                            </div>
+                        </div>
+                        <p class="font-medium text-secondary-600">${{ "{:,.2f}".format(agent.total_premium) }}</p>
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>
@@ -106,19 +201,48 @@
 </div>
 
 {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Añadir efecto hover a las tarjetas
-    const cards = document.querySelectorAll('.card');
-    cards.forEach(card => {
-        card.addEventListener('mouseenter', function() {
-            this.classList.add('transform', 'scale-105');
-        });
-        card.addEventListener('mouseleave', function() {
-            this.classList.remove('transform', 'scale-105');
-        });
+    // Configuración de gráficos
+    const salesData = {{ daily_sales|tojson }};
+    const activityData = {{ weekly_activity|tojson }};
+
+    // Gráfico de Ventas
+    new Chart(document.getElementById('salesChart'), {
+        type: 'line',
+        data: {
+            labels: salesData.dates,
+            datasets: [{
+                label: 'Ventas Diarias',
+                data: salesData.totals,
+                borderColor: '#0284c7',
+                backgroundColor: '#0284c720',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
     });
-});
+
+    // Gráfico de Actividad
+    new Chart(document.getElementById('activityChart'), {
+        type: 'bar',
+        data: {
+            labels: Object.keys(activityData),
+            datasets: [{
+                label: 'Pólizas Emitidas',
+                data: Object.values(activityData),
+                backgroundColor: '#0284c7'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
 </script>
 {% endblock %}
 {% endblock %}
