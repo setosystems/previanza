@@ -4,7 +4,6 @@ __pycache__/
 *$py.class
 *.so
 .Python
-env/
 build/
 develop-eggs/
 dist/
@@ -42,17 +41,22 @@ Thumbs.db
 # Application specific
 static/uploads/*
 static/img/products/*
+static/samples/*
 !static/uploads/.gitkeep
 !static/img/products/.gitkeep
+!static/samples/.gitkeep
 reports/*
 !reports/.gitkeep
 logs/*
 !logs/.gitkeep
+migrations/*
+!migrations/.gitkeep
 
 # Database
 *.sqlite3
 *.db
 *.sql
+postgres_data/
 
 # Logs
 *.log
@@ -63,6 +67,7 @@ yarn-error.log*
 # Docker
 .docker/
 docker-compose.override.yml
+docker-compose.prod.yml
 
 # Node
 node_modules/
@@ -84,6 +89,7 @@ tmp/
 *.bak
 *.backup
 *~
+*.dump
 
 # System files
 .directory
@@ -99,30 +105,6 @@ Desktop.ini
 *.der
 *.priv
 
-# Compiled Python files
-*.pyc
-*.pyo
-*.pyd
-
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
-
 # Flask stuff
 instance/
 .webassets-cache
@@ -132,3 +114,13 @@ instance/
 .coverage.*
 coverage.xml
 *.cover
+
+# Redis
+*.rdb
+redis_data/
+
+# Excel and CSV files
+*.xlsx
+*.xls
+*.csv
+!requirements.txt

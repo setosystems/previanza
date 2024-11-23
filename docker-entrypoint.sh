@@ -17,7 +17,7 @@ done
 
 echo "Redis listo"
 
-# Crear directorios necesarios si no existen y establecer permisos
+# Crear directorios necesarios
 mkdir -p /app/static/uploads
 mkdir -p /app/static/img/products
 mkdir -p /app/static/samples
@@ -29,37 +29,31 @@ chown -R root:root /app/static
 chmod -R 777 /app/static
 chmod -R +t /app/static
 
-# Copiar env.py si no existe
-if [ ! -f "migrations/env.py" ]; then
-    echo "Copiando env.py..."
-    cp /app/migrations/env.py migrations/env.py
-fi
-
-# Inicializar las migraciones dentro del contexto de la aplicación
+# Inicializar la base de datos
+export FLASK_APP=app.py
 python -c "
 from app import create_app
 app = create_app()
 with app.app_context():
-    from flask_migrate import init, migrate, upgrade
     from models import db
     db.create_all()
-    try:
-        init()
-    except:
-        pass
-    migrate()
-    upgrade()
 "
 
+# Inicializar migraciones si no existen
+if [ ! -d "migrations/versions" ]; then
+    flask db init
+    flask db migrate
+    flask db upgrade
+fi
+
 # Crear usuario admin si no existe
-export FLASK_APP=app.py
-flask create-admin admin admin@example.com password123
+flask create-admin admin admin@example.com password123 || true
 
 # Generar archivos de ejemplo
-python crea_excel.py
+python crea_excel.py || true
 
 # Actualizar imágenes de productos
-python update_product_images.py
+python update_product_images.py || true
 
 # Iniciar la aplicación
-exec "$@" 
+exec "$@"

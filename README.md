@@ -24,18 +24,18 @@ Sistema web profesional para la gestión integral de seguros, desarrollado con F
 ```bash
 git clone <repositorio>
 cd <directorio>
+```
 
+### 2. Configurar el Entorno
+```bash
 # Crear archivo .env
 cp .env.example .env
 
-# Crear directorios necesarios y establecer permisos
-sudo mkdir -p static/img/products static/uploads
-sudo chown -R $USER:$USER static/
-sudo chmod -R 777 static/
-sudo chmod -R +t static/
+# Editar variables de entorno según necesidad
+nano .env
 ```
 
-2. **Iniciar con Docker**
+### 3. Iniciar con Docker
 ```bash
 # Construir e iniciar contenedores
 docker-compose up --build -d
@@ -44,16 +44,53 @@ docker-compose up --build -d
 docker-compose logs -f
 ```
 
-3. **Acceso**
-- Aplicación web: http://localhost
-- Base de datos: localhost:5433
-- Redis: localhost:6379
+### 4. Verificar Servicios
+- **Aplicación web**: http://localhost
+- **Base de datos**: localhost:5432
+- **Redis**: localhost:6379
 
-4. **Credenciales por defecto**
+### 5. Credenciales por Defecto
 ```
 Usuario: admin
 Email: admin@example.com
 Contraseña: password123
+```
+
+### 6. Estructura de Directorios
+El sistema creará automáticamente los siguientes directorios:
+```
+proyecto/
+├── static/
+│   ├── uploads/        # Archivos subidos
+│   ├── img/products/   # Imágenes de productos
+│   └── samples/        # Archivos de muestra
+├── reports/           # Reportes generados
+└── migrations/        # Migraciones de base de datos
+```
+
+### 7. Verificación
+```bash
+# Verificar el estado de los contenedores
+docker-compose ps
+
+# Verificar logs específicos
+docker-compose logs web
+docker-compose logs db
+docker-compose logs nginx
+```
+
+### 8. Solución de Problemas
+Si encuentras problemas durante la instalación:
+
+```bash
+# Detener y eliminar todos los contenedores y volúmenes
+docker-compose down -v
+
+# Limpiar sistema
+docker system prune -a
+
+# Reconstruir desde cero
+docker-compose up --build -d
 ```
 
 ## 🛠️ Estructura del Proyecto Dockerizado
@@ -148,7 +185,7 @@ sistema-seguros/
 ## 🔐 Seguridad
 
 - Autenticación basada en sesiones
-- Protección CSRF
+- Protección CSRFd
 - Validación de datos
 - Encriptación de contraseñas
 - Control de acceso por roles
