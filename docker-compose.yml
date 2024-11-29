@@ -53,7 +53,7 @@ services:
     user: "root"
 
   db:
-    image: postgres:latest
+    image: postgres:17
     hostname: db
     environment:
       - POSTGRES_USER=admin

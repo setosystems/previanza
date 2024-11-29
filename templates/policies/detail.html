@@ -201,7 +201,7 @@ document.addEventListener('DOMContentLoaded', function() {
         recalculateBtn.addEventListener('click', function() {
             const policyId = this.dataset.policyId;
             if (confirm('¿Está seguro de que desea recalcular las comisiones?')) {
-                window.location.href = "{{ url_for('policies.recalculate_commission', id='') }}" + policyId;
+                window.location.href = "{{ url_for('policies.recalculate_commission', id=0) }}".replace('/0', '/' + policyId);
             }
         });
     }
