@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container-fluid">
+<div class="container-fluid h-full flex flex-col">
     <div class="mb-6">
         <h1 class="page-title">Reporte de Comisiones</h1>
         <p class="subtitle">Gestione y visualice las comisiones de los agentes</p>
@@ -66,7 +66,7 @@
     </div>
 
     <!-- Tabla de Resultados -->
-    <div class="card">
+    <div class="card flex-1 overflow-auto">
         <div class="card-header">
             <h3 class="section-title">Resultados</h3>
         </div>
@@ -86,19 +86,21 @@
                             <td class="table-cell">{{ result.agent_name }}</td>
                             <td class="table-cell text-right">${{ "{:,.2f}".format(result.total_commission) }}</td>
                             <td class="table-cell">
-                                <div class="flex justify-center space-x-3">
+                                <div class="flex items-center space-x-4">
                                     <a href="{{ url_for('reports.agent_commission_details', agent_id=result.agent_id|int) }}"
-                                       class="text-primary-600 hover:text-primary-900"
+                                       class="btn-icon text-blue-600 hover:text-blue-800"
                                        title="Ver Detalles">
-                                        <i class="fas fa-search-dollar"></i>
+                                        <span class="material-symbols-outlined">visibility</span>
+                                        <span class="sr-only">Ver detalles</span>
                                     </a>
                                     <form action="{{ url_for('reports.generate_commission_report', agent_id=result.agent_id|int) }}" 
                                           method="POST" 
                                           class="inline">
                                         <button type="submit" 
-                                                class="text-success-600 hover:text-success-900"
+                                                class="btn-icon text-green-600 hover:text-green-800"
                                                 title="Generar Reporte">
-                                            <i class="fas fa-file-invoice"></i>
+                                            <span class="material-symbols-outlined">description</span>
+                                            <span class="sr-only">Generar reporte</span>
                                         </button>
                                     </form>
                                 </div>
