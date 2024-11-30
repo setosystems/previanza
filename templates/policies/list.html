@@ -1,21 +1,16 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container-fluid">
+<div class="container-fluid h-full flex flex-col">
     <div class="card">
         <div class="card-header">
             <div class="flex justify-between items-center">
                 <h2 class="section-title">Búsqueda de Pólizas</h2>
-                {% if current_user.role != UserRole.AGENTE %}
                 <div class="flex space-x-4">
                     <a href="{{ url_for('policies.create_policy') }}" class="btn-primary">
                         <span class="material-symbols-outlined mr-2">add</span>Nueva Póliza
                     </a>
-                    <a href="{{ url_for('policies.bulk_upload_policies') }}" class="btn-secondary">
-                        <span class="material-symbols-outlined mr-2">upload_file</span>Carga Masiva
-                    </a>
                 </div>
-                {% endif %}
             </div>
         </div>
         
@@ -51,7 +46,7 @@
         </div>
     </div>
 
-    <div class="section">
+    <div class="section flex-1 overflow-auto">
         <div class="table-container">
             <table class="table">
                 <thead class="bg-gray-50">
