@@ -203,24 +203,21 @@ def create_app():
     def create_admin(username, email, password):
         """Crea un usuario administrador."""
         with app.app_context():
-            if User.query.filter_by(username=username).first():
-                print("El nombre de usuario ya existe.")
-                return
-            if User.query.filter_by(email=email).first():
-                print("El correo electrónico ya está en uso.")
-                return
-            
-            admin_user = User(
-                username=username,
-                email=email,
-                role=UserRole.ADMIN,
-                document_type=DocumentType.DNI,
-                document_number="12345678"
-            )
-            admin_user.set_password(password)
-            db.session.add(admin_user)
-            db.session.commit()
-            print(f"Usuario administrador '{username}' creado.")
+            admin_user = User.query.filter_by(username=username).first()
+            if admin_user is None:
+                admin_user = User(
+                    username=username,
+                    email=email,
+                    role=UserRole.ADMIN,
+                    document_type=DocumentType.DNI,
+                    document_number="12345678"
+                )
+                admin_user.set_password(password)
+                db.session.add(admin_user)
+                db.session.commit()
+                print(f"Usuario administrador '{username}' creado.")
+            else:
+                return 0  # Silenciosamente indica éxito si el usuario ya existe
 
     @app.route('/static/<path:filename>')
     def static_files(filename):
@@ -230,13 +227,16 @@ def create_app():
 
 app = create_app()
 
-# Crear todas las tablas solo si no existen
-with app.app_context():
-    try:
-        db.create_all()
-        logging.info("Base de datos verificada exitosamente")
-    except Exception as e:
-        logging.error(f"Error al verificar la base de datos: {str(e)}")
+def verify_database():
+    """Verifica y crea las tablas de la base de datos si no existen."""
+    if os.environ.get('FLASK_APP_WORKER_ID') == '1':  # Solo el primer worker
+        with app.app_context():
+            try:
+                db.create_all()
+                if os.environ.get('FLASK_DEBUG') == '1':
+                    logging.info("Base de datos verificada exitosamente")
+            except Exception as e:
+                logging.error(f"Error al verificar la base de datos: {str(e)}")
 
 if not app.debug:
     # Compilar Tailwind CSS
@@ -248,8 +248,12 @@ if not app.debug:
         'static/css/input.css', 
         '-o', 
         'static/css/output.css', 
-        '--minify'
-    ])
+        '--minify',
+        '--quiet'
+    ], capture_output=True)
+
+# Verificar la base de datos al inicio
+verify_database()
 
 if __name__ == '__main__':
     logger.info("Starting Flask application")

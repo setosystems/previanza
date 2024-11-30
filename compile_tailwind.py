@@ -1,5 +1,6 @@
 import subprocess
 import os
+import logging
 
 def compile_tailwind():
     try:
@@ -11,13 +12,15 @@ def compile_tailwind():
             'tailwindcss',
             '-i', 'static/css/input.css',
             '-o', 'static/css/output.css',
-            '--minify'
-        ], check=True)
-        print("Tailwind CSS compilado exitosamente")
+            '--minify',
+            '--quiet'
+        ], check=True, capture_output=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        if os.environ.get('FLASK_DEBUG') == '1':
+            logging.info("Tailwind CSS compilado exitosamente")
     except subprocess.CalledProcessError as e:
-        print(f"Error al compilar Tailwind CSS: {e}")
+        logging.error(f"Error al compilar Tailwind CSS: {e}")
     except Exception as e:
-        print(f"Error inesperado: {e}")
+        logging.error(f"Error inesperado: {e}")
 
 if __name__ == "__main__":
     compile_tailwind() 

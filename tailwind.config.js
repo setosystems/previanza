@@ -3,6 +3,7 @@ module.exports = {
     "./templates/**/*.html",
     "./static/**/*.js"
   ],
+  logLevel: 'silent',
   theme: {
     extend: {
       colors: {

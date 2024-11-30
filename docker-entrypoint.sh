@@ -32,11 +32,9 @@ chmod -R +t /app/static
 # Inicializar la base de datos
 export FLASK_APP=app.py
 python -c "
-from app import create_app
+from app import create_app, verify_database
 app = create_app()
-with app.app_context():
-    from models import db
-    db.create_all()
+verify_database()
 "
 
 # Inicializar migraciones si no existen
@@ -47,7 +45,7 @@ if [ ! -d "migrations/versions" ]; then
 fi
 
 # Crear usuario admin si no existe
-flask create-admin admin admin@example.com password123 || true
+flask create-admin admin admin@example.com password123 > /dev/null 2>&1 || true
 
 # Generar archivos de ejemplo
 python crea_excel.py || true

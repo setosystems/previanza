@@ -52,6 +52,7 @@ RUN npx tailwindcss -i static/css/input.css -o static/css/output.css --minify
 
 # Copiar el resto del código
 COPY . .
+COPY gunicorn_config.py /app/gunicorn_config.py
 
 # Asegurarse de que los archivos CSS existan y tengan los permisos correctos
 RUN touch static/css/output.css && \

@@ -30,7 +30,7 @@
             <li>
                 <a href="{{ url_for('index') }}" 
                    class="flex items-center px-3 py-2.5 text-gray-100 hover:bg-primary-600/50 
-                          {{ 'bg-primary-600 text-white' if request.endpoint == 'index' else '' }}
+                          {{ 'bg-primary-600 text-white' if request.endpoint and request.endpoint == 'index' else '' }}
                           rounded-xl transition-all duration-300 group">
                     <div class="w-6 text-center flex-shrink-0">
                         <i class="uil uil-estate text-primary-300 group-hover:text-white transition-colors"></i>
@@ -46,7 +46,7 @@
             <li>
                 <a href="{{ url_for('clients.list_clients') }}" 
                    class="flex items-center px-3 py-2.5 text-gray-100 hover:bg-primary-600/50 
-                          {{ 'bg-primary-600 text-white' if request.endpoint.startswith('clients.') else '' }}
+                          {{ 'bg-primary-600 text-white' if request.endpoint and request.endpoint.startswith('clients.') else '' }}
                           rounded-xl transition-all duration-300 group">
                     <div class="w-6 text-center flex-shrink-0">
                         <i class="uil uil-users-alt text-primary-300 group-hover:text-white transition-colors"></i>
@@ -64,7 +64,7 @@
                     <li>
                         <a href="{{ url_for('policies.list_policies') }}" 
                            class="flex items-center px-3 py-2.5 text-gray-100 hover:bg-primary-600/50 
-                                  {{ 'bg-primary-600 text-white' if request.endpoint.startswith('policies.') else '' }}
+                                  {{ 'bg-primary-600 text-white' if request.endpoint and request.endpoint.startswith('policies.') else '' }}
                                   rounded-xl transition-all duration-300 group">
                             <div class="w-6 text-center flex-shrink-0">
                                 <i class="uil uil-file-alt text-primary-300 group-hover:text-white transition-colors"></i>
@@ -78,7 +78,7 @@
                     <li>
                         <a href="{{ url_for('products.list_products') }}" 
                            class="flex items-center px-3 py-2.5 text-gray-100 hover:bg-primary-600/50 
-                                  {{ 'bg-primary-600 text-white' if request.endpoint.startswith('products.') else '' }}
+                                  {{ 'bg-primary-600 text-white' if request.endpoint and request.endpoint.startswith('products.') else '' }}
                                   rounded-xl transition-all duration-300 group">
                             <div class="w-6 text-center flex-shrink-0">
                                 <i class="uil uil-box text-primary-300 group-hover:text-white transition-colors"></i>
@@ -94,7 +94,7 @@
                     <li>
                         <a href="{{ url_for('agents.list_agents') }}" 
                            class="flex items-center px-3 py-2.5 text-gray-100 hover:bg-primary-600/50 
-                                  {{ 'bg-primary-600 text-white' if request.endpoint.startswith('agents.') else '' }}
+                                  {{ 'bg-primary-600 text-white' if request.endpoint and request.endpoint.startswith('agents.') else '' }}
                                   rounded-xl transition-all duration-300 group">
                             <div class="w-6 text-center flex-shrink-0">
                                 <i class="uil uil-user-md text-primary-300 group-hover:text-white transition-colors"></i>
@@ -108,7 +108,7 @@
                     <li>
                         <a href="{{ url_for('auth.list_users') }}" 
                            class="flex items-center px-3 py-2.5 text-gray-100 hover:bg-primary-600/50 
-                                  {{ 'bg-primary-600 text-white' if request.endpoint.startswith('auth.') else '' }}
+                                  {{ 'bg-primary-600 text-white' if request.endpoint and request.endpoint.startswith('auth.') else '' }}
                                   rounded-xl transition-all duration-300 group">
                             <div class="w-6 text-center flex-shrink-0">
                                 <i class="uil uil-users-alt text-primary-300 group-hover:text-white transition-colors"></i>
@@ -122,7 +122,7 @@
                     <li>
                         <a href="{{ url_for('config.config_index') }}" 
                            class="flex items-center px-3 py-2.5 text-gray-100 hover:bg-primary-600/50 
-                                  {{ 'bg-primary-600 text-white' if request.endpoint.startswith('config.') else '' }}
+                                  {{ 'bg-primary-600 text-white' if request.endpoint and request.endpoint.startswith('config.') else '' }}
                                   rounded-xl transition-all duration-300 group">
                             <div class="w-6 text-center flex-shrink-0">
                                 <i class="uil uil-setting text-primary-300 group-hover:text-white transition-colors"></i>
@@ -142,7 +142,7 @@
                             data-menu="informes"
                             @click="open = !open"
                             class="w-full flex items-center justify-between px-3 py-2.5 text-gray-100 hover:bg-primary-600/50 
-                                   {{ 'bg-primary-600 text-white' if request.endpoint.startswith('reports.') else '' }}
+                                   {{ 'bg-primary-600 text-white' if request.endpoint and request.endpoint.startswith('reports.') else '' }}
                                    rounded-xl transition-all duration-300 group"
                             :aria-expanded="open">
                         <div class="flex items-center">

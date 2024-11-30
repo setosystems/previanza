@@ -37,6 +37,7 @@ services:
         target: /app/static/img/products
         volume:
           nocopy: true
+      - ./gunicorn_config.py:/app/gunicorn_config.py
     depends_on:
       db:
         condition: service_healthy
@@ -51,6 +52,12 @@ services:
       timeout: 10s
       retries: 3
     user: "root"
+    command: >
+      gunicorn
+      --bind 0.0.0.0:5000
+      --workers 4
+      --config /app/gunicorn_config.py
+      wsgi:application
 
   db:
     image: postgres:17
