@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container-fluid h-full flex flex-col">
-    <div class="card">
-        <div class="card-header">
+<div class="container mx-auto">
+    <div class="bg-white shadow-sm">
+        <div class="px-4 py-4 border-b border-gray-200">
             <div class="flex justify-between items-center">
-                <h2 class="section-title">Búsqueda de Clientes</h2>
+                <h2 class="section-title">Lista de Clientes</h2>
                 <div class="flex space-x-4">
                     <a href="{{ url_for('clients.create_client') }}" class="btn-primary">
                         <span class="material-symbols-outlined mr-2">person_add</span>Nuevo Cliente
@@ -16,156 +16,413 @@
                 </div>
             </div>
         </div>
-        
-        <div class="card-body">
-            <form method="GET">
-                <div class="flex gap-4">
-                    <div class="form-group flex-1">
-                        <label class="form-label" for="name">Nombre</label>
-                        <input type="text" id="name" name="name" class="form-input" 
-                               value="{{ request.args.get('name', '') }}"
-                               placeholder="Nombre del cliente">
-                    </div>
-                    <div class="form-group flex-1">
-                        <label class="form-label" for="email">Email</label>
-                        <input type="email" id="email" name="email" class="form-input" 
-                               value="{{ request.args.get('email', '') }}"
-                               placeholder="Email del cliente">
-                    </div>
-                    <div class="form-group flex-1">
-                        <label class="form-label" for="document">Documento</label>
-                        <input type="text" id="document" name="document" class="form-input" 
-                               value="{{ request.args.get('document', '') }}"
-                               placeholder="Número de documento">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label opacity-0">Buscar</label>
-                        <button type="submit" class="btn-primary">
-                            <span class="material-symbols-outlined mr-2">search</span>Buscar
-                        </button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
 
-    <div class="section flex-1 overflow-auto">
-        <div class="table-container">
-            <table class="table">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="table-header">Nombre</th>
-                        <th class="table-header">Email</th>
-                        <th class="table-header">Documento</th>
-                        <th class="table-header">Estado</th>
-                        <th class="table-header">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-200">
-                    {% for client in clients %}
-                    <tr class="table-row">
-                        <td class="table-cell">{{ client.name }}</td>
-                        <td class="table-cell">{{ client.email }}</td>
-                        <td class="table-cell">{{ client.document_type.value }} {{ client.document_number }}</td>
-                        <td class="table-cell">
-                            <span class="badge {% if client.is_active %}badge-success{% else %}badge-danger{% endif %}">
-                                {{ "Activo" if client.is_active else "Inactivo" }}
-                            </span>
-                        </td>
-                        <td class="table-cell">
-                            <div class="flex items-center space-x-4">
-                                <a href="{{ url_for('clients.client_detail', id=client.id) }}" 
-                                   class="btn-icon text-blue-600 hover:text-blue-800"
-                                   title="Ver Detalles">
-                                    <span class="material-symbols-outlined">visibility</span>
-                                    <span class="sr-only">Ver detalles</span>
-                                </a>
-                                {% if current_user.role != UserRole.AGENTE %}
-                                <a href="{{ url_for('clients.edit_client', id=client.id) }}" 
-                                   class="btn-icon text-green-600 hover:text-green-800"
-                                   title="Editar Cliente">
-                                    <span class="material-symbols-outlined">edit</span>
-                                    <span class="sr-only">Editar</span>
-                                </a>
-                                {% endif %}
-                                {% if current_user.role == UserRole.ADMIN %}
-                                <button onclick="confirmDelete('{{ client.id }}', '{{ client.name }}')"
-                                        class="btn-icon text-red-600 hover:text-red-800"
-                                        title="Eliminar Cliente">
-                                    <span class="material-symbols-outlined">delete</span>
-                                    <span class="sr-only">Eliminar</span>
-                                </button>
-                                {% endif %}
-                                {% if client.policies %}
-                                <a href="{{ url_for('policies.list_policies', client_id=client.id) }}"
-                                   class="btn-icon text-purple-600 hover:text-purple-800"
-                                   title="Ver Pólizas">
-                                    <span class="material-symbols-outlined">policy</span>
-                                    <span class="sr-only">Ver pólizas</span>
-                                </a>
-                                {% endif %}
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    {% if pagination %}
-    <div class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6 mt-6">
-        <div class="flex flex-1 justify-between sm:hidden">
-            {% if pagination.has_prev %}
-            <a href="{{ url_for('clients.list_clients', page=pagination.prev_num) }}" class="btn-secondary">Anterior</a>
-            {% endif %}
-            {% if pagination.has_next %}
-            <a href="{{ url_for('clients.list_clients', page=pagination.next_num) }}" class="btn-secondary">Siguiente</a>
-            {% endif %}
-        </div>
-        <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-            <div>
-                <p class="text-sm text-gray-700">
-                    Mostrando página <span class="font-medium">{{ pagination.page }}</span> de <span class="font-medium">{{ pagination.pages }}</span>
-                </p>
+        <div class="p-0">
+            <div class="table-container">
+                <table class="table">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="table-header group relative w-1/4">
+                                <div class="flex items-center justify-between" 
+                                     x-data="{ 
+                                         isSearching: {{ 'true' if search_field == 'name' else 'false' }}, 
+                                         searchValue: '{{ search_value if search_field == 'name' else '' }}'
+                                     }">
+                                    <div class="flex items-center cursor-pointer w-full min-h-[2.5rem]">
+                                        <div class="flex-1 relative" @click="isSearching = !isSearching">
+                                            <span x-show="!isSearching" class="flex items-center absolute inset-0">
+                                                <div class="flex items-center w-full">
+                                                    <span class="cursor-pointer" @click.stop="isSearching = !isSearching">Nombre</span>
+                                                    <div class="flex-1 min-w-[20px]"></div>
+                                                    <div class="flex flex-col opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <span class="cursor-pointer text-xs leading-none {{ 'text-primary-600' if sort_field == 'name' and sort_direction == 'asc' else 'text-gray-400' }}"
+                                                              @click.stop="sortClients('name')">▲</span>
+                                                        <span class="cursor-pointer text-xs leading-none {{ 'text-primary-600' if sort_field == 'name' and sort_direction == 'desc' else 'text-gray-400' }}"
+                                                              @click.stop="sortClients('name')">▼</span>
+                                                    </div>
+                                                </div>
+                                            </span>
+                                            <form x-show="isSearching" 
+                                                  x-transition:enter="transition ease-out duration-200"
+                                                  x-transition:enter-start="opacity-0"
+                                                  x-transition:enter-end="opacity-100"
+                                                  x-transition:leave="transition ease-in duration-150"
+                                                  x-transition:leave-start="opacity-100"
+                                                  x-transition:leave-end="opacity-0"
+                                                  @submit.prevent="searchClients(searchValue, 'name')"
+                                                  class="flex items-center w-full absolute inset-0">
+                                                <input type="text"
+                                                       class="form-input w-full"
+                                                       placeholder="Buscar por nombre..."
+                                                       x-model="searchValue"
+                                                       @click.stop
+                                                       @keydown.escape="isSearching = false; searchValue = ''"
+                                                       @keydown.enter.prevent="searchClients(searchValue, 'name')"
+                                                       x-trap="isSearching"
+                                                       x-init="$watch('isSearching', value => { if(value) $nextTick(() => $el.focus()) })">
+                                                <button type="button" 
+                                                        class="text-gray-400 hover:text-gray-600 ml-2"
+                                                        @click.stop="searchValue ? (searchClients(searchValue, 'name')) : null">
+                                                    <span class="material-symbols-outlined text-sm">search</span>
+                                                </button>
+                                                <button type="button" 
+                                                        x-show="isSearching"
+                                                        class="text-gray-400 hover:text-gray-600 ml-2"
+                                                        @click.stop="searchValue = ''; searchClients('', 'name'); isSearching = false">
+                                                    <span class="material-symbols-outlined text-sm">close</span>
+                                                </button>
+                                            </form>
+                                        </div>
+                                        <button x-show="!isSearching"
+                                                @click.stop="isSearching = !isSearching" 
+                                                class="text-gray-400 hover:text-gray-600 ml-2">
+                                            <span class="material-symbols-outlined text-sm">search</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </th>
+                            <th class="table-header group relative w-1/4">
+                                <div class="flex items-center justify-between" 
+                                     x-data="{ 
+                                         isSearching: {{ 'true' if search_field == 'email' else 'false' }}, 
+                                         searchValue: '{{ search_value if search_field == 'email' else '' }}'
+                                     }">
+                                    <div class="flex items-center cursor-pointer w-full min-h-[2.5rem]">
+                                        <div class="flex-1 relative" @click="isSearching = !isSearching">
+                                            <span x-show="!isSearching" 
+                                                  x-transition:enter="transition ease-out duration-200"
+                                                  x-transition:enter-start="opacity-0"
+                                                  x-transition:enter-end="opacity-100"
+                                                  x-transition:leave="transition ease-in duration-150"
+                                                  x-transition:leave-start="opacity-100"
+                                                  x-transition:leave-end="opacity-0"
+                                                  class="flex items-center absolute inset-0">
+                                                Email
+                                                <span class="ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    {% if sort_field == 'email' %}
+                                                        {% if sort_direction == 'asc' %}↑{% else %}↓{% endif %}
+                                                    {% else %}↕{% endif %}
+                                                </span>
+                                            </span>
+                                            <form x-show="isSearching" 
+                                                  x-transition:enter="transition ease-out duration-200"
+                                                  x-transition:enter-start="opacity-0"
+                                                  x-transition:enter-end="opacity-100"
+                                                  x-transition:leave="transition ease-in duration-150"
+                                                  x-transition:leave-start="opacity-100"
+                                                  x-transition:leave-end="opacity-0"
+                                                  @submit.prevent="searchClients(searchValue, 'email')"
+                                                  class="flex items-center w-full absolute inset-0">
+                                                <input type="text"
+                                                       class="form-input w-full"
+                                                       placeholder="Buscar por email..."
+                                                       x-model="searchValue"
+                                                       @click.stop
+                                                       @keydown.escape="isSearching = false; searchValue = ''"
+                                                       @keydown.enter.prevent="searchClients(searchValue, 'email')"
+                                                       x-trap="isSearching"
+                                                       x-init="$watch('isSearching', value => { if(value) $nextTick(() => $el.focus()) })">
+                                                <button type="button" 
+                                                        class="text-gray-400 hover:text-gray-600 ml-2"
+                                                        @click.stop="searchValue ? (searchClients(searchValue, 'email')) : null">
+                                                    <span class="material-symbols-outlined text-sm">search</span>
+                                                </button>
+                                                <button type="button" 
+                                                        x-show="isSearching"
+                                                        class="text-gray-400 hover:text-gray-600 ml-2"
+                                                        @click.stop="searchValue = ''; searchClients('', 'email'); isSearching = false">
+                                                    <span class="material-symbols-outlined text-sm">close</span>
+                                                </button>
+                                            </form>
+                                        </div>
+                                        <button x-show="!isSearching"
+                                                @click.stop="isSearching = !isSearching" 
+                                                class="text-gray-400 hover:text-gray-600 ml-2">
+                                            <span class="material-symbols-outlined text-sm">search</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </th>
+                            <th class="table-header group relative w-1/3">
+                                <div class="flex items-center justify-between" 
+                                     x-data="{ 
+                                         isSearching: {{ 'true' if search_field == 'document' else 'false' }}, 
+                                         searchValue: '{{ search_value if search_field == 'document' else '' }}'
+                                     }">
+                                    <div class="flex items-center cursor-pointer w-full min-h-[2.5rem]">
+                                        <div class="flex-1 relative" @click="isSearching = !isSearching">
+                                            <span x-show="!isSearching" 
+                                                  x-transition:enter="transition ease-out duration-200"
+                                                  x-transition:enter-start="opacity-0"
+                                                  x-transition:enter-end="opacity-100"
+                                                  x-transition:leave="transition ease-in duration-150"
+                                                  x-transition:leave-start="opacity-100"
+                                                  x-transition:leave-end="opacity-0"
+                                                  class="flex items-center absolute inset-0">
+                                                Documento
+                                                <span class="ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    {% if sort_field == 'document' %}
+                                                        {% if sort_direction == 'asc' %}↑{% else %}↓{% endif %}
+                                                    {% else %}↕{% endif %}
+                                                </span>
+                                            </span>
+                                            <form x-show="isSearching" 
+                                                  x-transition:enter="transition ease-out duration-200"
+                                                  x-transition:enter-start="opacity-0"
+                                                  x-transition:enter-end="opacity-100"
+                                                  x-transition:leave="transition ease-in duration-150"
+                                                  x-transition:leave-start="opacity-100"
+                                                  x-transition:leave-end="opacity-0"
+                                                  @submit.prevent="searchClients(searchValue, 'document')"
+                                                  class="flex items-center w-full absolute inset-0">
+                                                <input type="text"
+                                                       class="form-input w-full"
+                                                       placeholder="Buscar por documento..."
+                                                       x-model="searchValue"
+                                                       @click.stop
+                                                       @keydown.escape="isSearching = false; searchValue = ''"
+                                                       @keydown.enter.prevent="searchClients(searchValue, 'document')"
+                                                       x-trap="isSearching"
+                                                       x-init="$watch('isSearching', value => { if(value) $nextTick(() => $el.focus()) })">
+                                                <button type="button" 
+                                                        class="text-gray-400 hover:text-gray-600 ml-2"
+                                                        @click.stop="searchValue ? (searchClients(searchValue, 'document')) : null">
+                                                    <span class="material-symbols-outlined text-sm">search</span>
+                                                </button>
+                                                <button type="button" 
+                                                        x-show="isSearching"
+                                                        class="text-gray-400 hover:text-gray-600 ml-2"
+                                                        @click.stop="searchValue = ''; searchClients('', 'document'); isSearching = false">
+                                                    <span class="material-symbols-outlined text-sm">close</span>
+                                                </button>
+                                            </form>
+                                        </div>
+                                        <button x-show="!isSearching"
+                                                @click.stop="isSearching = !isSearching" 
+                                                class="text-gray-400 hover:text-gray-600 ml-2">
+                                            <span class="material-symbols-outlined text-sm">search</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </th>
+                            <th class="table-header w-24">Estado</th>
+                            <th class="table-header w-32">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200" id="clientsTableBody" x-ref="tableBody" x-data="{ 
+                        sortField: '{{ sort_field }}',
+                        sortDirection: '{{ sort_direction }}',
+                        async sort(field) {
+                            const url = new URL(window.location);
+                            
+                            // Mantener parámetros de búsqueda
+                            const searchField = url.searchParams.get('search_field');
+                            const searchValue = url.searchParams.get('search_value');
+                            if (searchField && searchValue) {
+                                url.searchParams.set('search_field', searchField);
+                                url.searchParams.set('search_value', searchValue);
+                            }
+                            
+                            // Actualizar ordenamiento
+                            if (this.sortField === field) {
+                                this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+                            } else {
+                                this.sortField = field;
+                                this.sortDirection = 'asc';
+                            }
+                            
+                            url.searchParams.set('sort_field', this.sortField);
+                            url.searchParams.set('sort_direction', this.sortDirection);
+                            
+                            try {
+                                const response = await fetch(url);
+                                const html = await response.text();
+                                const parser = new DOMParser();
+                                const doc = parser.parseFromString(html, 'text/html');
+                                const newTableBody = doc.querySelector('#clientsTableBody');
+                                this.$refs.tableBody.innerHTML = newTableBody.innerHTML;
+                                
+                                // Actualizar URL sin recargar
+                                window.history.pushState({}, '', url);
+                            } catch (error) {
+                                console.error('Error:', error);
+                            }
+                        }
+                    }">
+                        {% for client in clients %}
+                        <tr class="table-row">
+                            <td class="table-cell w-1/4">{{ client.name }}</td>
+                            <td class="table-cell w-1/4">{{ client.email }}</td>
+                            <td class="table-cell w-1/3">{{ client.document_type.value }} {{ client.document_number }}</td>
+                            <td class="table-cell w-24">
+                                <span class="badge {% if client.is_active %}badge-success{% else %}badge-danger{% endif %}">
+                                    {{ "Activo" if client.is_active else "Inactivo" }}
+                                </span>
+                            </td>
+                            <td class="table-cell w-32">
+                                <div class="flex items-center space-x-4">
+                                    <a href="{{ url_for('clients.client_detail', id=client.id) }}" 
+                                       class="btn-icon text-blue-600 hover:text-blue-800"
+                                       title="Ver Detalles">
+                                        <span class="material-symbols-outlined">visibility</span>
+                                        <span class="sr-only">Ver detalles</span>
+                                    </a>
+                                    {% if current_user.role != UserRole.AGENTE %}
+                                    <a href="{{ url_for('clients.edit_client', id=client.id) }}" 
+                                       class="btn-icon text-green-600 hover:text-green-800"
+                                       title="Editar Cliente">
+                                        <span class="material-symbols-outlined">edit</span>
+                                        <span class="sr-only">Editar</span>
+                                    </a>
+                                    {% endif %}
+                                    {% if current_user.role == UserRole.ADMIN %}
+                                    <button onclick="confirmDelete('{{ client.id }}', '{{ client.name }}')"
+                                            class="btn-icon text-red-600 hover:text-red-800"
+                                            title="Eliminar Cliente">
+                                        <span class="material-symbols-outlined">delete</span>
+                                        <span class="sr-only">Eliminar</span>
+                                    </button>
+                                    {% endif %}
+                                    {% if client.policies %}
+                                    <a href="{{ url_for('policies.list_policies', client_id=client.id) }}"
+                                       class="btn-icon text-purple-600 hover:text-purple-800"
+                                       title="Ver Pólizas">
+                                        <span class="material-symbols-outlined">policy</span>
+                                        <span class="sr-only">Ver pólizas</span>
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
-            <div>
-                <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
-                    {% if pagination.has_prev %}
-                    <a href="{{ url_for('clients.list_clients', page=pagination.prev_num) }}" 
-                       class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
-                        <span class="sr-only">Anterior</span>
-                        <span class="material-symbols-outlined text-sm">chevron_left</span>
-                    </a>
-                    {% endif %}
-                    
-                    {% for page in range(1, pagination.pages + 1) %}
-                        {% if page == pagination.page %}
-                        <a href="#" aria-current="page"
-                           class="relative z-10 inline-flex items-center bg-primary-600 px-4 py-2 text-sm font-semibold text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600">
-                            {{ page }}
-                        </a>
-                        {% else %}
-                        <a href="{{ url_for('clients.list_clients', page=page) }}"
-                           class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
-                            {{ page }}
-                        </a>
-                        {% endif %}
-                    {% endfor %}
-
-                    {% if pagination.has_next %}
-                    <a href="{{ url_for('clients.list_clients', page=pagination.next_num) }}"
-                       class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
-                        <span class="sr-only">Siguiente</span>
-                        <span class="material-symbols-outlined text-sm">chevron_right</span>
-                    </a>
-                    {% endif %}
-                </nav>
-            </div>
         </div>
     </div>
-    {% endif %}
 </div>
+
+{% if pagination %}
+<div class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6 mt-6">
+    <div class="flex flex-1 justify-between sm:hidden">
+        {% if pagination.has_prev %}
+        <a href="{{ url_for('clients.list_clients', page=pagination.prev_num, sort_field=sort_field, sort_direction=sort_direction, search_field=search_field, search_value=search_value) }}" 
+           class="btn-secondary">
+            Anterior
+        </a>
+        {% endif %}
+        {% if pagination.has_next %}
+        <a href="{{ url_for('clients.list_clients', page=pagination.next_num, sort_field=sort_field, sort_direction=sort_direction, search_field=search_field, search_value=search_value) }}" 
+           class="btn-secondary">
+            Siguiente
+        </a>
+        {% endif %}
+    </div>
+    <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+        <div>
+            <p class="text-sm text-gray-700">
+                Mostrando página <span class="font-medium">{{ pagination.page }}</span> de <span class="font-medium">{{ pagination.pages }}</span>
+            </p>
+        </div>
+        <div>
+            <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+                {% if pagination.has_prev %}
+                <a href="{{ url_for('clients.list_clients', page=pagination.prev_num, sort_field=sort_field, sort_direction=sort_direction, search_field=search_field, search_value=search_value) }}" 
+                   class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
+                    <span class="sr-only">Anterior</span>
+                    <span class="material-symbols-outlined text-sm">chevron_left</span>
+                </a>
+                {% endif %}
+                
+                {% for page in range(1, pagination.pages + 1) %}
+                    {% if page == pagination.page %}
+                    <a href="#" aria-current="page"
+                       class="relative z-10 inline-flex items-center bg-primary-600 px-4 py-2 text-sm font-semibold text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600">
+                        {{ page }}
+                    </a>
+                    {% else %}
+                    <a href="{{ url_for('clients.list_clients', page=page, sort_field=sort_field, sort_direction=sort_direction, search_field=search_field, search_value=search_value) }}"
+                       class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
+                        {{ page }}
+                    </a>
+                    {% endif %}
+                {% endfor %}
+
+                {% if pagination.has_next %}
+                <a href="{{ url_for('clients.list_clients', page=pagination.next_num, sort_field=sort_field, sort_direction=sort_direction, search_field=search_field, search_value=search_value) }}"
+                   class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
+                    <span class="sr-only">Siguiente</span>
+                    <span class="material-symbols-outlined text-sm">chevron_right</span>
+                </a>
+                {% endif %}
+            </nav>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Alpine.js y Scripts -->
+<script>
+function searchClients(value, field) {
+    const url = new URL(window.location);
+    
+    // Mantener el ordenamiento actual
+    const currentSort = url.searchParams.get('sort_field');
+    const currentDirection = url.searchParams.get('sort_direction');
+    if (currentSort) {
+        url.searchParams.set('sort_field', currentSort);
+        url.searchParams.set('sort_direction', currentDirection);
+    }
+    
+    // Actualizar parámetros de búsqueda
+    if (value) {
+        url.searchParams.set('search_field', field);
+        url.searchParams.set('search_value', value);
+    } else {
+        url.searchParams.delete('search_field');
+        url.searchParams.delete('search_value');
+    }
+    
+    // Resetear la página a 1 cuando se hace una nueva búsqueda
+    url.searchParams.set('page', '1');
+    
+    window.location = url;
+}
+
+function confirmDelete(clientId, clientName) {
+    if (confirm(`¿Está seguro que desea eliminar al cliente "${clientName}"?\nEsta acción no se puede deshacer.`)) {
+        window.location.href = `/clients/delete/${clientId}`;
+    }
+}
+
+function sortClients(field) {
+    const url = new URL(window.location);
+    const currentField = url.searchParams.get('sort_field');
+    const currentDirection = url.searchParams.get('sort_direction');
+    
+    // Actualizar ordenamiento
+    url.searchParams.set('sort_field', field);
+    if (currentField === field) {
+        url.searchParams.set('sort_direction', currentDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+        url.searchParams.set('sort_direction', 'asc');
+    }
+    
+    // Hacer la petición AJAX
+    fetch(url)
+        .then(response => response.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newTableBody = doc.querySelector('#clientsTableBody');
+            document.querySelector('#clientsTableBody').innerHTML = newTableBody.innerHTML;
+            
+            // Actualizar URL sin recargar
+            window.history.pushState({}, '', url);
+        })
+        .catch(error => console.error('Error:', error));
+}
+</script>
 {% endblock %}
 
 {% block page_title %}Lista de Clientes{% endblock %}
@@ -174,8 +431,36 @@
 <script>
 function confirmDelete(clientId, clientName) {
     if (confirm(`¿Está seguro que desea eliminar al cliente "${clientName}"?\nEsta acción no se puede deshacer.`)) {
-        window.location.href = "{{ url_for('clients.delete_client', id='') }}" + clientId;
+        window.location.href = `/clients/delete/${clientId}`;
     }
+}
+
+function sortClients(field) {
+    const url = new URL(window.location);
+    const currentField = url.searchParams.get('sort_field');
+    const currentDirection = url.searchParams.get('sort_direction');
+    
+    // Actualizar ordenamiento
+    url.searchParams.set('sort_field', field);
+    if (currentField === field) {
+        url.searchParams.set('sort_direction', currentDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+        url.searchParams.set('sort_direction', 'asc');
+    }
+    
+    // Hacer la petición AJAX
+    fetch(url)
+        .then(response => response.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const newTableBody = doc.querySelector('#clientsTableBody');
+            document.querySelector('#clientsTableBody').innerHTML = newTableBody.innerHTML;
+            
+            // Actualizar URL sin recargar
+            window.history.pushState({}, '', url);
+        })
+        .catch(error => console.error('Error:', error));
 }
 </script>
 {% endblock %}

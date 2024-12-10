@@ -9,7 +9,7 @@
   }
 
   .section {
-    @apply py-8;
+    @apply py-4;
   }
 
   /* Typography */
@@ -77,11 +77,11 @@
   }
 
   .card-header {
-    @apply px-6 py-4 border-b border-gray-200;
+    @apply px-4 py-4 border-b border-gray-200;
   }
 
   .card-body {
-    @apply p-6;
+    @apply p-4;
   }
 
   .card-footer {
@@ -202,5 +202,20 @@
 
   .flex-between {
     @apply flex items-center justify-between;
+  }
+
+  /* Agregar a los estilos existentes */
+  .table-header-sortable {
+    @apply relative cursor-pointer hover:bg-gray-100 transition-colors;
+  }
+
+  .search-popover {
+    @apply absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg p-4 z-50 
+           transform transition-all duration-200 ease-in-out;
+  }
+
+  .search-input {
+    @apply w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm 
+           focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500;
   }
 } 

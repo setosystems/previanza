@@ -39,8 +39,8 @@
             {% endif %}
 
             <!-- Contenido Principal -->
-            <main class="flex-1 bg-gray-50 h-[calc(100vh-4rem)]">
-                <div class="container mx-auto px-6 py-8 h-full overflow-auto">
+            <main class="flex-1 bg-gray-50">
+                <div class="container mx-auto px-6 py-8">
                     {% with messages = get_flashed_messages(with_categories=true) %}
                         {% if messages %}
                             {% for category, message in messages %}
@@ -97,30 +97,29 @@
     </script>
     {% block extra_js %}{% endblock %}
     <style>
-        /* Personalizar scrollbar */
-        .overflow-auto::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
+        /* Scrollbar sutil para toda la página */
+        html::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
         }
         
-        .overflow-auto::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
+        html::-webkit-scrollbar-track {
+            background: transparent;
         }
         
-        .overflow-auto::-webkit-scrollbar-thumb {
+        html::-webkit-scrollbar-thumb {
+            background: #e2e8f0;
+            border-radius: 3px;
+        }
+        
+        html::-webkit-scrollbar-thumb:hover {
             background: #cbd5e1;
-            border-radius: 4px;
-        }
-        
-        .overflow-auto::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
         }
         
         /* Firefox */
-        .overflow-auto {
+        html {
             scrollbar-width: thin;
-            scrollbar-color: #cbd5e1 #f1f1f1;
+            scrollbar-color: #e2e8f0 transparent;
         }
     </style>
 </body>

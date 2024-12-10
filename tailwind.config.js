@@ -108,10 +108,10 @@ module.exports = {
       container: {
         center: true,
         padding: {
-          DEFAULT: '1rem',
-          sm: '2rem',
-          lg: '4rem',
-          xl: '5rem',
+          DEFAULT: '0',
+          sm: '0',
+          lg: '0',
+          xl: '0',
         },
       },
       width: {

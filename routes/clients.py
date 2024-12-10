@@ -18,22 +18,29 @@ bp = Blueprint('clients', __name__, url_prefix='/clients')
 @login_required
 @admin_or_digitador_required
 def list_clients():
-    name = request.args.get('name', '')
-    email = request.args.get('email', '')
-    document_type = request.args.get('document_type', '')
-    document_number = request.args.get('document', '')
+    # Obtener parámetros de ordenamiento y búsqueda
+    sort_field = request.args.get('sort', 'name')
+    sort_direction = request.args.get('direction', 'asc')
+    search_field = request.args.get('search_field')
+    search_value = request.args.get('search_value', '')
     
     query = Client.query
-    if name:
-        query = query.filter(Client.name.ilike(f'%{name}%'))
-    if email:
-        query = query.filter(Client.email.ilike(f'%{email}%'))
-    if document_type:
-        query = query.filter(Client.document_type == DocumentType[document_type])
-    if document_number:
-        query = query.filter(Client.document_number.ilike(f'%{document_number}%'))
     
-    query = query.order_by(Client.name)
+    # Aplicar búsqueda si existe
+    if search_field and search_value:
+        if search_field == 'name':
+            query = query.filter(Client.name.ilike(f'%{search_value}%'))
+        elif search_field == 'email':
+            query = query.filter(Client.email.ilike(f'%{search_value}%'))
+        elif search_field == 'document':
+            query = query.filter(Client.document_number.ilike(f'%{search_value}%'))
+    
+    # Aplicar ordenamiento
+    if hasattr(Client, sort_field):
+        order_field = getattr(Client, sort_field)
+        if sort_direction == 'desc':
+            order_field = order_field.desc()
+        query = query.order_by(order_field)
     
     page = request.args.get('page', 1, type=int)
     per_page = 10
@@ -41,10 +48,11 @@ def list_clients():
     
     return render_template('clients/list.html', 
                          clients=clients.items, 
-                         document_types=DocumentType, 
                          pagination=clients,
-                         title="Lista de Clientes",
-                         show_client_actions=True)
+                         sort_field=sort_field,
+                         sort_direction=sort_direction,
+                         search_field=search_field,
+                         search_value=search_value)
 
 @bp.route('/create', methods=['GET', 'POST'])
 @login_required
