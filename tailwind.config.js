@@ -1,4 +1,5 @@
 module.exports = {
+  darkMode: 'class',
   content: [
     "./templates/**/*.html",
     "./static/**/*.js"
@@ -150,12 +151,21 @@ module.exports = {
         'screen': '100vh',
         'full': '100%'
       },
-      backgroundColor: {
-        'search': {
-          50: '#f8fafc',
-          100: '#f1f5f9',
+      backgroundColor: theme => ({
+        ...theme('colors'),
+        dark: {
+          'primary': '#1a1f2e',
+          'secondary': '#252b3b',
+          'hover': '#2d3548'
         }
-      },
+      }),
+      textColor: theme => ({
+        ...theme('colors'),
+        dark: {
+          'primary': '#f3f4f6',
+          'secondary': '#d1d5db'
+        }
+      }),
       ringColor: {
         'search': {
           focus: '#60a5fa',

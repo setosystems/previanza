@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" class="h-full bg-gray-50">
+<html lang="es" class="h-full" x-data="{ darkMode: localStorage.theme === 'dark' }" :class="{ 'dark': darkMode }">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -23,8 +23,18 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
 
     {% block extra_css %}{% endblock %}
+    <script>
+        // Check for saved dark mode preference
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark')
+            localStorage.theme = 'dark'
+        } else {
+            document.documentElement.classList.remove('dark')
+            localStorage.theme = 'light'
+        }
+    </script>
 </head>
-<body class="h-full">
+<body class="h-full bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
     <div class="min-h-screen flex">
         <!-- Sidebar -->
         {% include 'includes/sidebar.html' %}
@@ -34,11 +44,11 @@
             {% include 'includes/header.html' %}
             
             <!-- Content Area -->
-            <main class="flex-1 overflow-auto bg-gray-50 p-6">
+            <main class="flex-1 overflow-auto bg-gray-50 dark:bg-gray-900 p-6">
                 {% with messages = get_flashed_messages(with_categories=true) %}
                     {% if messages %}
                         {% for category, message in messages %}
-                            <div class="mb-4 p-4 rounded-lg {% if category == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
+                            <div class="mb-4 p-4 rounded-lg {% if category == 'error' %}bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200{% else %}bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-200{% endif %}">
                                 {{ message }}
                             </div>
                         {% endfor %}
@@ -96,24 +106,42 @@
         }
         
         .overflow-auto::-webkit-scrollbar-track {
-            background: #f1f1f1;
+            @apply bg-gray-100 dark:bg-gray-800;
             border-radius: 4px;
         }
         
         .overflow-auto::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
+            @apply bg-gray-300 dark:bg-gray-600;
             border-radius: 4px;
         }
         
         .overflow-auto::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
+            @apply bg-gray-400 dark:bg-gray-500;
         }
         
         /* Firefox */
         .overflow-auto {
             scrollbar-width: thin;
-            scrollbar-color: #cbd5e1 #f1f1f1;
+            scrollbar-color: var(--scrollbar-thumb, #cbd5e1) var(--scrollbar-track, #f1f1f1);
+        }
+
+        /* Dark mode scrollbar variables */
+        :root[class~="dark"] {
+            --scrollbar-thumb: #4b5563;
+            --scrollbar-track: #1f2937;
         }
     </style>
+    <script>
+        // Dark mode toggle handler
+        window.addEventListener('dark-mode-toggle', event => {
+            if (event.detail) {
+                localStorage.theme = 'dark'
+                document.documentElement.classList.add('dark')
+            } else {
+                localStorage.theme = 'light'
+                document.documentElement.classList.remove('dark')
+            }
+        })
+    </script>
 </body>
 </html>

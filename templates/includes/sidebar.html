@@ -1,15 +1,15 @@
-<aside class="bg-primary-800 flex flex-col z-40 shadow-xl transition-all duration-300 ease-in-out fixed 
-            m-2 rounded-2xl h-[calc(100vh-1rem)] sticky top-2" 
+<aside class="bg-primary-800 dark:bg-gray-800 flex flex-col z-40 shadow-xl transition-all duration-300 ease-in-out fixed 
+            m-2 rounded-2xl h-[calc(100vh-1rem)] sticky top-2 border border-primary-700/50 dark:border-gray-700" 
        :class="{ 'w-64': !collapsed, 'w-16': collapsed }"
        x-data="{ collapsed: false }">
     <!-- Logo y Marca -->
-    <div class="p-4 border-b border-primary-700/50 flex items-center justify-between shrink-0">
+    <div class="p-4 border-b border-primary-700/50 dark:border-gray-700 flex items-center justify-between shrink-0">
         <div class="flex items-center transition-all duration-300"
              :class="{ 'opacity-100 w-auto': !collapsed, 'opacity-0 w-0 overflow-hidden': collapsed }">
             <img src="{{ url_for('static', filename='img/logo_black.svg') }}" 
                  alt="Logo Previanza" 
                  class="w-8 h-8">
-            <span class="ml-2 text-primary-100 font-medium">
+            <span class="ml-2 text-primary-100 dark:text-gray-200 font-medium">
                 Previanza
             </span>
         </div>
@@ -26,14 +26,14 @@
     <!-- Menú Principal -->
     <nav class="flex-1 overflow-y-auto scrollbar-hide">
         <ul class="space-y-1 py-4" :class="{ 'px-2': collapsed, 'px-3': !collapsed }">
-            <!-- Inicio (corregido) -->
+            <!-- Inicio -->
             <li>
                 <a href="{{ url_for('index') }}" 
-                   class="flex items-center px-3 py-2.5 text-gray-100 hover:bg-primary-600/50 
-                          {{ 'bg-primary-600 text-white' if request.endpoint and request.endpoint == 'index' else '' }}
+                   class="flex items-center px-3 py-2.5 text-gray-100 dark:text-gray-300 hover:bg-primary-600/50 dark:hover:bg-gray-700 
+                          {{ 'bg-primary-600 dark:bg-gray-700 text-white' if request.endpoint and request.endpoint == 'index' else '' }}
                           rounded-xl transition-all duration-300 group">
                     <div class="w-6 text-center flex-shrink-0">
-                        <i class="uil uil-estate text-primary-300 group-hover:text-white transition-colors"></i>
+                        <i class="uil uil-estate text-primary-300 dark:text-gray-400 group-hover:text-white transition-colors"></i>
                     </div>
                     <span class="ml-3 transition-all duration-300 whitespace-nowrap"
                           :class="{ 'opacity-0 w-0 overflow-hidden': collapsed, 'opacity-100 w-auto': !collapsed }">
@@ -45,11 +45,11 @@
             <!-- Clientes (corregido) -->
             <li>
                 <a href="{{ url_for('clients.list_clients') }}" 
-                   class="flex items-center px-3 py-2.5 text-gray-100 hover:bg-primary-600/50 
-                          {{ 'bg-primary-600 text-white' if request.endpoint and request.endpoint.startswith('clients.') else '' }}
+                   class="flex items-center px-3 py-2.5 text-gray-100 dark:text-gray-300 hover:bg-primary-600/50 dark:hover:bg-gray-700 
+                          {{ 'bg-primary-600 dark:bg-gray-700 text-white' if request.endpoint and request.endpoint.startswith('clients.') else '' }}
                           rounded-xl transition-all duration-300 group">
                     <div class="w-6 text-center flex-shrink-0">
-                        <i class="uil uil-users-alt text-primary-300 group-hover:text-white transition-colors"></i>
+                        <i class="uil uil-users-alt text-primary-300 dark:text-gray-400 group-hover:text-white transition-colors"></i>
                     </div>
                     <span class="ml-3 transition-all duration-300 whitespace-nowrap"
                           :class="{ 'opacity-0 w-0 overflow-hidden': collapsed, 'opacity-100 w-auto': !collapsed }">
@@ -63,11 +63,11 @@
                     <!-- Pólizas -->
                     <li>
                         <a href="{{ url_for('policies.list_policies') }}" 
-                           class="flex items-center px-3 py-2.5 text-gray-100 hover:bg-primary-600/50 
-                                  {{ 'bg-primary-600 text-white' if request.endpoint and request.endpoint.startswith('policies.') else '' }}
+                           class="flex items-center px-3 py-2.5 text-gray-100 dark:text-gray-300 hover:bg-primary-600/50 dark:hover:bg-gray-700 
+                                  {{ 'bg-primary-600 dark:bg-gray-700 text-white' if request.endpoint and request.endpoint.startswith('policies.') else '' }}
                                   rounded-xl transition-all duration-300 group">
                             <div class="w-6 text-center flex-shrink-0">
-                                <i class="uil uil-file-alt text-primary-300 group-hover:text-white transition-colors"></i>
+                                <i class="uil uil-file-alt text-primary-300 dark:text-gray-400 group-hover:text-white transition-colors"></i>
                             </div>
                             <span class="ml-3 transition-all duration-300 whitespace-nowrap"
                                   :class="{ 'opacity-0 w-0 overflow-hidden': collapsed, 'opacity-100 w-auto': !collapsed }">Pólizas</span>
@@ -77,11 +77,11 @@
                     <!-- Productos -->
                     <li>
                         <a href="{{ url_for('products.list_products') }}" 
-                           class="flex items-center px-3 py-2.5 text-gray-100 hover:bg-primary-600/50 
-                                  {{ 'bg-primary-600 text-white' if request.endpoint and request.endpoint.startswith('products.') else '' }}
+                           class="flex items-center px-3 py-2.5 text-gray-100 dark:text-gray-300 hover:bg-primary-600/50 dark:hover:bg-gray-700 
+                                  {{ 'bg-primary-600 dark:bg-gray-700 text-white' if request.endpoint and request.endpoint.startswith('products.') else '' }}
                                   rounded-xl transition-all duration-300 group">
                             <div class="w-6 text-center flex-shrink-0">
-                                <i class="uil uil-box text-primary-300 group-hover:text-white transition-colors"></i>
+                                <i class="uil uil-box text-primary-300 dark:text-gray-400 group-hover:text-white transition-colors"></i>
                             </div>
                             <span class="ml-3 transition-all duration-300 whitespace-nowrap"
                                   :class="{ 'opacity-0 w-0 overflow-hidden': collapsed, 'opacity-100 w-auto': !collapsed }">Productos</span>
@@ -93,11 +93,11 @@
                     <!-- Agentes -->
                     <li>
                         <a href="{{ url_for('agents.list_agents') }}" 
-                           class="flex items-center px-3 py-2.5 text-gray-100 hover:bg-primary-600/50 
-                                  {{ 'bg-primary-600 text-white' if request.endpoint and request.endpoint.startswith('agents.') else '' }}
+                           class="flex items-center px-3 py-2.5 text-gray-100 dark:text-gray-300 hover:bg-primary-600/50 dark:hover:bg-gray-700 
+                                  {{ 'bg-primary-600 dark:bg-gray-700 text-white' if request.endpoint and request.endpoint.startswith('agents.') else '' }}
                                   rounded-xl transition-all duration-300 group">
                             <div class="w-6 text-center flex-shrink-0">
-                                <i class="uil uil-user-md text-primary-300 group-hover:text-white transition-colors"></i>
+                                <i class="uil uil-user-md text-primary-300 dark:text-gray-400 group-hover:text-white transition-colors"></i>
                             </div>
                             <span class="ml-3 transition-all duration-300 whitespace-nowrap"
                                   :class="{ 'opacity-0 w-0 overflow-hidden': collapsed, 'opacity-100 w-auto': !collapsed }">Agentes</span>
@@ -107,11 +107,11 @@
                     <!-- Usuarios (corregido) -->
                     <li>
                         <a href="{{ url_for('auth.list_users') }}" 
-                           class="flex items-center px-3 py-2.5 text-gray-100 hover:bg-primary-600/50 
-                                  {{ 'bg-primary-600 text-white' if request.endpoint and request.endpoint.startswith('auth.') else '' }}
+                           class="flex items-center px-3 py-2.5 text-gray-100 dark:text-gray-300 hover:bg-primary-600/50 dark:hover:bg-gray-700 
+                                  {{ 'bg-primary-600 dark:bg-gray-700 text-white' if request.endpoint and request.endpoint.startswith('auth.') else '' }}
                                   rounded-xl transition-all duration-300 group">
                             <div class="w-6 text-center flex-shrink-0">
-                                <i class="uil uil-users-alt text-primary-300 group-hover:text-white transition-colors"></i>
+                                <i class="uil uil-users-alt text-primary-300 dark:text-gray-400 group-hover:text-white transition-colors"></i>
                             </div>
                             <span class="ml-3 transition-all duration-300 whitespace-nowrap"
                                   :class="{ 'opacity-0 w-0 overflow-hidden': collapsed, 'opacity-100 w-auto': !collapsed }">Usuarios</span>
@@ -121,11 +121,11 @@
                     <!-- Configuración (corregido) -->
                     <li>
                         <a href="{{ url_for('config.config_index') }}" 
-                           class="flex items-center px-3 py-2.5 text-gray-100 hover:bg-primary-600/50 
-                                  {{ 'bg-primary-600 text-white' if request.endpoint and request.endpoint.startswith('config.') else '' }}
+                           class="flex items-center px-3 py-2.5 text-gray-100 dark:text-gray-300 hover:bg-primary-600/50 dark:hover:bg-gray-700 
+                                  {{ 'bg-primary-600 dark:bg-gray-700 text-white' if request.endpoint and request.endpoint.startswith('config.') else '' }}
                                   rounded-xl transition-all duration-300 group">
                             <div class="w-6 text-center flex-shrink-0">
-                                <i class="uil uil-setting text-primary-300 group-hover:text-white transition-colors"></i>
+                                <i class="uil uil-setting text-primary-300 dark:text-gray-400 group-hover:text-white transition-colors"></i>
                             </div>
                             <span class="ml-3 transition-all duration-300 whitespace-nowrap"
                                   :class="{ 'opacity-0 w-0 overflow-hidden': collapsed, 'opacity-100 w-auto': !collapsed }">Configuración</span>
@@ -141,20 +141,20 @@
                     <button type="button" 
                             data-menu="informes"
                             @click="open = !open"
-                            class="w-full flex items-center justify-between px-3 py-2.5 text-gray-100 hover:bg-primary-600/50 
-                                   {{ 'bg-primary-600 text-white' if request.endpoint and request.endpoint.startswith('reports.') else '' }}
+                            class="w-full flex items-center justify-between px-3 py-2.5 text-gray-100 dark:text-gray-300 hover:bg-primary-600/50 dark:hover:bg-gray-700 
+                                   {{ 'bg-primary-600 dark:bg-gray-700 text-white' if request.endpoint and request.endpoint.startswith('reports.') else '' }}
                                    rounded-xl transition-all duration-300 group"
                             :aria-expanded="open">
                         <div class="flex items-center">
                             <div class="w-6 text-center flex-shrink-0">
-                                <i class="uil uil-chart text-primary-300 group-hover:text-white transition-colors"></i>
+                                <i class="uil uil-chart text-primary-300 dark:text-gray-400 group-hover:text-white transition-colors"></i>
                             </div>
                             <span class="ml-3 transition-all duration-300 whitespace-nowrap"
                                   :class="{ 'opacity-0 w-0 overflow-hidden': collapsed, 'opacity-100 w-auto': !collapsed }">
                                 Informes
                             </span>
                         </div>
-                        <i class="uil uil-angle-down transform transition-all duration-300 text-primary-300 group-hover:text-white"
+                        <i class="uil uil-angle-down transform transition-all duration-300 text-primary-300 dark:text-gray-400 group-hover:text-white"
                            :class="{ 'opacity-0 w-0': collapsed, 'opacity-100': !collapsed, 'rotate-180': open }"></i>
                     </button>
 
@@ -226,12 +226,12 @@
     </nav>
 
     <!-- Cerrar Sesión -->
-    <div class="p-3 border-t border-primary-700/50 shrink-0">
+    <div class="p-3 border-t border-primary-700/50 dark:border-gray-700 shrink-0">
         <a href="{{ url_for('auth.logout') }}" 
-           class="flex items-center px-3 py-2.5 text-gray-100 hover:bg-primary-600/50 
+           class="flex items-center px-3 py-2.5 text-gray-100 dark:text-gray-300 hover:bg-primary-600/50 dark:hover:bg-gray-700 
                   rounded-xl transition-all duration-300 group">
             <div class="w-6 text-center flex-shrink-0">
-                <i class="uil uil-signout text-primary-300 group-hover:text-white transition-colors"></i>
+                <i class="uil uil-signout text-primary-300 dark:text-gray-400 group-hover:text-white transition-colors"></i>
             </div>
             <span class="ml-3 transition-all duration-300 whitespace-nowrap"
                   :class="{ 'opacity-0 w-0 overflow-hidden': collapsed, 'opacity-100 w-auto': !collapsed }">Cerrar Sesión</span>
