@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="h-full bg-gray-50">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -24,35 +24,27 @@
 
     {% block extra_css %}{% endblock %}
 </head>
-<body class="bg-gray-50">
-    <div class="flex h-screen">
+<body class="h-full">
+    <div class="min-h-screen flex">
         <!-- Sidebar -->
-        {% if current_user.is_authenticated %}
-            {% include 'includes/sidebar.html' %}
-        {% endif %}
-
-        <!-- Contenido Principal -->
-        <div class="flex-1 flex flex-col min-w-0 transition-all duration-300">
-            <!-- Header -->
-            {% if current_user.is_authenticated %}
-                {% include 'includes/header.html' %}
-            {% endif %}
-
-            <!-- Contenido Principal -->
-            <main class="flex-1 bg-gray-50 h-[calc(100vh-4rem)]">
-                <div class="container mx-auto px-6 py-8 h-full overflow-auto">
-                    {% with messages = get_flashed_messages(with_categories=true) %}
-                        {% if messages %}
-                            {% for category, message in messages %}
-                                <div class="mb-4 p-4 rounded-lg {% if category == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
-                                    {{ message }}
-                                </div>
-                            {% endfor %}
-                        {% endif %}
-                    {% endwith %}
-                    
-                    {% block content %}{% endblock %}
-                </div>
+        {% include 'includes/sidebar.html' %}
+        
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col min-h-screen">
+            {% include 'includes/header.html' %}
+            
+            <!-- Content Area -->
+            <main class="flex-1 overflow-auto bg-gray-50 p-6">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="mb-4 p-4 rounded-lg {% if category == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                {% block content %}{% endblock %}
             </main>
         </div>
     </div>

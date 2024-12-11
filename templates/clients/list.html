@@ -1,81 +1,106 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container-fluid h-full flex flex-col">
-    <div class="card">
-        <div class="card-header">
-            <div class="flex justify-between items-center">
-                <h2 class="section-title">Búsqueda de Clientes</h2>
-                <div class="flex space-x-4">
-                    <a href="{{ url_for('clients.create_client') }}" class="btn-primary">
-                        <span class="material-symbols-outlined mr-2">person_add</span>Nuevo Cliente
-                    </a>
-                    <a href="{{ url_for('clients.bulk_upload_clients') }}" class="btn-secondary">
-                        <span class="material-symbols-outlined mr-2">upload_file</span>Carga Masiva
-                    </a>
-                </div>
-            </div>
-        </div>
-        
+<div class="flex flex-col h-full">
+    <div class="bg-white rounded-lg shadow-sm mb-6">
         <div class="card-body">
             <form method="GET">
-                <div class="flex gap-4">
-                    <div class="form-group flex-1">
-                        <label class="form-label" for="name">Nombre</label>
-                        <input type="text" id="name" name="name" class="form-input" 
-                               value="{{ request.args.get('name', '') }}"
-                               placeholder="Nombre del cliente">
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="flex-1">
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="material-symbols-outlined text-gray-400">person</span>
+                            </span>
+                            <input type="text" 
+                                   id="name" 
+                                   name="name" 
+                                   class="form-input h-10 pl-10 w-full rounded-lg border-gray-300 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150" 
+                                   value="{{ request.args.get('name', '') }}"
+                                   placeholder="Nombre del cliente">
+                        </div>
                     </div>
-                    <div class="form-group flex-1">
-                        <label class="form-label" for="email">Email</label>
-                        <input type="email" id="email" name="email" class="form-input" 
-                               value="{{ request.args.get('email', '') }}"
-                               placeholder="Email del cliente">
+                    <div class="flex-1">
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="material-symbols-outlined text-gray-400">mail</span>
+                            </span>
+                            <input type="email" 
+                                   id="email" 
+                                   name="email" 
+                                   class="form-input h-10 pl-10 w-full rounded-lg border-gray-300 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150" 
+                                   value="{{ request.args.get('email', '') }}"
+                                   placeholder="Email del cliente">
+                        </div>
                     </div>
-                    <div class="form-group flex-1">
-                        <label class="form-label" for="document">Documento</label>
-                        <input type="text" id="document" name="document" class="form-input" 
-                               value="{{ request.args.get('document', '') }}"
-                               placeholder="Número de documento">
+                    <div class="flex-1">
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="material-symbols-outlined text-gray-400">badge</span>
+                            </span>
+                            <input type="text" 
+                                   id="document" 
+                                   name="document" 
+                                   class="form-input h-10 pl-10 w-full rounded-lg border-gray-300 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150" 
+                                   value="{{ request.args.get('document', '') }}"
+                                   placeholder="Número de documento">
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label opacity-0">Buscar</label>
-                        <button type="submit" class="btn-primary">
-                            <span class="material-symbols-outlined mr-2">search</span>Buscar
+                    <div class="flex items-center space-x-2 md:col-span-3">
+                        <button type="submit" 
+                                class="btn-primary h-10 w-10 flex items-center justify-center rounded-lg">
+                            <span class="material-symbols-outlined">search</span>
                         </button>
+                        <a href="{{ url_for('clients.create_client') }}" 
+                           class="h-10 w-10 inline-flex items-center justify-center rounded-lg shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-150"
+                           title="Nuevo Cliente">
+                            <span class="material-symbols-outlined">person_add</span>
+                        </a>
+                        <a href="{{ url_for('clients.bulk_upload_clients') }}" 
+                           class="h-10 w-10 inline-flex items-center justify-center rounded-lg shadow-sm text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-150"
+                           title="Carga Masiva">
+                            <span class="material-symbols-outlined">upload_file</span>
+                        </a>
                     </div>
                 </div>
             </form>
         </div>
     </div>
 
-    <div class="section flex-1 overflow-auto">
-        <div class="table-container">
+    <div class="card flex-1">
+        <div class="table-container overflow-hidden">
             <table class="table">
-                <thead class="bg-gray-50">
+                <thead class="bg-gray-50 border-b border-gray-200">
                     <tr>
-                        <th class="table-header">Nombre</th>
+                        <th class="table-header font-medium text-gray-600">Nombre</th>
                         <th class="table-header">Email</th>
                         <th class="table-header">Documento</th>
                         <th class="table-header">Estado</th>
                         <th class="table-header">Acciones</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200">
+                <tbody class="divide-y divide-gray-100 bg-white">
                     {% for client in clients %}
-                    <tr class="table-row">
+                    <tr class="table-row hover:bg-gray-50 transition-colors duration-150">
                         <td class="table-cell">{{ client.name }}</td>
                         <td class="table-cell">{{ client.email }}</td>
                         <td class="table-cell">{{ client.document_type.value }} {{ client.document_number }}</td>
                         <td class="table-cell">
-                            <span class="badge {% if client.is_active %}badge-success{% else %}badge-danger{% endif %}">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                {% if client.is_active %}
+                                    bg-green-100 text-green-800
+                                {% else %}
+                                    bg-red-100 text-red-800
+                                {% endif %}">
+                                <span class="w-1.5 h-1.5 rounded-full 
+                                    {% if client.is_active %}bg-green-400{% else %}bg-red-400{% endif %} 
+                                    mr-1.5"></span>
                                 {{ "Activo" if client.is_active else "Inactivo" }}
                             </span>
                         </td>
                         <td class="table-cell">
                             <div class="flex items-center space-x-4">
                                 <a href="{{ url_for('clients.client_detail', id=client.id) }}" 
-                                   class="btn-icon text-blue-600 hover:text-blue-800"
+                                   class="p-1 rounded-full hover:bg-blue-50 text-blue-600 hover:text-blue-700 transition-all duration-150"
                                    title="Ver Detalles">
                                     <span class="material-symbols-outlined">visibility</span>
                                     <span class="sr-only">Ver detalles</span>
@@ -114,54 +139,70 @@
     </div>
 
     {% if pagination %}
-    <div class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6 mt-6">
-        <div class="flex flex-1 justify-between sm:hidden">
-            {% if pagination.has_prev %}
-            <a href="{{ url_for('clients.list_clients', page=pagination.prev_num) }}" class="btn-secondary">Anterior</a>
-            {% endif %}
-            {% if pagination.has_next %}
-            <a href="{{ url_for('clients.list_clients', page=pagination.next_num) }}" class="btn-secondary">Siguiente</a>
-            {% endif %}
-        </div>
-        <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-            <div>
-                <p class="text-sm text-gray-700">
-                    Mostrando página <span class="font-medium">{{ pagination.page }}</span> de <span class="font-medium">{{ pagination.pages }}</span>
-                </p>
-            </div>
-            <div>
-                <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
-                    {% if pagination.has_prev %}
-                    <a href="{{ url_for('clients.list_clients', page=pagination.prev_num) }}" 
-                       class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
-                        <span class="sr-only">Anterior</span>
-                        <span class="material-symbols-outlined text-sm">chevron_left</span>
-                    </a>
-                    {% endif %}
-                    
-                    {% for page in range(1, pagination.pages + 1) %}
-                        {% if page == pagination.page %}
-                        <a href="#" aria-current="page"
-                           class="relative z-10 inline-flex items-center bg-primary-600 px-4 py-2 text-sm font-semibold text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600">
-                            {{ page }}
-                        </a>
-                        {% else %}
-                        <a href="{{ url_for('clients.list_clients', page=page) }}"
-                           class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
-                            {{ page }}
-                        </a>
-                        {% endif %}
-                    {% endfor %}
+    <div class="mt-4 bg-white rounded-lg shadow-sm border border-gray-100">
+        <div class="flex flex-col sm:flex-row items-center justify-between px-4 py-3 gap-4">
+            <!-- Selector de elementos por página -->
+            <div class="flex flex-wrap items-center gap-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-sm text-gray-600">Ver</span>
+                    <select name="per_page" 
+                            onchange="window.location.href=this.value"
+                            class="form-select w-20 rounded-md text-sm border-gray-200 bg-white focus:border-primary-500 focus:ring-primary-500 transition-colors">
+                        {% for count in [10, 25, 50, 100] %}
+                        <option value="{{ url_for('clients.list_clients', per_page=count) }}"
+                                {% if request.args.get('per_page', '10')|int == count %}selected{% endif %}>
+                            {{ count }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <span class="text-sm text-gray-600">registros</span>
+                </div>
 
-                    {% if pagination.has_next %}
-                    <a href="{{ url_for('clients.list_clients', page=pagination.next_num) }}"
-                       class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
-                        <span class="sr-only">Siguiente</span>
-                        <span class="material-symbols-outlined text-sm">chevron_right</span>
-                    </a>
-                    {% endif %}
-                </nav>
+                <div class="h-4 w-px bg-gray-300 hidden sm:block"></div>
+
+                <!-- Información de registros -->
+                <span class="text-sm text-gray-600">
+                    <span class="font-medium text-gray-900">{{ (pagination.page - 1) * pagination.per_page + 1 }}</span>
+                    -
+                    <span class="font-medium text-gray-900">{{ pagination.page * pagination.per_page if pagination.page * pagination.per_page <= pagination.total else pagination.total }}</span>
+                    de
+                    <span class="font-medium text-gray-900">{{ pagination.total }}</span>
+                    {{ 'registro' if pagination.total == 1 else 'registros' }}
+                </span>
             </div>
+
+            <!-- Paginación -->
+            <nav class="flex items-center justify-center sm:justify-end gap-1">
+                {% if pagination.has_prev %}
+                <a href="{{ url_for('clients.list_clients', page=pagination.prev_num, per_page=request.args.get('per_page', 10)) }}"
+                   class="relative inline-flex items-center rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-primary-600 transition-colors">
+                    <span class="sr-only">Anterior</span>
+                    <span class="material-symbols-outlined text-sm">chevron_left</span>
+                </a>
+                {% endif %}
+
+                {% for page in pagination.iter_pages() %}
+                    {% if page %}
+                        <a href="{{ url_for('clients.list_clients', page=page, per_page=request.args.get('per_page', 10)) }}"
+                           class="relative inline-flex items-center justify-center min-w-[2.5rem] h-10 text-sm font-medium rounded-md transition-colors
+                                  {% if page == pagination.page %}
+                                      text-white bg-primary-600 hover:bg-primary-700 shadow-sm
+                                  {% else %}
+                                      text-gray-700 hover:bg-gray-50 hover:text-primary-600
+                                  {% endif %}">
+                            {{ page }}
+                        </a>
+                    {% endif %}
+                {% endfor %}
+
+                {% if pagination.has_next %}
+                <a href="{{ url_for('clients.list_clients', page=pagination.next_num, per_page=request.args.get('per_page', 10)) }}"
+                   class="relative inline-flex items-center rounded-md p-2 text-gray-400 hover:bg-gray-50 hover:text-primary-600 transition-colors">
+                    <span class="sr-only">Siguiente</span>
+                    <span class="material-symbols-outlined text-sm">chevron_right</span>
+                </a>
+                {% endif %}
+            </nav>
         </div>
     </div>
     {% endif %}

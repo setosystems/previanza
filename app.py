@@ -223,6 +223,9 @@ def create_app():
     def static_files(filename):
         return send_from_directory(app.static_folder, filename)
 
+    # Agregar funciones globales a Jinja2
+    app.jinja_env.globals.update(min=min)
+
     return app
 
 app = create_app()

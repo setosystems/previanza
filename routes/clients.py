@@ -36,13 +36,22 @@ def list_clients():
     query = query.order_by(Client.name)
     
     page = request.args.get('page', 1, type=int)
-    per_page = 10
-    clients = query.paginate(page=page, per_page=per_page, error_out=False)
+    per_page = request.args.get('per_page', 10, type=int)
+    
+    allowed_per_page = [10, 25, 50, 100]
+    if per_page not in allowed_per_page:
+        per_page = 10
+    
+    pagination = query.paginate(
+        page=page, 
+        per_page=per_page,
+        error_out=False
+    )
     
     return render_template('clients/list.html', 
-                         clients=clients.items, 
+                         clients=pagination.items, 
                          document_types=DocumentType, 
-                         pagination=clients,
+                         pagination=pagination,
                          title="Lista de Clientes",
                          show_client_actions=True)
 

@@ -52,12 +52,8 @@ services:
       timeout: 10s
       retries: 3
     user: "root"
-    command: >
-      gunicorn
-      --bind 0.0.0.0:5000
-      --workers 4
-      --config /app/gunicorn_config.py
-      wsgi:application
+    entrypoint: ["/app/docker-entrypoint.sh"]
+    command: ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "4", "--config", "/app/gunicorn_config.py", "wsgi:application"]
 
   db:
     image: postgres:17
