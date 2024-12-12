@@ -1,99 +1,107 @@
 {% extends "base.html" %}
 
+{% set breadcrumbs = [
+    ('index', 'Inicio'),
+    ('clients.list_clients', 'Clientes'),
+    (None, 'Carga Masiva')
+] %}
+
 {% block content %}
-<div class="container-fluid">
-    <div class="max-w-2xl mx-auto">
-        {% if summary %}
-        <div class="card mb-8">
-            <div class="card-header">
-                <h3 class="section-title flex items-center">
-                    <span class="material-symbols-outlined text-primary-600 mr-2">analytics</span>
-                    Resumen de la Carga
-                </h3>
-            </div>
-            <div class="card-body">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div class="stat-card">
-                        <div class="flex items-center">
-                            <div class="w-10 h-10 bg-success-50 rounded-full flex-center mr-3">
-                                <span class="material-symbols-outlined text-success-500">add_circle</span>
-                            </div>
-                            <div>
-                                <p class="stat-title">Creados</p>
-                                <p class="stat-value">{{ summary.created }}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="stat-card">
-                        <div class="flex items-center">
-                            <div class="w-10 h-10 bg-primary-50 rounded-full flex-center mr-3">
-                                <span class="material-symbols-outlined text-primary-500">update</span>
-                            </div>
-                            <div>
-                                <p class="stat-title">Actualizados</p>
-                                <p class="stat-value">{{ summary.updated }}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="stat-card">
-                        <div class="flex items-center">
-                            <div class="w-10 h-10 bg-danger-50 rounded-full flex-center mr-3">
-                                <span class="material-symbols-outlined text-danger-500">error</span>
-                            </div>
-                            <div>
-                                <p class="stat-title">Errores</p>
-                                <p class="stat-value">{{ summary.errors }}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {% if summary.error_details %}
-                <div class="bg-danger-50 rounded-lg p-4">
-                    <h4 class="font-medium text-danger-700 mb-2">Detalles de los errores:</h4>
-                    <div class="space-y-2">
-                        {% for error in summary.error_details %}
-                        <div class="bg-white rounded p-3 border border-danger-200">
-                            <p class="text-sm text-danger-700">
-                                <span class="font-medium">Fila {{ error.row }}:</span> 
-                                {{ error.message }}
-                            </p>
-                            {% if error.data %}
-                            <p class="text-xs text-gray-500 mt-1">
-                                Datos de la fila: {{ error.data }}
-                            </p>
-                            {% endif %}
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endif %}
-            </div>
-        </div>
-        {% endif %}
-
-        <div class="card">
-            <div class="card-header">
-                <h3 class="section-title">Subir Archivo</h3>
-            </div>
+<div class="space-y-6 px-6 pt-4">
+    {% if summary %}
+    <div class="card-container">
+        <div class="p-4">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center mb-6">
+                <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 mr-2">analytics</span>
+                Resumen de la Carga
+            </h3>
             
-            <form method="POST" enctype="multipart/form-data" class="card-body space-y-6">
-                <div class="form-group">
-                    <label for="file" class="form-label">Selecciona archivo XLSX:</label>
-                    <input type="file" 
-                           id="file" 
-                           name="file" 
-                           accept=".xlsx" 
-                           required
-                           class="form-input">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-white dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-success-50 dark:bg-success-900/50 rounded-full flex items-center justify-center mr-3">
+                            <span class="material-symbols-outlined text-success-500 dark:text-success-400">add_circle</span>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Creados</p>
+                            <p class="text-xl font-semibold text-gray-900 dark:text-gray-100">{{ summary.created }}</p>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="bg-gray-50 rounded-lg p-4">
-                    <h4 class="font-medium text-gray-900 mb-2">Instrucciones</h4>
-                    <p class="text-sm text-gray-600 mb-4">El archivo XLSX debe tener las siguientes columnas en orden:</p>
-                    <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
+                <div class="bg-white dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-primary-50 dark:bg-primary-900/50 rounded-full flex items-center justify-center mr-3">
+                            <span class="material-symbols-outlined text-primary-500 dark:text-primary-400">update</span>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Actualizados</p>
+                            <p class="text-xl font-semibold text-gray-900 dark:text-gray-100">{{ summary.updated }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-danger-50 dark:bg-danger-900/50 rounded-full flex items-center justify-center mr-3">
+                            <span class="material-symbols-outlined text-danger-500 dark:text-danger-400">error</span>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Errores</p>
+                            <p class="text-xl font-semibold text-gray-900 dark:text-gray-100">{{ summary.errors }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if summary.error_details %}
+            <div class="bg-danger-50 dark:bg-danger-900/50 rounded-lg p-4">
+                <h4 class="font-medium text-danger-700 dark:text-danger-200 mb-2">Detalles de los errores:</h4>
+                <div class="space-y-2">
+                    {% for error in summary.error_details %}
+                    <div class="bg-white dark:bg-gray-800 rounded p-3 border border-danger-200 dark:border-danger-700">
+                        <p class="text-sm text-danger-700 dark:text-danger-200">
+                            <span class="font-medium">Fila {{ error.row }}:</span> 
+                            {{ error.message }}
+                        </p>
+                        {% if error.data %}
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            Datos de la fila: {{ error.data }}
+                        </p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="card-container">
+        <div class="p-4">
+            <form method="POST" enctype="multipart/form-data" class="space-y-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Selecciona archivo XLSX:
+                    </label>
+                    <input type="file" 
+                            name="file" 
+                            accept=".xlsx"
+                            required
+                            class="block w-full text-sm text-gray-500 dark:text-gray-400
+                                   file:mr-4 file:py-2 file:px-4 
+                                   file:rounded-lg file:border-0
+                                   file:text-sm file:font-medium
+                                   file:bg-primary-50/50 dark:file:bg-primary-900/30 file:text-primary-600 dark:file:text-primary-400
+                                   hover:file:bg-primary-100/70 dark:hover:file:bg-primary-800/40
+                                   transition-colors duration-150">
+                </div>
+
+                <div class="bg-gray-50/50 dark:bg-gray-700/50 rounded-lg p-4">
+                    <h4 class="font-medium text-gray-900 dark:text-gray-100 mb-2">Instrucciones</h4>
+                    <p class="mb-2">El archivo XLSX debe tener las siguientes columnas en orden:</p>
+                    <ul class="list-disc list-inside space-y-1 ml-2">
                         <li>Nombre</li>
                         <li>Correo electrónico</li>
                         <li>Teléfono</li>
@@ -105,27 +113,28 @@
                     </ul>
                 </div>
 
-                <div class="alert alert-warning">
+                <div class="bg-warning-50/30 dark:bg-warning-900/20 text-warning-700 dark:text-warning-300 p-4 rounded-lg flex items-center">
                     <span class="material-symbols-outlined mr-2">warning</span>
                     <span>Si un cliente con el mismo correo electrónico ya existe, sus datos serán actualizados.</span>
                 </div>
-            
+
                 <div class="flex justify-end space-x-4">
-                    <a href="{{ url_for('clients.download_client_sample') }}" class="btn-secondary">
+                    <a href="{{ url_for('clients.download_client_sample') }}" 
+                       class="btn-secondary">
                         <span class="material-symbols-outlined mr-2">download</span>Descargar plantilla
                     </a>
+                    <a href="{{ url_for('clients.list_clients') }}" 
+                       class="btn-secondary">
+                        <span class="material-symbols-outlined mr-2">keyboard_backspace</span>Volver
+                    </a>
                     <button type="submit" class="btn-primary">
-                        <span class="material-symbols-outlined mr-2">upload</span>Subir Archivo
+                        <span class="material-symbols-outlined mr-2">upload_file</span>Cargar Archivo
                     </button>
                 </div>
             </form>
         </div>
-
-        <div class="flex justify-center mt-6">
-            <a href="{{ url_for('clients.list_clients') }}" class="btn-secondary">
-                <span class="material-symbols-outlined mr-2">arrow_back</span>Volver a la Lista de Clientes
-            </a>
-        </div>
     </div>
 </div>
 {% endblock %}
+
+{% block page_title %}Carga Masiva de Clientes{% endblock %}

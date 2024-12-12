@@ -104,6 +104,9 @@ module.exports = {
         '84': '21rem',
         '96': '24rem',
         'row': '2.5rem',
+        'layout': '1.5rem',
+        'section': '2rem',
+        'element': '1rem',
       },
       borderRadius: {
         'sm': '0.125rem',
@@ -133,15 +136,18 @@ module.exports = {
         'sidebar': '16rem',
       },
       zIndex: {
-        'sidebar': '40',
-        'header': '30',
+        'modal': '50',
+        'overlay': '40',
+        'sidebar': '30',
+        'header': '20',
       },
       position: {
         'sticky': 'sticky',
         'fixed': 'fixed',
       },
       transitionProperty: {
-        'sidebar': 'width, transform',
+        'sidebar': 'transform, width, margin, opacity',
+        'menu': 'transform, opacity, visibility',
       },
       height: {
         'screen': '100vh',
@@ -172,18 +178,38 @@ module.exports = {
         }
       },
       animation: {
-        'fade-in': 'fadeIn 0.2s ease-in-out',
-        'slide-in': 'slideIn 0.3s ease-out',
+        'fade-in': 'fadeIn 150ms ease-out',
+        'fade-out': 'fadeOut 150ms ease-in',
+        'slide-in': 'slideIn 150ms ease-out',
+        'slide-out': 'slideOut 150ms ease-in',
       },
       keyframes: {
         fadeIn: {
           '0%': { opacity: '0' },
           '100%': { opacity: '1' },
         },
-        slideIn: {
-          '0%': { transform: 'translateY(-10px)', opacity: '0' },
-          '100%': { transform: 'translateY(0)', opacity: '1' },
+        fadeOut: {
+          '0%': { opacity: '1' },
+          '100%': { opacity: '0' },
         },
+        slideIn: {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(0)' },
+        },
+        slideOut: {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-100%)' },
+        },
+      },
+      maxWidth: {
+        'layout': '1440px',
+        'content': '1280px',
+        'card': '800px',
+        'form': '640px',
+      },
+      screens: {
+        'xs': '475px',
+        // Los demás breakpoints de Tailwind se mantienen (sm, md, lg, xl, 2xl)
       },
     },
   },
@@ -219,6 +245,31 @@ module.exports = {
         }
       }
       addUtilities(iconUtilities)
+    },
+    function({ addComponents }) {
+      addComponents({
+        '.content-container': {
+          '@apply max-w-content mx-auto px-4 w-full': {},
+        },
+        '.card-container': {
+          '@apply bg-white dark:bg-gray-800 rounded-xl shadow-sm transition-colors duration-200': {},
+        },
+        '.form-container': {
+          '@apply max-w-form mx-auto': {},
+        },
+        '.section-container': {
+          '@apply space-y-section': {},
+        },
+        '.btn-primary': {
+          '@apply inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-primary-600/90 hover:bg-primary-700/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-150': {},
+        },
+        '.btn-secondary': {
+          '@apply inline-flex items-center px-4 py-2 border border-gray-200 dark:border-gray-700/50 shadow-sm text-sm font-medium rounded-lg text-gray-600 dark:text-gray-300 bg-white/80 dark:bg-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-700/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors duration-150': {},
+        },
+        '.btn-icon': {
+          '@apply p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150': {},
+        },
+      })
     }
   ]
 }

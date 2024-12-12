@@ -1,115 +1,131 @@
 {% extends "base.html" %}
 
+{% set breadcrumbs = [
+    ('index', 'Inicio'),
+    ('clients.list_clients', 'Clientes'),
+    (None, 'Nuevo Cliente')
+] %}
+
 {% block content %}
-<div class="container-fluid">
-    <div class="max-w-2xl mx-auto">
-        <div class="card">
-            <form method="POST" class="space-y-6">
-                {{ form.hidden_tag() }}
-                
-                <div class="card-body">
-                    <!-- Información Personal -->
-                    <div class="space-y-6">
-                        <h3 class="section-title">Información Personal</h3>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="form-group">
-                                {{ form.name.label(class="form-label") }}
-                                {{ form.name(class="form-input", placeholder="Nombre completo") }}
-                                {% for error in form.name.errors %}
-                                    <span class="form-error">{{ error }}</span>
-                                {% endfor %}
-                            </div>
-
-                            <div class="form-group">
-                                {{ form.email.label(class="form-label") }}
-                                {{ form.email(class="form-input", placeholder="correo@ejemplo.com") }}
-                                {% for error in form.email.errors %}
-                                    <span class="form-error">{{ error }}</span>
-                                {% endfor %}
-                            </div>
+<div class="space-y-6 px-6 pt-4">
+    <div class="card-container max-w-3xl mx-auto">
+        <form method="POST" class="space-y-6">
+            {{ form.hidden_tag() }}
+            
+            <div class="p-4">
+                <!-- Información Personal -->
+                <div class="space-y-6">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
+                        <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 mr-2">person</span>
+                        Información Personal
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="form-group">
+                            {{ form.name.label(class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1") }}
+                            {{ form.name(class="form-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150", placeholder="Nombre completo") }}
+                            {% for error in form.name.errors %}
+                                <span class="text-sm text-red-600 dark:text-red-400 mt-1">{{ error }}</span>
+                            {% endfor %}
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="form-group">
-                                {{ form.phone.label(class="form-label") }}
-                                {{ form.phone(class="form-input", placeholder="+593 99 999 9999") }}
-                                {% for error in form.phone.errors %}
-                                    <span class="form-error">{{ error }}</span>
-                                {% endfor %}
-                            </div>
-
-                            <div class="form-group">
-                                {{ form.birthdate.label(class="form-label") }}
-                                {{ form.birthdate(class="form-input", type="date") }}
-                                {% for error in form.birthdate.errors %}
-                                    <span class="form-error">{{ error }}</span>
-                                {% endfor %}
-                            </div>
+                        <div class="form-group">
+                            {{ form.email.label(class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1") }}
+                            {{ form.email(class="form-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150", placeholder="correo@ejemplo.com") }}
+                            {% for error in form.email.errors %}
+                                <span class="text-sm text-red-600 dark:text-red-400 mt-1">{{ error }}</span>
+                            {% endfor %}
                         </div>
                     </div>
 
-                    <div class="divider"></div>
-
-                    <!-- Dirección -->
-                    <div class="space-y-6">
-                        <h3 class="section-title">Dirección</h3>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="form-group md:col-span-2">
-                                {{ form.address.label(class="form-label") }}
-                                {{ form.address(class="form-input", placeholder="Dirección completa") }}
-                                {% for error in form.address.errors %}
-                                    <span class="form-error">{{ error }}</span>
-                                {% endfor %}
-                            </div>
-
-                            <div class="form-group">
-                                {{ form.city.label(class="form-label") }}
-                                {{ form.city(class="form-input", placeholder="Ciudad") }}
-                                {% for error in form.city.errors %}
-                                    <span class="form-error">{{ error }}</span>
-                                {% endfor %}
-                            </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="form-group">
+                            {{ form.phone.label(class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1") }}
+                            {{ form.phone(class="form-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150", placeholder="+593 99 999 9999") }}
+                            {% for error in form.phone.errors %}
+                                <span class="text-sm text-red-600 dark:text-red-400 mt-1">{{ error }}</span>
+                            {% endfor %}
                         </div>
-                    </div>
 
-                    <div class="divider"></div>
-
-                    <!-- Documentación -->
-                    <div class="space-y-6">
-                        <h3 class="section-title">Documentación</h3>
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="form-group">
-                                {{ form.document_type.label(class="form-label") }}
-                                {{ form.document_type(class="form-select") }}
-                                {% for error in form.document_type.errors %}
-                                    <span class="form-error">{{ error }}</span>
-                                {% endfor %}
-                            </div>
-
-                            <div class="form-group">
-                                {{ form.document_number.label(class="form-label") }}
-                                {{ form.document_number(class="form-input", placeholder="Número de documento") }}
-                                {% for error in form.document_number.errors %}
-                                    <span class="form-error">{{ error }}</span>
-                                {% endfor %}
-                            </div>
+                        <div class="form-group">
+                            {{ form.birthdate.label(class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1") }}
+                            {{ form.birthdate(class="form-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150", type="date") }}
+                            {% for error in form.birthdate.errors %}
+                                <span class="text-sm text-red-600 dark:text-red-400 mt-1">{{ error }}</span>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
 
-                <div class="card-footer flex justify-end space-x-4">
-                    <a href="{{ url_for('clients.list_clients') }}" class="btn-secondary">
-                        <span class="material-symbols-outlined mr-2">close</span>Cancelar
-                    </a>
-                    <button type="submit" class="btn-primary">
-                        <span class="material-symbols-outlined mr-2">save</span>Guardar
-                    </button>
+                <div class="border-t border-gray-200 dark:border-gray-700 my-6"></div>
+
+                <!-- Dirección -->
+                <div class="space-y-6">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
+                        <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 mr-2">location_on</span>
+                        Dirección
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="form-group md:col-span-2">
+                            {{ form.address.label(class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1") }}
+                            {{ form.address(class="form-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150", placeholder="Dirección completa") }}
+                            {% for error in form.address.errors %}
+                                <span class="text-sm text-red-600 dark:text-red-400 mt-1">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+
+                        <div class="form-group">
+                            {{ form.city.label(class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1") }}
+                            {{ form.city(class="form-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150", placeholder="Ciudad") }}
+                            {% for error in form.city.errors %}
+                                <span class="text-sm text-red-600 dark:text-red-400 mt-1">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
-            </form>
-        </div>
+
+                <div class="border-t border-gray-200 dark:border-gray-700 my-6"></div>
+
+                <!-- Documentación -->
+                <div class="space-y-6">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
+                        <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 mr-2">badge</span>
+                        Documentación
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="form-group">
+                            {{ form.document_type.label(class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1") }}
+                            {{ form.document_type(class="form-select w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150") }}
+                            {% for error in form.document_type.errors %}
+                                <span class="text-sm text-red-600 dark:text-red-400 mt-1">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+
+                        <div class="form-group">
+                            {{ form.document_number.label(class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1") }}
+                            {{ form.document_number(class="form-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150", placeholder="Número de documento") }}
+                            {% for error in form.document_number.errors %}
+                                <span class="text-sm text-red-600 dark:text-red-400 mt-1">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-6 py-4 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-200 dark:border-gray-700 rounded-b-xl flex justify-end space-x-4">
+                <a href="{{ url_for('clients.list_clients') }}" 
+                   class="btn-secondary">
+                    <span class="material-symbols-outlined mr-2">keyboard_backspace</span>Volver
+                </a>
+                <button type="submit" class="btn-primary">
+                    <span class="material-symbols-outlined mr-2">save</span>Guardar
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 {% endblock %}
+
+{% block page_title %}{{ 'Editar' if client else 'Nuevo' }} Cliente{% endblock %}

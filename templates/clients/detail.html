@@ -1,160 +1,157 @@
 {% extends "base.html" %}
 
+{% set breadcrumbs = [
+    ('index', 'Inicio'),
+    ('clients.list_clients', 'Clientes'),
+    (None, client.name)
+] %}
+
 {% block content %}
-<div class="container-fluid">
-    <div class="max-w-4xl mx-auto">
-        <div class="card">
-            <div class="card-header">
-                <div class="flex justify-between items-center">
-                    <h2 class="section-title">Detalles del Cliente</h2>
-                    <div class="flex space-x-4">
-                        <a href="{{ url_for('clients.edit_client', id=client.id) }}" class="btn-primary">
-                            <span class="material-symbols-outlined mr-2">edit</span>Editar Cliente
-                        </a>
-                    </div>
+<div class="space-y-6 px-6 pt-4">
+    <!-- Encabezado y Acciones -->
+    <div class="card-container">
+        <div class="p-4">
+            <div class="flex justify-between items-start mb-8">
+                <div>
+                    <h2 class="text-2xl font-medium text-gray-900 dark:text-gray-100">{{ client.name }}</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ client.document_type.value }} {{ client.document_number }}</p>
                 </div>
+                <a href="{{ url_for('clients.edit_client', id=client.id) }}" 
+                   class="btn-primary">
+                    <span class="material-symbols-outlined mr-2">edit_note</span>Editar Cliente
+                </a>
             </div>
 
             <!-- Información del Cliente -->
-            <div class="card-body">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Información Personal -->
-                    <div class="space-y-4">
-                        <h3 class="section-title flex items-center">
-                            <span class="material-symbols-outlined text-primary-600 mr-2">person</span>
-                            Información Personal
-                        </h3>
-                        <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Contacto -->
+                <div class="space-y-4">
+                    <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Contacto</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center">
+                            <span class="material-symbols-outlined text-gray-400 dark:text-gray-500 w-5 h-5 mr-2">mail</span>
+                            <span class="text-gray-900 dark:text-gray-100">{{ client.email }}</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="material-symbols-outlined text-gray-400 dark:text-gray-500 w-5 h-5 mr-2">phone</span>
+                            <span class="text-gray-900 dark:text-gray-100">{{ client.phone or 'No especificado' }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dirección -->
+                <div class="space-y-4">
+                    <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Ubicación</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-start">
+                            <span class="material-symbols-outlined text-gray-400 dark:text-gray-500 w-5 h-5 mr-2 mt-0.5">location_on</span>
                             <div>
-                                <p class="text-sm font-medium text-gray-500">Email</p>
-                                <p class="text-gray-900">{{ client.email }}</p>
-                            </div>
-                            <div>
-                                <p class="text-sm font-medium text-gray-500">Teléfono</p>
-                                <p class="text-gray-900">{{ client.phone or 'No especificado' }}</p>
-                            </div>
-                            <div>
-                                <p class="text-sm font-medium text-gray-500">Fecha de Nacimiento</p>
-                                <p class="text-gray-900">{{ client.birthdate.strftime('%d/%m/%Y') if client.birthdate else 'No especificada' }}</p>
+                                <p class="text-gray-900 dark:text-gray-100">{{ client.address }}</p>
+                                <p class="text-gray-500 dark:text-gray-400 text-sm">{{ client.city }}</p>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Documentación -->
-                    <div class="space-y-4">
-                        <h3 class="section-title flex items-center">
-                            <span class="material-symbols-outlined text-primary-600 mr-2">badge</span>
-                            Documentación
-                        </h3>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <p class="text-sm font-medium text-gray-500">Tipo de Documento</p>
-                                <p class="text-gray-900">{{ client.document_type.value if client.document_type else 'No especificado' }}</p>
-                            </div>
-                            <div>
-                                <p class="text-sm font-medium text-gray-500">Número de Documento</p>
-                                <p class="text-gray-900">{{ client.document_number }}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Dirección -->
-                    <div class="md:col-span-2 space-y-4">
-                        <h3 class="section-title flex items-center">
-                            <span class="material-symbols-outlined text-primary-600 mr-2">location_on</span>
-                            Dirección
-                        </h3>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div class="col-span-2">
-                                <p class="text-sm font-medium text-gray-500">Dirección Completa</p>
-                                <p class="text-gray-900">{{ client.address }}</p>
-                            </div>
-                            <div>
-                                <p class="text-sm font-medium text-gray-500">Ciudad</p>
-                                <p class="text-gray-900">{{ client.city }}</p>
-                            </div>
+                <!-- Documentación -->
+                <div class="space-y-4">
+                    <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Información Adicional</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center">
+                            <span class="material-symbols-outlined text-gray-400 dark:text-gray-500 w-5 h-5 mr-2">cake</span>
+                            <span class="text-gray-900 dark:text-gray-100">{{ client.birthdate.strftime('%d/%m/%Y') if client.birthdate else 'No especificada' }}</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Pólizas Asociadas -->
-        <div class="card mt-6">
-            <div class="card-header">
-                <div class="flex justify-between items-center">
-                    <h3 class="section-title flex items-center">
-                        <span class="material-symbols-outlined text-primary-600 mr-2">policy</span>
-                        Pólizas Asociadas
-                    </h3>
-                    <a href="{{ url_for('policies.create_policy', client_id=client.id) }}" class="btn-primary">
-                        <span class="material-symbols-outlined mr-2">add</span>Nueva Póliza
-                    </a>
-                </div>
+    <!-- Pólizas Asociadas -->
+    <div class="card-container">
+        <div class="p-4">
+            <!-- Encabezado de Pólizas -->
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
+                    <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 mr-2">policy</span>
+                    Pólizas Asociadas
+                </h3>
+                <a href="{{ url_for('policies.create_policy', client_id=client.id) }}" 
+                   class="btn-primary">
+                    <span class="material-symbols-outlined mr-2">post_add</span>Nueva Póliza
+                </a>
             </div>
-            <div class="card-body">
-                {% if policies %}
-                <div class="table-container">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th class="table-header">Número de Póliza</th>
-                                <th class="table-header">Producto</th>
-                                <th class="table-header">Fecha Inicio</th>
-                                <th class="table-header">Fecha Fin</th>
-                                <th class="table-header">Prima</th>
-                                <th class="table-header">Estado</th>
-                                <th class="table-header">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for policy in policies %}
-                            <tr class="table-row">
-                                <td class="table-cell">{{ policy.policy_number }}</td>
-                                <td class="table-cell">{{ policy.product.name }}</td>
-                                <td class="table-cell">{{ policy.start_date.strftime('%d/%m/%Y') }}</td>
-                                <td class="table-cell">{{ policy.end_date.strftime('%d/%m/%Y') }}</td>
-                                <td class="table-cell">${{ "{:,.2f}".format(policy.premium) }}</td>
-                                <td class="table-cell">
-                                    <span class="badge {% if policy.payment_status.name == 'PAGADO' %}badge-success{% elif policy.payment_status.name == 'PENDIENTE' %}badge-warning{% else %}badge-danger{% endif %}">
+
+            {% if client.policies %}
+            <div class="overflow-hidden rounded-xl">
+                <table class="table w-full">
+                    <thead class="bg-gray-50 dark:bg-gray-700">
+                        <tr>
+                            <th class="table-header text-gray-600 dark:text-gray-300">Número de Póliza</th>
+                            <th class="table-header text-gray-600 dark:text-gray-300">Producto</th>
+                            <th class="table-header text-gray-600 dark:text-gray-300">Fecha Inicio</th>
+                            <th class="table-header text-gray-600 dark:text-gray-300">Fecha Fin</th>
+                            <th class="table-header text-gray-600 dark:text-gray-300">Prima</th>
+                            <th class="table-header text-gray-600 dark:text-gray-300">Estado</th>
+                            <th class="table-header text-gray-600 dark:text-gray-300">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 dark:divide-gray-700 bg-white dark:bg-gray-800">
+                        {% for policy in client.policies %}
+                        <tr class="table-row hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
+                            <td class="table-cell text-gray-900 dark:text-gray-100">{{ policy.policy_number }}</td>
+                            <td class="table-cell text-gray-900 dark:text-gray-100">{{ policy.product.name }}</td>
+                            <td class="table-cell text-gray-900 dark:text-gray-100">{{ policy.start_date.strftime('%d/%m/%Y') }}</td>
+                            <td class="table-cell text-gray-900 dark:text-gray-100">{{ policy.end_date.strftime('%d/%m/%Y') }}</td>
+                            <td class="table-cell text-gray-900 dark:text-gray-100">${{ "{:,.2f}".format(policy.premium) }}</td>
+                            <td class="table-cell">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                            {% if policy.payment_status.name == 'PAGADO' %}
+                                                bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+                                            {% elif policy.payment_status.name == 'PENDIENTE' %}
+                                                bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
+                                            {% else %}
+                                                bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
+                                            {% endif %}">
                                         {{ policy.payment_status.value }}
                                     </span>
                                 </td>
                                 <td class="table-cell">
                                     <div class="flex items-center space-x-4">
                                         <a href="{{ url_for('policies.policy_detail', id=policy.id) }}" 
-                                           class="btn-icon text-blue-600 hover:text-blue-800"
+                                           class="btn-icon text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
                                            title="Ver Detalles">
                                             <span class="material-symbols-outlined">visibility</span>
-                                            <span class="sr-only">Ver detalles</span>
                                         </a>
                                         <a href="{{ url_for('policies.edit_policy', id=policy.id) }}" 
-                                           class="btn-icon text-green-600 hover:text-green-800"
+                                           class="btn-icon text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300"
                                            title="Editar Póliza">
-                                            <span class="material-symbols-outlined">edit</span>
-                                            <span class="sr-only">Editar</span>
+                                            <span class="material-symbols-outlined">edit_note</span>
                                         </a>
                                     </div>
                                 </td>
                             </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                {% else %}
-                <div class="text-center py-8">
-                    <span class="material-symbols-outlined text-gray-400 text-4xl">policy_off</span>
-                    <p class="text-gray-500 mt-2">Este cliente no tiene pólizas asociadas.</p>
-                </div>
-                {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
+            {% else %}
+            <div class="text-center py-12">
+                <span class="material-symbols-outlined text-gray-400 dark:text-gray-600 text-5xl">policy_off</span>
+                <p class="text-gray-500 dark:text-gray-400 mt-3">Este cliente no tiene pólizas asociadas.</p>
+            </div>
+            {% endif %}
         </div>
+    </div>
 
-        <div class="flex justify-center mt-6">
-            <a href="{{ url_for('clients.list_clients') }}" class="btn-secondary">
-                <span class="material-symbols-outlined mr-2">arrow_back</span>Volver a la Lista de Clientes
-            </a>
-        </div>
+    <!-- Botón de Volver -->
+    <div class="flex justify-center">
+        <a href="{{ url_for('clients.list_clients') }}" 
+           class="btn-secondary">
+            <span class="material-symbols-outlined mr-2">keyboard_backspace</span>Volver a la Lista de Clientes
+        </a>
     </div>
 </div>
 {% endblock %}
+
+{% block page_title %}Detalles del Cliente{% endblock %}

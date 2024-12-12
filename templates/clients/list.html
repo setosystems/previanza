@@ -1,9 +1,17 @@
 {% extends "base.html" %}
 
+{% set breadcrumbs = [
+    ('index', 'Inicio'),
+    ('clients.list_clients', 'Clientes')
+] %}
+
+{% block page_title %}Lista de Clientes{% endblock %}
+
 {% block content %}
-<div class="flex flex-col h-full">
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm mb-6 transition-colors duration-200">
-        <div class="card-body">
+<div class="space-y-6 px-6 pt-4">
+    <!-- Barra de búsqueda -->
+    <div class="card-container">
+        <div class="p-4">
             <form method="GET" class="space-y-4">
                 <div class="flex flex-col md:flex-row gap-4">
                     <div class="flex-1">
@@ -51,12 +59,12 @@
                             <span class="material-symbols-outlined">search</span>
                         </button>
                         <a href="{{ url_for('clients.create_client') }}" 
-                           class="h-10 w-10 inline-flex items-center justify-center rounded-lg shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-150"
+                           class="btn-primary h-10 w-10 flex items-center justify-center rounded-lg"
                            title="Nuevo Cliente">
-                            <span class="material-symbols-outlined">person_add</span>
+                            <span class="material-symbols-outlined">add</span>
                         </a>
                         <a href="{{ url_for('clients.bulk_upload_clients') }}" 
-                           class="h-10 w-10 inline-flex items-center justify-center rounded-lg shadow-sm text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors duration-150"
+                           class="btn-secondary h-10 w-10 flex items-center justify-center rounded-lg"
                            title="Carga Masiva">
                             <span class="material-symbols-outlined">upload_file</span>
                         </a>
@@ -66,19 +74,22 @@
         </div>
     </div>
 
-    <div class="card flex-1 dark:bg-gray-800 transition-colors duration-200">
-        <div class="table-container overflow-hidden">
-            <table class="table">
-                <thead class="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+    <!-- Tabla de clientes -->
+    <div class="card-container">
+        <div class="overflow-hidden rounded-xl">
+            <table class="table w-full">
+                <thead class="bg-gray-50 dark:bg-gray-700">
                     <tr>
-                        <th class="table-header text-gray-600 dark:text-gray-300">Nombre</th>
+                        <th class="table-header text-gray-600 dark:text-gray-300 first:rounded-tl-xl last:rounded-tr-xl">
+                            Nombre
+                        </th>
                         <th class="table-header text-gray-600 dark:text-gray-300">Email</th>
                         <th class="table-header text-gray-600 dark:text-gray-300">Documento</th>
                         <th class="table-header text-gray-600 dark:text-gray-300">Estado</th>
                         <th class="table-header text-gray-600 dark:text-gray-300">Acciones</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100 dark:divide-gray-700 bg-white dark:bg-gray-800">
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-700 bg-white dark:bg-gray-800 last:border-b-0">
                     {% for client in clients %}
                     <tr class="table-row hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
                         <td class="table-cell text-gray-900 dark:text-gray-100">{{ client.name }}</td>
@@ -138,8 +149,9 @@
         </div>
     </div>
 
+    <!-- Paginación -->
     {% if pagination %}
-    <div class="mt-4 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
+    <div class="card-container">
         <div class="flex flex-col sm:flex-row items-center justify-between px-4 py-3 gap-4">
             <!-- Selector de elementos por página -->
             <div class="flex flex-wrap items-center gap-3">
@@ -208,8 +220,6 @@
     {% endif %}
 </div>
 {% endblock %}
-
-{% block page_title %}Lista de Clientes{% endblock %}
 
 {% block scripts %}
 <script>

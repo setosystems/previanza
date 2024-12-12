@@ -1,9 +1,15 @@
 {% extends "base.html" %}
 
+{% set breadcrumbs = [
+    ('index', 'Inicio'),
+    ('policies.list_policies', 'Pólizas')
+] %}
+
 {% block content %}
-<div class="container-fluid h-full flex flex-col">
-    <div class="card">
-        <div class="card-header">
+<div class="space-y-6 px-6 pt-4">
+    <!-- Barra de búsqueda -->
+    <div class="card-container">
+        <div class="p-4">
             <div class="flex justify-between items-center">
                 <h2 class="section-title">Búsqueda de Pólizas</h2>
                 <div class="flex space-x-4">
@@ -15,14 +21,24 @@
         </div>
         
         <div class="card-body">
-            <form method="GET">
-                <div class="flex gap-4">
-                    <div class="form-group flex-1">
-                        <label class="form-label" for="policy_number">Número de Póliza</label>
-                        <input type="text" id="policy_number" name="policy_number" class="form-input" 
-                               value="{{ request.args.get('policy_number', '') }}"
-                               placeholder="Número de póliza">
+            <form method="GET" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="form-group">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" 
+                               for="policy_number">Número de Póliza</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="material-symbols-outlined text-gray-400 dark:text-gray-500">policy</span>
+                            </span>
+                            <input type="text" 
+                                   id="policy_number" 
+                                   name="policy_number" 
+                                   class="form-input pl-10 w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100" 
+                                   value="{{ request.args.get('policy_number', '') }}"
+                                   placeholder="Número de póliza">
+                        </div>
                     </div>
+
                     <div class="form-group flex-1">
                         <label class="form-label" for="client_name">Cliente</label>
                         <input type="text" id="client_name" name="client_name" class="form-input" 
@@ -35,10 +51,9 @@
                                value="{{ request.args.get('product_name', '') }}"
                                placeholder="Nombre del producto">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label opacity-0">Buscar</label>
-                        <button type="submit" class="btn-primary">
-                            <span class="material-symbols-outlined mr-2">search</span>Buscar
+                    <div class="flex items-center space-x-2">
+                        <button type="submit" class="btn-primary h-10 w-10 flex items-center justify-center rounded-lg">
+                            <span class="material-symbols-outlined">search</span>
                         </button>
                     </div>
                 </div>
@@ -46,9 +61,10 @@
         </div>
     </div>
 
-    <div class="section flex-1 overflow-auto">
-        <div class="table-container">
-            <table class="table">
+    <!-- Tabla de pólizas -->
+    <div class="card-container">
+        <div class="overflow-hidden rounded-xl">
+            <table class="table w-full">
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="table-header">Número</th>
@@ -102,63 +118,68 @@
         </div>
     </div>
 
+    <!-- Paginación -->
     {% if pagination %}
-    <div class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6 mt-6">
-        <!-- Paginación móvil -->
-        <div class="flex flex-1 justify-between sm:hidden">
-            {% if pagination.has_prev %}
-            <a href="{{ url_for('policies.list_policies', page=pagination.prev_num) }}" class="btn-secondary">Anterior</a>
-            {% endif %}
-            {% if pagination.has_next %}
-            <a href="{{ url_for('policies.list_policies', page=pagination.next_num) }}" class="btn-secondary">Siguiente</a>
-            {% endif %}
-        </div>
-
-        <!-- Paginación desktop -->
-        <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-            <div>
-                <p class="text-sm text-gray-700">
-                    Mostrando página <span class="font-medium">{{ pagination.page }}</span> de <span class="font-medium">{{ pagination.pages }}</span>
-                </p>
+    <div class="card-container">
+        <div class="flex flex-col sm:flex-row items-center justify-between px-4 py-3 gap-4">
+            <!-- Paginación móvil -->
+            <div class="flex flex-1 justify-between sm:hidden">
+                {% if pagination.has_prev %}
+                <a href="{{ url_for('policies.list_policies', page=pagination.prev_num) }}" class="btn-secondary">Anterior</a>
+                {% endif %}
+                {% if pagination.has_next %}
+                <a href="{{ url_for('policies.list_policies', page=pagination.next_num) }}" class="btn-secondary">Siguiente</a>
+                {% endif %}
             </div>
-            <div>
-                <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
-                    {% if pagination.has_prev %}
-                    <a href="{{ url_for('policies.list_policies', page=pagination.prev_num) }}" 
-                       class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
-                        <span class="sr-only">Anterior</span>
-                        <span class="material-symbols-outlined text-sm">chevron_left</span>
-                    </a>
-                    {% endif %}
-                    
-                    {% for page in range(1, pagination.pages + 1) %}
-                        {% if page == pagination.page %}
-                        <a href="#" aria-current="page"
-                           class="relative z-10 inline-flex items-center bg-primary-600 px-4 py-2 text-sm font-semibold text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600">
-                            {{ page }}
-                        </a>
-                        {% else %}
-                        <a href="{{ url_for('policies.list_policies', page=page) }}"
-                           class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
-                            {{ page }}
+
+            <!-- Paginación desktop -->
+            <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+                <div>
+                    <p class="text-sm text-gray-700">
+                        Mostrando página <span class="font-medium">{{ pagination.page }}</span> de <span class="font-medium">{{ pagination.pages }}</span>
+                    </p>
+                </div>
+                <div>
+                    <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+                        {% if pagination.has_prev %}
+                        <a href="{{ url_for('policies.list_policies', page=pagination.prev_num) }}" 
+                           class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
+                            <span class="sr-only">Anterior</span>
+                            <span class="material-symbols-outlined text-sm">chevron_left</span>
                         </a>
                         {% endif %}
-                    {% endfor %}
+                        
+                        {% for page in range(1, pagination.pages + 1) %}
+                            {% if page == pagination.page %}
+                            <a href="#" aria-current="page"
+                               class="relative z-10 inline-flex items-center bg-primary-600 px-4 py-2 text-sm font-semibold text-white focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600">
+                                {{ page }}
+                            </a>
+                            {% else %}
+                            <a href="{{ url_for('policies.list_policies', page=page) }}"
+                               class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
+                                {{ page }}
+                            </a>
+                            {% endif %}
+                        {% endfor %}
 
-                    {% if pagination.has_next %}
-                    <a href="{{ url_for('policies.list_policies', page=pagination.next_num) }}"
-                       class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
-                        <span class="sr-only">Siguiente</span>
-                        <span class="material-symbols-outlined text-sm">chevron_right</span>
-                    </a>
-                    {% endif %}
-                </nav>
+                        {% if pagination.has_next %}
+                        <a href="{{ url_for('policies.list_policies', page=pagination.next_num) }}"
+                           class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
+                            <span class="sr-only">Siguiente</span>
+                            <span class="material-symbols-outlined text-sm">chevron_right</span>
+                        </a>
+                        {% endif %}
+                    </nav>
+                </div>
             </div>
         </div>
     </div>
     {% endif %}
 </div>
 {% endblock %}
+
+{% block page_title %}Lista de Pólizas{% endblock %}
 
 {% block scripts %}
 <script>

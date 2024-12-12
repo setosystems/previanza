@@ -1,25 +1,28 @@
-<nav class="sticky top-0 z-30 px-6 py-2">
-    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl h-12 shadow-sm transition-colors duration-200">
-        <div class="max-w-screen-2xl mx-auto flex items-center justify-between h-full px-4">
+{% from "includes/macros.html" import render_breadcrumbs %}
+
+<nav class="sticky top-0 z-header px-6 pt-4">
+    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm transition-colors duration-200">
+        <div class="flex items-center justify-between h-14 px-6">
+            <!-- Botón de menú móvil -->
+            <button class="lg:hidden p-2 -ml-2 text-gray-500 hover:text-gray-600 dark:text-gray-400 
+                          dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 
+                          rounded-lg transition-colors"
+                    @click="mobileMenuOpen = !mobileMenuOpen"
+                    :aria-expanded="mobileMenuOpen">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
+
             <!-- Breadcrumbs -->
-            <div class="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400">
-                <a href="{{ url_for('index') }}" class="hover:text-primary-600 transition-colors">
-                    <span class="material-symbols-outlined text-sm align-middle">home</span>
-                </a>
-                {% if request.endpoint %}
-                    <span class="material-symbols-outlined text-sm">chevron_right</span>
-                    {% if request.endpoint.startswith('clients') %}
-                        <a href="{{ url_for('clients.list_clients') }}" 
-                           class="hover:text-primary-600 transition-colors">Clientes</a>
-                        {% if 'create' in request.endpoint %}
-                            <span class="material-symbols-outlined text-sm">chevron_right</span>
-                            <span class="text-gray-700 dark:text-gray-300">Nuevo Cliente</span>
-                        {% elif 'edit' in request.endpoint %}
-                            <span class="material-symbols-outlined text-sm">chevron_right</span>
-                            <span class="text-gray-700 dark:text-gray-300">Editar Cliente</span>
-                        {% endif %}
-                    {% endif %}
-                    <!-- Puedes agregar más condiciones para otras secciones -->
+            <div class="hidden lg:flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 flex-1">
+                {{ render_breadcrumbs(breadcrumbs) if breadcrumbs is defined else render_breadcrumbs([('index', 'Inicio')]) }}
+            </div>
+
+            <!-- Título de página en móvil -->
+            <div class="lg:hidden text-sm font-medium text-gray-700 dark:text-gray-300 flex-1 text-center">
+                {% if self.page_title is defined %}
+                    {{ self.page_title() }}
+                {% else %}
+                    Previanza
                 {% endif %}
             </div>
 
@@ -66,4 +69,159 @@
             </div>
         </div>
     </div>
-</nav> 
+</nav>
+
+<!-- Menú móvil -->
+<div x-show="mobileMenuOpen"
+     x-transition:enter="transition ease-out duration-200"
+     x-transition:enter-start="opacity-0"
+     x-transition:enter-end="opacity-100"
+     x-transition:leave="transition ease-in duration-150"
+     x-transition:leave-start="opacity-100"
+     x-transition:leave-end="opacity-0"
+     class="fixed inset-0 z-40 lg:hidden"
+     @click="mobileMenuOpen = false">
+    <!-- Overlay de fondo -->
+    <div class="fixed inset-0 bg-black/50" aria-hidden="true"></div>
+
+    <!-- Panel del menú -->
+    <div x-show="mobileMenuOpen"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="-translate-x-full"
+         x-transition:enter-end="translate-x-0"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="translate-x-0"
+         x-transition:leave-end="-translate-x-full"
+         @click.stop=""
+         class="fixed inset-y-0 left-0 w-full max-w-[280px] bg-white dark:bg-gray-800 shadow-xl flex flex-col">
+        
+        <!-- Header del menú móvil -->
+        <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+            <div class="flex items-center">
+                <img src="{{ url_for('static', filename='img/logo_black.svg') }}" 
+                     alt="Logo Previanza" 
+                     class="w-8 h-8">
+                <span class="ml-2 text-gray-900 dark:text-gray-100 font-medium">Previanza</span>
+            </div>
+            <button @click="mobileMenuOpen = false"
+                    class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+
+        <!-- Contenido del menú móvil -->
+        <nav class="flex-1 overflow-y-auto py-4">
+            <div class="px-4 space-y-1">
+                <!-- Inicio -->
+                <a href="{{ url_for('index') }}" 
+                   class="flex items-center px-3 py-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors
+                          {{ 'bg-primary-600 text-white dark:bg-primary-600' if request.endpoint == 'index' }}">
+                    <span class="material-symbols-outlined mr-3">home</span>
+                    <span>Inicio</span>
+                </a>
+
+                <!-- Clientes -->
+                <a href="{{ url_for('clients.list_clients') }}" 
+                   class="flex items-center px-3 py-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors
+                          {{ 'bg-primary-600 text-white dark:bg-primary-600' if request.endpoint and request.endpoint.startswith('clients.') }}">
+                    <span class="material-symbols-outlined mr-3">group</span>
+                    <span>Clientes</span>
+                </a>
+
+                {% if current_user.is_authenticated %}
+                    {% if current_user.role in [UserRole.ADMIN, UserRole.DIGITADOR] %}
+                        <!-- Pólizas -->
+                        <a href="{{ url_for('policies.list_policies') }}" 
+                           class="flex items-center px-3 py-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors
+                                  {{ 'bg-primary-600 text-white dark:bg-primary-600' if request.endpoint and request.endpoint.startswith('policies.') }}">
+                            <span class="material-symbols-outlined mr-3">policy</span>
+                            <span>Pólizas</span>
+                        </a>
+
+                        <!-- Productos -->
+                        <a href="{{ url_for('products.list_products') }}" 
+                           class="flex items-center px-3 py-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors
+                                  {{ 'bg-primary-600 text-white dark:bg-primary-600' if request.endpoint and request.endpoint.startswith('products.') }}">
+                            <span class="material-symbols-outlined mr-3">inventory_2</span>
+                            <span>Productos</span>
+                        </a>
+                    {% endif %}
+
+                    {% if current_user.role == UserRole.ADMIN %}
+                        <!-- Agentes -->
+                        <a href="{{ url_for('agents.list_agents') }}" 
+                           class="flex items-center px-3 py-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors
+                                  {{ 'bg-primary-600 text-white dark:bg-primary-600' if request.endpoint and request.endpoint.startswith('agents.') }}">
+                            <span class="material-symbols-outlined mr-3">support_agent</span>
+                            <span>Agentes</span>
+                        </a>
+
+                        <!-- Usuarios -->
+                        <a href="{{ url_for('auth.list_users') }}" 
+                           class="flex items-center px-3 py-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors
+                                  {{ 'bg-primary-600 text-white dark:bg-primary-600' if request.endpoint and request.endpoint.startswith('auth.') }}">
+                            <span class="material-symbols-outlined mr-3">manage_accounts</span>
+                            <span>Usuarios</span>
+                        </a>
+
+                        <!-- Configuración -->
+                        <a href="{{ url_for('config.config_index') }}" 
+                           class="flex items-center px-3 py-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors
+                                  {{ 'bg-primary-600 text-white dark:bg-primary-600' if request.endpoint and request.endpoint.startswith('config.') }}">
+                            <span class="material-symbols-outlined mr-3">settings</span>
+                            <span>Configuración</span>
+                        </a>
+                    {% endif %}
+
+                    <!-- Informes -->
+                    <div x-data="{ open: false }" class="relative">
+                        <button @click="open = !open"
+                                class="w-full flex items-center justify-between px-3 py-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors
+                                       {{ 'bg-primary-600 text-white dark:bg-primary-600' if request.endpoint and request.endpoint.startswith('reports.') }}">
+                            <div class="flex items-center">
+                                <span class="material-symbols-outlined mr-3">analytics</span>
+                                <span>Informes</span>
+                            </div>
+                            <span class="material-symbols-outlined transition-transform duration-200"
+                                  :class="{ 'rotate-180': open }">expand_more</span>
+                        </button>
+                        
+                        <div x-show="open"
+                             x-transition:enter="transition ease-out duration-100"
+                             x-transition:enter-start="transform opacity-0 scale-95"
+                             x-transition:enter-end="transform opacity-100 scale-100"
+                             x-transition:leave="transition ease-in duration-75"
+                             x-transition:leave-start="transform opacity-100 scale-100"
+                             x-transition:leave-end="transform opacity-0 scale-95"
+                             class="mt-1 pl-8 space-y-1">
+                           {% for item in [
+                               ('reports.dashboard', 'Dashboard', 'dashboard'),
+                               ('reports.sales_report', 'Reporte de Ventas', 'trending_up'),
+                               ('reports.commission_report', 'Reporte de Comisiones', 'payments'),
+                               ('reports.client_analytics', 'Análisis de Clientes', 'group_add'),
+                               ('reports.policy_analytics', 'Análisis de Pólizas', 'insights'),
+                               ('reports.diagram', 'Diagrama de Comisiones', 'account_tree')
+                           ] %}
+                           <a href="{{ url_for(item[0]) }}"
+                              class="flex items-center px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors
+                                     {{ 'bg-primary-600 text-white dark:bg-primary-600' if request.endpoint == item[0] }}">
+                               <span class="material-symbols-outlined mr-3">{{ item[2] }}</span>
+                               <span>{{ item[1] }}</span>
+                           </a>
+                           {% endfor %}
+                       </div>
+                   </div>
+                {% endif %}
+            </div>
+        </nav>
+
+        <!-- Footer del menú móvil -->
+        <div class="p-4 border-t border-gray-200 dark:border-gray-700">
+            <a href="{{ url_for('auth.logout') }}" 
+               class="flex items-center px-3 py-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                <span class="material-symbols-outlined mr-3">logout</span>
+                <span>Cerrar Sesión</span>
+            </a>
+        </div>
+    </div>
+</div> 

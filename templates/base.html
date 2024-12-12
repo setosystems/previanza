@@ -1,5 +1,13 @@
 <!DOCTYPE html>
-<html lang="es" class="h-full" x-data="{ darkMode: localStorage.theme === 'dark' }" :class="{ 'dark': darkMode }">
+<html lang="es" class="h-full" 
+      x-data="{ 
+          darkMode: localStorage.theme === 'dark',
+          mobileMenuOpen: false
+      }" 
+      :class="{ 
+          'dark': darkMode,
+          'overflow-hidden': mobileMenuOpen
+      }">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -34,29 +42,34 @@
         }
     </script>
 </head>
-<body class="h-full bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+<body class="h-full bg-gray-50 dark:bg-gray-900 transition-colors duration-200"
+      @keydown.escape="mobileMenuOpen = false">
     <div class="min-h-screen flex">
-        <!-- Sidebar -->
         {% include 'includes/sidebar.html' %}
         
         <!-- Main Content -->
-        <div class="flex-1 flex flex-col min-h-screen">
+        <div class="flex-1 flex flex-col min-h-screen"
+             :class="{ 
+                 'lg:ml-64': !sidebarCollapsed && !mobileMenuOpen,
+                 'lg:ml-16': sidebarCollapsed && !mobileMenuOpen,
+                 'overflow-hidden': mobileMenuOpen
+             }">
             {% include 'includes/header.html' %}
             
             <!-- Content Area -->
-            <main class="flex-1 overflow-auto bg-gray-50 dark:bg-gray-900">
-                <div class="max-w-screen-2xl mx-auto px-6 pb-6">
+            <main class="flex-1 overflow-auto bg-gray-50 dark:bg-gray-900 pb-6">
                     {% with messages = get_flashed_messages(with_categories=true) %}
                         {% if messages %}
+                           <div class="max-w-screen-2xl mx-auto px-6">
                             {% for category, message in messages %}
                                 <div class="mb-4 p-4 rounded-lg {% if category == 'error' %}bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200{% else %}bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-200{% endif %}">
                                     {{ message }}
                                 </div>
                             {% endfor %}
+                           </div>
                         {% endif %}
                     {% endwith %}
                     {% block content %}{% endblock %}
-                </div>
             </main>
         </div>
     </div>
