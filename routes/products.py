@@ -40,16 +40,36 @@ def save_product_image(form_image):
 @login_required
 @admin_or_digitador_required
 def list_products():
-    name = request.args.get('name', '')
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
     
-    query = Product.query
+    query = Product.query.order_by(Product.name)
+    
+    # Aplicar filtros de búsqueda si existen
+    name = request.args.get('name', '')
+    aseguradora = request.args.get('aseguradora', '')
+    
     if name:
         query = query.filter(Product.name.ilike(f'%{name}%'))
+    if aseguradora:
+        query = query.filter(Product.aseguradora.ilike(f'%{aseguradora}%'))
     
-    products = query.all()
-    return render_template('products/list.html', 
+    # Obtener la paginación
+    pagination = query.paginate(
+        page=page,
+        per_page=per_page,
+        error_out=False
+    )
+    
+    total = query.count()
+    products = pagination.items
+    
+    return render_template('products/list.html',
                          products=products,
-                         title="Lista de Productos")
+                         pagination=pagination,
+                         total=total,
+                         page=page,
+                         per_page=per_page)
 
 @bp.route('/create', methods=['GET', 'POST'])
 @login_required

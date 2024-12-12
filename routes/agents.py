@@ -11,17 +11,36 @@ bp = Blueprint('agents', __name__, url_prefix='/agents')
 @login_required
 @admin_required
 def list_agents():
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    
+    query = User.query.filter_by(role=UserRole.AGENTE).order_by(User.username)
+    
+    # Aplicar filtros de búsqueda si existen
     username = request.args.get('username', '')
     email = request.args.get('email', '')
     
-    query = User.query.filter_by(role=UserRole.AGENTE)
     if username:
         query = query.filter(User.username.ilike(f'%{username}%'))
     if email:
         query = query.filter(User.email.ilike(f'%{email}%'))
     
-    agents = query.all()
-    return render_template('agents/list.html', agents=agents, title="Lista de Agentes")
+    # Obtener la paginación
+    pagination = query.paginate(
+        page=page,
+        per_page=per_page,
+        error_out=False
+    )
+    
+    total = query.count()
+    agents = pagination.items
+    
+    return render_template('agents/list.html',
+                         agents=agents,
+                         pagination=pagination,
+                         total=total,
+                         page=page,
+                         per_page=per_page)
 
 @bp.route('/create', methods=['GET', 'POST'])
 @login_required

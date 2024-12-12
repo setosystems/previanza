@@ -1,77 +1,106 @@
 {% extends "base.html" %}
 
+{% set breadcrumbs = [
+    ('index', 'Inicio'),
+    ('agents.list_agents', 'Agentes')
+] %}
+
 {% block content %}
-<div class="container-fluid h-full flex flex-col">
-    <div class="card">
-        <div class="card-header">
-            <div class="flex justify-between items-center">
-                <h2 class="section-title">Búsqueda de Agentes</h2>
-                <div class="flex space-x-4">
-                    <a href="{{ url_for('agents.create_agent') }}" class="btn-primary">
-                        <span class="material-symbols-outlined mr-2">person_add</span>Nuevo Agente
-                    </a>
-                </div>
-            </div>
-        </div>
-        
-        <div class="card-body">
-            <form method="GET">
-                <div class="flex gap-4">
-                    <div class="form-group flex-1">
-                        <label class="form-label" for="username">Usuario</label>
-                        <input type="text" id="username" name="username" class="form-input" 
-                               value="{{ request.args.get('username', '') }}"
-                               placeholder="Nombre de usuario">
+<div class="space-y-6 px-6 pt-4">
+    <!-- Barra de búsqueda -->
+    <div class="card-container">
+        <div class="p-4">
+            <div class="flex items-center space-x-4">
+                <!-- Campos de búsqueda -->
+                <form method="GET" class="flex-1 flex items-center space-x-4">
+                    <div class="flex-1">
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="material-symbols-outlined text-gray-400 dark:text-gray-500">person</span>
+                            </span>
+                            <input type="text" 
+                                   id="username" 
+                                   name="username" 
+                                   class="form-input h-10 pl-10 w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150" 
+                                   value="{{ request.args.get('username', '') }}"
+                                   placeholder="Nombre de usuario">
+                        </div>
                     </div>
-                    <div class="form-group flex-1">
-                        <label class="form-label" for="email">Email</label>
-                        <input type="email" id="email" name="email" class="form-input" 
-                               value="{{ request.args.get('email', '') }}"
-                               placeholder="correo@ejemplo.com">
+
+                    <div class="flex-1">
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="material-symbols-outlined text-gray-400 dark:text-gray-500">mail</span>
+                            </span>
+                            <input type="email" 
+                                   id="email" 
+                                   name="email" 
+                                   class="form-input h-10 pl-10 w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150" 
+                                   value="{{ request.args.get('email', '') }}"
+                                   placeholder="correo@ejemplo.com">
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label opacity-0">Buscar</label>
-                        <button type="submit" class="btn-primary">
-                            <span class="material-symbols-outlined mr-2">search</span>Buscar
+
+                    <div class="flex items-center">
+                        <button type="submit" 
+                                class="btn-primary h-10 w-10 flex items-center justify-center rounded-lg">
+                            <span class="material-symbols-outlined">search</span>
                         </button>
+                        
+                        <div class="flex items-center space-x-2 ml-4">
+                            <a href="{{ url_for('agents.create_agent') }}" 
+                               class="bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white h-10 w-10 flex items-center justify-center rounded-lg transition-colors"
+                               title="Nuevo Agente">
+                                <span class="material-symbols-outlined">add</span>
+                            </a>
+                        </div>
                     </div>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
 
-    <div class="section flex-1 overflow-auto">
-        <div class="table-container">
-            <table class="table">
-                <thead class="bg-gray-50">
+    <!-- Tabla de agentes -->
+    <div class="card-container">
+        <div class="overflow-hidden rounded-xl">
+            <table class="table w-full">
+                <thead class="bg-gray-50 dark:bg-gray-700">
                     <tr>
-                        <th class="table-header">Usuario</th>
-                        <th class="table-header">Email</th>
-                        <th class="table-header">Nombre</th>
-                        <th class="table-header">Supervisor</th>
-                        <th class="table-header">Acciones</th>
+                        <th class="table-header text-gray-600 dark:text-gray-300 first:rounded-tl-xl">Usuario</th>
+                        <th class="table-header text-gray-600 dark:text-gray-300">Email</th>
+                        <th class="table-header text-gray-600 dark:text-gray-300">Nombre</th>
+                        <th class="table-header text-gray-600 dark:text-gray-300">Supervisor</th>
+                        <th class="table-header text-gray-600 dark:text-gray-300 last:rounded-tr-xl">Acciones</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200">
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-700 bg-white dark:bg-gray-800 last:border-b-0">
                     {% for agent in agents %}
-                    <tr class="table-row">
-                        <td class="table-cell">{{ agent.username }}</td>
-                        <td class="table-cell">{{ agent.email }}</td>
-                        <td class="table-cell">{{ agent.name }}</td>
-                        <td class="table-cell">{{ agent.parent.username if agent.parent else 'N/A' }}</td>
+                    <tr class="table-row hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
+                        <td class="table-cell text-gray-900 dark:text-gray-100">{{ agent.username }}</td>
+                        <td class="table-cell text-gray-700 dark:text-gray-300">{{ agent.email }}</td>
+                        <td class="table-cell text-gray-700 dark:text-gray-300">{{ agent.name }}</td>
+                        <td class="table-cell text-gray-700 dark:text-gray-300">
+                            {% if agent.parent %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                {{ agent.parent.username }}
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200">
+                                N/A
+                            </span>
+                            {% endif %}
+                        </td>
                         <td class="table-cell">
-                            <div class="flex items-center space-x-4">
+                            <div class="flex justify-center space-x-2">
                                 <a href="{{ url_for('agents.edit_agent', id=agent.id) }}" 
-                                   class="btn-icon text-green-600 hover:text-green-800"
+                                   class="btn-icon text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300"
                                    title="Editar Agente">
                                     <span class="material-symbols-outlined">edit</span>
-                                    <span class="sr-only">Editar</span>
                                 </a>
                                 <button onclick="confirmDelete('{{ agent.id }}', '{{ agent.username }}')"
-                                        class="btn-icon text-red-600 hover:text-red-800"
+                                        class="btn-icon text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
                                         title="Eliminar Agente">
                                     <span class="material-symbols-outlined">delete</span>
-                                    <span class="sr-only">Eliminar</span>
                                 </button>
                             </div>
                         </td>
@@ -82,32 +111,77 @@
         </div>
     </div>
 
+    <!-- Paginación -->
     {% if pagination %}
-    <div class="flex justify-between items-center mt-6">
-        <div class="text-sm text-gray-700">
-            Mostrando página {{ pagination.page }} de {{ pagination.pages }}
-        </div>
-        <div class="flex space-x-2">
-            {% if pagination.has_prev %}
-            <a href="{{ url_for('agents.list_agents', page=pagination.prev_num) }}" 
-               class="btn-secondary">
-                <span class="material-symbols-outlined mr-2">chevron_left</span>Anterior
-            </a>
-            {% endif %}
-            
-            {% if pagination.has_next %}
-            <a href="{{ url_for('agents.list_agents', page=pagination.next_num) }}" 
-               class="btn-secondary">
-                Siguiente<span class="material-symbols-outlined ml-2">chevron_right</span>
-            </a>
-            {% endif %}
+    <div class="card-container">
+        <div class="flex flex-col sm:flex-row items-center justify-between px-4 py-3 gap-4">
+            <!-- Selector de elementos por página -->
+            <div class="flex flex-wrap items-center gap-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-sm text-gray-600 dark:text-gray-400">Ver</span>
+                    <select name="per_page" 
+                            onchange="window.location.href=this.value"
+                            class="form-select w-20 rounded-md text-sm border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 bg-white dark:bg-gray-700 focus:border-primary-500 focus:ring-primary-500 transition-colors">
+                        {% for count in [10, 25, 50, 100] %}
+                        <option value="{{ url_for('agents.list_agents', per_page=count) }}"
+                                {% if request.args.get('per_page', '10')|int == count %}selected{% endif %}>
+                            {{ count }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <span class="text-sm text-gray-600 dark:text-gray-400">registros</span>
+                </div>
+
+                <div class="h-4 w-px bg-gray-300 dark:bg-gray-600 hidden sm:block"></div>
+
+                <!-- Información de registros -->
+                <span class="text-sm text-gray-600 dark:text-gray-400">
+                    {{ (pagination.page - 1) * pagination.per_page + 1 }}
+                    -
+                    {{ min(pagination.page * pagination.per_page, pagination.total) }}
+                    de
+                    {{ pagination.total }}
+                    {{ 'registro' if pagination.total == 1 else 'registros' }}
+                </span>
+            </div>
+
+            <!-- Paginación -->
+            <nav class="flex items-center justify-center sm:justify-end gap-1">
+                {% if pagination.has_prev %}
+                <a href="{{ url_for('agents.list_agents', page=pagination.prev_num, per_page=request.args.get('per_page', 10)) }}"
+                   class="relative inline-flex items-center rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-primary-600 transition-colors">
+                    <span class="sr-only">Anterior</span>
+                    <span class="material-symbols-outlined text-sm">chevron_left</span>
+                </a>
+                {% endif %}
+
+                {% for page in pagination.iter_pages() %}
+                    {% if page %}
+                        <a href="{{ url_for('agents.list_agents', page=page, per_page=request.args.get('per_page', 10)) }}"
+                           class="relative inline-flex items-center justify-center min-w-[2.5rem] h-10 text-sm font-medium rounded-md transition-colors
+                                  {% if page == pagination.page %}
+                                      text-white bg-primary-600 hover:bg-primary-700 shadow-sm
+                                  {% else %}
+                                      text-gray-700 hover:bg-gray-50 hover:text-primary-600
+                                  {% endif %}">
+                            {{ page }}
+                        </a>
+                    {% endif %}
+                {% endfor %}
+
+                {% if pagination.has_next %}
+                <a href="{{ url_for('agents.list_agents', page=pagination.next_num, per_page=request.args.get('per_page', 10)) }}"
+                   class="relative inline-flex items-center rounded-md p-2 text-gray-400 hover:bg-gray-50 hover:text-primary-600 transition-colors">
+                    <span class="sr-only">Siguiente</span>
+                    <span class="material-symbols-outlined text-sm">chevron_right</span>
+                </a>
+                {% endif %}
+            </nav>
         </div>
     </div>
     {% endif %}
 </div>
 {% endblock %}
-
-{% block page_title %}Lista de Agentes{% endblock %}
 
 {% block scripts %}
 <script>

@@ -34,9 +34,26 @@ def list_policies():
     if current_user.role == UserRole.AGENTE:
         query = query.filter_by(agent_id=current_user.id)
     
-    policies = query.all()
+    # Ordenar por número de póliza
+    query = query.order_by(Policy.policy_number)
+    
+    # Configuración de paginación
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    
+    allowed_per_page = [10, 25, 50, 100]
+    if per_page not in allowed_per_page:
+        per_page = 10
+    
+    pagination = query.paginate(
+        page=page, 
+        per_page=per_page,
+        error_out=False
+    )
+    
     return render_template('policies/list.html', 
-                         policies=policies,
+                         policies=pagination.items,
+                         pagination=pagination,
                          title="Lista de Pólizas")
 
 @bp.route('/create', methods=['GET', 'POST'])

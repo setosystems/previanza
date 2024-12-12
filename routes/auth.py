@@ -84,19 +84,36 @@ def edit_user(user_id):
 @login_required
 @admin_required
 def list_users():
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 10, type=int)
+    
+    query = User.query.order_by(User.username)
+    
+    # Aplicar filtros de búsqueda si existen
     username = request.args.get('username', '')
     email = request.args.get('email', '')
     
-    query = User.query
     if username:
         query = query.filter(User.username.ilike(f'%{username}%'))
     if email:
         query = query.filter(User.email.ilike(f'%{email}%'))
     
-    users = query.all()
-    return render_template('auth/users.html', 
+    # Obtener la paginación
+    pagination = query.paginate(
+        page=page,
+        per_page=per_page,
+        error_out=False
+    )
+    
+    total = query.count()
+    users = pagination.items
+    
+    return render_template('auth/users.html',
                          users=users,
-                         title="Gestión de Usuarios")
+                         pagination=pagination,
+                         total=total,
+                         page=page,
+                         per_page=per_page)
 
 @bp.route('/delete_user/<int:user_id>')
 @login_required
