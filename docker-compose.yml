@@ -24,19 +24,13 @@ services:
       - PRODUCT_IMAGES_FOLDER=/app/static/img/products
       - SEND_FILE_MAX_AGE_DEFAULT=0
     volumes:
-      - ./static:/app/static:rw
+      - ./static/css:/app/static/css:rw
+      - ./static/js:/app/static/js:rw
+      - ./static/icons:/app/static/icons:rw
+      - uploaded_files:/app/static/uploads
+      - product_images:/app/static/img/products
       - ./migrations:/app/migrations:rw
       - ./reports:/app/reports:rw
-      - type: volume
-        source: uploaded_files
-        target: /app/static/uploads
-        volume:
-          nocopy: true
-      - type: volume
-        source: product_images
-        target: /app/static/img/products
-        volume:
-          nocopy: true
       - ./gunicorn_config.py:/app/gunicorn_config.py
     depends_on:
       db:

@@ -40,19 +40,13 @@
                         {% if policy_growth > 0 %}
                         <span class="text-green-600 dark:text-green-400">
                             <span class="material-symbols-outlined text-sm align-middle">trending_up</span>
-                            {{ "%.1f"|format(policy_growth) }}%
-                        </span>
-                        {% else %}
-                        <span class="text-red-600 dark:text-red-400">
-                            <span class="material-symbols-outlined text-sm align-middle">trending_down</span>
-                            {{ "%.1f"|format(policy_growth|abs) }}%
+                            {{ "%.1f"|format(policy_growth) }}% vs mes anterior
                         </span>
                         {% endif %}
-                        vs mes anterior
                     </p>
                 </div>
-                <div class="w-12 h-12 bg-primary-100 dark:bg-primary-900 rounded-lg flex items-center justify-center">
-                    <span class="material-symbols-outlined text-primary-600 dark:text-primary-400">description</span>
+                <div class="w-12 h-12 rounded-full bg-blue-900/90 dark:bg-blue-900 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-blue-200">description</span>
                 </div>
             </div>
         </div>
@@ -62,11 +56,11 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Prima Total</p>
-                    <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mt-1">${{ "{:,.2f}".format(total_premium) }}</p>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Acumulado del período</p>
+                    <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mt-1">${{ total_premium }}</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Acumulado del periodo</p>
                 </div>
-                <div class="w-12 h-12 bg-success-50 dark:bg-success-900 rounded-lg flex items-center justify-center">
-                    <span class="material-symbols-outlined text-success-500 dark:text-success-400">attach_money</span>
+                <div class="w-12 h-12 rounded-full bg-emerald-900/90 dark:bg-emerald-900 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-emerald-200">payments</span>
                 </div>
             </div>
         </div>
@@ -77,12 +71,10 @@
                 <div>
                     <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Clientes Activos</p>
                     <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mt-1">{{ active_clients }}</p>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                        <span class="text-green-600 dark:text-green-400">+{{ new_clients }}</span> nuevos este mes
-                    </p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">+{{ new_clients }} nuevos este mes</p>
                 </div>
-                <div class="w-12 h-12 bg-warning-50 dark:bg-warning-900 rounded-lg flex items-center justify-center">
-                    <span class="material-symbols-outlined text-warning-500 dark:text-warning-400">group</span>
+                <div class="w-12 h-12 rounded-full bg-amber-900/90 dark:bg-amber-900 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-amber-200">group</span>
                 </div>
             </div>
         </div>
@@ -92,11 +84,11 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Comisiones Totales</p>
-                    <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mt-1">${{ "{:,.2f}".format(total_commissions) }}</p>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Período actual</p>
+                    <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mt-1">${{ total_commissions }}</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Periodo actual</p>
                 </div>
-                <div class="w-12 h-12 bg-secondary-100 dark:bg-secondary-900 rounded-lg flex items-center justify-center">
-                    <span class="material-symbols-outlined text-secondary-600 dark:text-secondary-400">percent</span>
+                <div class="w-12 h-12 rounded-full bg-purple-900/90 dark:bg-purple-900 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-purple-200">receipt_long</span>
                 </div>
             </div>
         </div>
@@ -216,7 +208,7 @@
     // Configuración de gráficos con tema oscuro
     const isDarkMode = document.documentElement.classList.contains('dark');
     const textColor = isDarkMode ? '#9ca3af' : '#4b5563';
-    const gridColor = isDarkMode ? '#374151' : '#e5e7eb';
+    const gridColor = isDarkMode ? 'rgba(229, 231, 235, 0.1)' : 'rgba(55, 65, 81, 0.2)';
 
     const salesData = {{ daily_sales|tojson }};
     const activityData = {{ weekly_activity|tojson }};
