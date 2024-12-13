@@ -1,110 +1,123 @@
 {% extends "base.html" %}
 
+{% set breadcrumbs = [
+    ('index', 'Inicio'),
+    ('products.list_products', 'Productos'),
+    (None, 'Editar Producto')
+] %}
+
 {% block content %}
-<div class="container-fluid">
-    <div class="max-w-2xl mx-auto">
-        <div class="mb-6">
-            <h1 class="page-title">Editar Producto</h1>
-            <p class="subtitle">Actualice la información del producto</p>
-        </div>
-
-        <div class="card">
-            <form method="POST" enctype="multipart/form-data" class="space-y-6">
-                {{ form.hidden_tag() }}
-                
-                <div class="card-body">
-                    <!-- Información Básica -->
-                    <div class="space-y-6">
-                        <h3 class="section-title">Información Básica</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="form-group">
-                                {{ form.name.label(class="form-label") }}
-                                {{ form.name(class="form-input") }}
-                                {% for error in form.name.errors %}
-                                    <span class="form-error">{{ error }}</span>
-                                {% endfor %}
-                            </div>
-
-                            <div class="form-group">
-                                {{ form.aseguradora.label(class="form-label") }}
-                                {{ form.aseguradora(class="form-input") }}
-                                {% for error in form.aseguradora.errors %}
-                                    <span class="form-error">{{ error }}</span>
-                                {% endfor %}
-                            </div>
-
-                            <div class="form-group md:col-span-2">
-                                {{ form.description.label(class="form-label") }}
-                                {{ form.description(class="form-input") }}
-                                {% for error in form.description.errors %}
-                                    <span class="form-error">{{ error }}</span>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="divider"></div>
-
-                    <!-- Comisiones -->
-                    <div class="space-y-6">
-                        <h3 class="section-title">Comisiones</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="form-group">
-                                {{ form.commission_percentage.label(class="form-label") }}
-                                {{ form.commission_percentage(class="form-input") }}
-                                {% for error in form.commission_percentage.errors %}
-                                    <span class="form-error">{{ error }}</span>
-                                {% endfor %}
-                            </div>
-
-                            <div class="form-group flex items-center">
-                                {{ form.sobrecomision(class="form-checkbox mr-2") }}
-                                {{ form.sobrecomision.label(class="form-label") }}
-                            </div>
-
-                            <div class="form-group" id="overrideGroup">
-                                {{ form.override_percentage.label(class="form-label") }}
-                                {{ form.override_percentage(class="form-input") }}
-                                {% for error in form.override_percentage.errors %}
-                                    <span class="form-error">{{ error }}</span>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="divider"></div>
-
-                    <!-- Imagen -->
-                    <div class="space-y-6">
-                        <h3 class="section-title">Imagen del Producto</h3>
-                        {% if product.image_url %}
-                        <div class="bg-gray-50 rounded-lg p-4">
-                            <h4 class="text-sm font-medium text-gray-700 mb-2">Imagen Actual</h4>
-                            <img src="{{ url_for('static', filename=product.image_url) }}" 
-                                 alt="{{ product.name }}"
-                                 class="max-w-xs rounded-lg shadow-sm">
-                        </div>
-                        {% endif %}
+<div class="space-y-6 px-6 pt-4">
+    <div class="card-container max-w-3xl mx-auto">
+        <form method="POST" enctype="multipart/form-data" class="space-y-6">
+            {{ form.hidden_tag() }}
+            
+            <div class="p-4">
+                <!-- Información Básica -->
+                <div class="space-y-6">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
+                        <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 mr-2">inventory_2</span>
+                        Información Básica
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="form-group">
-                            {{ form.image.label(class="form-label") }}
-                            {{ form.image(class="form-input") }}
-                            {% for error in form.image.errors %}
-                                <span class="form-error">{{ error }}</span>
+                            {{ form.name.label(class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1") }}
+                            {{ form.name(class="form-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150") }}
+                            {% for error in form.name.errors %}
+                                <span class="text-sm text-red-600 dark:text-red-400 mt-1">{{ error }}</span>
                             {% endfor %}
-                            <div id="imagePreview" class="mt-4 p-4 border border-dashed border-gray-300 rounded-lg"></div>
-                            <p class="text-sm text-gray-500 mt-2">Deja este campo vacío si no deseas cambiar la imagen actual.</p>
+                        </div>
+
+                        <div class="form-group">
+                            {{ form.aseguradora.label(class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1") }}
+                            {{ form.aseguradora(class="form-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150") }}
+                            {% for error in form.aseguradora.errors %}
+                                <span class="text-sm text-red-600 dark:text-red-400 mt-1">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+
+                        <div class="form-group md:col-span-2">
+                            {{ form.description.label(class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1") }}
+                            {{ form.description(class="form-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150") }}
+                            {% for error in form.description.errors %}
+                                <span class="text-sm text-red-600 dark:text-red-400 mt-1">{{ error }}</span>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
 
-                <div class="card-footer flex justify-end space-x-4">
-                    <a href="{{ url_for('products.list_products') }}" class="btn-secondary">
-                        <i class="fas fa-times mr-2"></i>Cancelar
-                    </a>
-                    {{ form.submit(class="btn-primary") }}
+                <div class="border-t border-gray-200 dark:border-gray-700 my-6"></div>
+
+                <!-- Comisiones -->
+                <div class="space-y-6">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
+                        <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 mr-2">payments</span>
+                        Comisiones
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="form-group">
+                            {{ form.commission_percentage.label(class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1") }}
+                            {{ form.commission_percentage(class="form-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150") }}
+                            {% for error in form.commission_percentage.errors %}
+                                <span class="text-sm text-red-600 dark:text-red-400 mt-1">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+
+                        <div class="form-group flex items-center">
+                            {{ form.sobrecomision(class="form-checkbox rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500 mr-2") }}
+                            {{ form.sobrecomision.label(class="block text-sm font-medium text-gray-700 dark:text-gray-300") }}
+                        </div>
+
+                        <div class="form-group" id="overrideGroup">
+                            {{ form.override_percentage.label(class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1") }}
+                            {{ form.override_percentage(class="form-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150") }}
+                            {% for error in form.override_percentage.errors %}
+                                <span class="text-sm text-red-600 dark:text-red-400 mt-1">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
-            </form>
-        </div>
+
+                <div class="border-t border-gray-200 dark:border-gray-700 my-6"></div>
+
+                <!-- Imagen -->
+                <div class="space-y-6">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
+                        <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 mr-2">image</span>
+                        Imagen del Producto
+                    </h3>
+                    
+                    {% if product.image_url %}
+                    <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                        <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Imagen Actual</h4>
+                        <img src="{{ url_for('static', filename=product.image_url) }}" 
+                             alt="{{ product.name }}"
+                             class="max-w-xs rounded-lg shadow-sm">
+                    </div>
+                    {% endif %}
+                    
+                    <div class="form-group">
+                        {{ form.image.label(class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1") }}
+                        {{ form.image(class="form-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150") }}
+                        {% for error in form.image.errors %}
+                            <span class="text-sm text-red-600 dark:text-red-400 mt-1">{{ error }}</span>
+                        {% endfor %}
+                        <div id="imagePreview" class="mt-4 p-4 border border-dashed border-gray-300 dark:border-gray-600 rounded-lg"></div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Deja este campo vacío si no deseas cambiar la imagen actual.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-6 py-4 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-200 dark:border-gray-700 rounded-b-xl flex justify-end space-x-4">
+                <a href="{{ url_for('products.list_products') }}" 
+                   class="btn-secondary">
+                    <span class="material-symbols-outlined mr-2">keyboard_backspace</span>Volver
+                </a>
+                {{ form.submit(class="btn-primary flex items-center") }}
+            </div>
+        </form>
     </div>
 </div>
 

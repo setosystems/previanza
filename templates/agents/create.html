@@ -1,121 +1,137 @@
 {% extends "base.html" %}
 
+{% set breadcrumbs = [
+    ('index', 'Inicio'),
+    ('agents.list_agents', 'Agentes'),
+    (None, 'Nuevo Agente')
+] %}
+
 {% block content %}
-<div class="container-fluid">
-    <div class="max-w-2xl mx-auto">
-        <div class="mb-6">
-            <h1 class="page-title">Crear Nuevo Agente</h1>
-            <p class="subtitle">Complete la información del nuevo agente</p>
-        </div>
-
-        <div class="card">
-            <form method="POST" class="space-y-6">
-                {{ form.hidden_tag() }}
-                
-                <div class="card-body">
-                    <!-- Información de Cuenta -->
-                    <div class="space-y-6">
-                        <h3 class="section-title">Información de Cuenta</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="form-group">
-                                {{ form.username.label(class="form-label") }}
-                                {{ form.username(class="form-input", placeholder="Nombre de usuario") }}
-                                {% for error in form.username.errors %}
-                                    <span class="form-error">{{ error }}</span>
-                                {% endfor %}
-                            </div>
-
-                            <div class="form-group">
-                                {{ form.password.label(class="form-label") }}
-                                {{ form.password(class="form-input", placeholder="Contraseña") }}
-                                {% for error in form.password.errors %}
-                                    <span class="form-error">{{ error }}</span>
-                                {% endfor %}
-                            </div>
+<div class="space-y-6 px-6 pt-4">
+    <div class="card-container max-w-3xl mx-auto">
+        <form method="POST" class="space-y-6">
+            {{ form.hidden_tag() }}
+            
+            <div class="p-4">
+                <!-- Información de Cuenta -->
+                <div class="space-y-6">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
+                        <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 mr-2">account_circle</span>
+                        Información de Cuenta
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="form-group">
+                            {{ form.username.label(class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1") }}
+                            {{ form.username(class="form-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150", placeholder="Nombre de usuario") }}
+                            {% for error in form.username.errors %}
+                                <span class="text-sm text-red-600 dark:text-red-400 mt-1">{{ error }}</span>
+                            {% endfor %}
                         </div>
-                    </div>
 
-                    <div class="divider"></div>
-
-                    <!-- Información Personal -->
-                    <div class="space-y-6">
-                        <h3 class="section-title">Información Personal</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="form-group">
-                                {{ form.name.label(class="form-label") }}
-                                {{ form.name(class="form-input", placeholder="Nombre completo") }}
-                                {% for error in form.name.errors %}
-                                    <span class="form-error">{{ error }}</span>
-                                {% endfor %}
-                            </div>
-
-                            <div class="form-group">
-                                {{ form.email.label(class="form-label") }}
-                                {{ form.email(class="form-input", placeholder="correo@ejemplo.com") }}
-                                {% for error in form.email.errors %}
-                                    <span class="form-error">{{ error }}</span>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="divider"></div>
-
-                    <!-- Documentación -->
-                    <div class="space-y-6">
-                        <h3 class="section-title">Documentación</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="form-group">
-                                {{ form.document_type.label(class="form-label") }}
-                                {{ form.document_type(class="form-select") }}
-                                {% for error in form.document_type.errors %}
-                                    <span class="form-error">{{ error }}</span>
-                                {% endfor %}
-                            </div>
-
-                            <div class="form-group">
-                                {{ form.document_number.label(class="form-label") }}
-                                {{ form.document_number(class="form-input", placeholder="Número de documento") }}
-                                {% for error in form.document_number.errors %}
-                                    <span class="form-error">{{ error }}</span>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="divider"></div>
-
-                    <!-- Información Laboral -->
-                    <div class="space-y-6">
-                        <h3 class="section-title">Información Laboral</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="form-group">
-                                {{ form.hire_date.label(class="form-label") }}
-                                {{ form.hire_date(class="form-input", type="date") }}
-                                {% for error in form.hire_date.errors %}
-                                    <span class="form-error">{{ error }}</span>
-                                {% endfor %}
-                            </div>
-
-                            <div class="form-group">
-                                {{ form.parent_id.label(class="form-label") }}
-                                {{ form.parent_id(class="form-select") }}
-                                {% for error in form.parent_id.errors %}
-                                    <span class="form-error">{{ error }}</span>
-                                {% endfor %}
-                            </div>
+                        <div class="form-group">
+                            {{ form.password.label(class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1") }}
+                            {{ form.password(class="form-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150", placeholder="Contraseña") }}
+                            {% for error in form.password.errors %}
+                                <span class="text-sm text-red-600 dark:text-red-400 mt-1">{{ error }}</span>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
 
-                <div class="card-footer flex justify-end space-x-4">
-                    <a href="{{ url_for('agents.list_agents') }}" class="btn-secondary">
-                        <i class="fas fa-times mr-2"></i>Cancelar
-                    </a>
-                    {{ form.submit(class="btn-primary") }}
+                <div class="border-t border-gray-200 dark:border-gray-700 my-6"></div>
+
+                <!-- Información Personal -->
+                <div class="space-y-6">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
+                        <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 mr-2">person</span>
+                        Información Personal
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="form-group">
+                            {{ form.name.label(class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1") }}
+                            {{ form.name(class="form-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150", placeholder="Nombre completo") }}
+                            {% for error in form.name.errors %}
+                                <span class="text-sm text-red-600 dark:text-red-400 mt-1">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+
+                        <div class="form-group">
+                            {{ form.email.label(class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1") }}
+                            {{ form.email(class="form-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150", placeholder="correo@ejemplo.com") }}
+                            {% for error in form.email.errors %}
+                                <span class="text-sm text-red-600 dark:text-red-400 mt-1">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
-            </form>
-        </div>
+
+                <div class="border-t border-gray-200 dark:border-gray-700 my-6"></div>
+
+                <!-- Documentación -->
+                <div class="space-y-6">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
+                        <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 mr-2">badge</span>
+                        Documentación
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="form-group">
+                            {{ form.document_type.label(class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1") }}
+                            {{ form.document_type(class="form-select w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150") }}
+                            {% for error in form.document_type.errors %}
+                                <span class="text-sm text-red-600 dark:text-red-400 mt-1">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+
+                        <div class="form-group">
+                            {{ form.document_number.label(class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1") }}
+                            {{ form.document_number(class="form-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150", placeholder="Número de documento") }}
+                            {% for error in form.document_number.errors %}
+                                <span class="text-sm text-red-600 dark:text-red-400 mt-1">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border-t border-gray-200 dark:border-gray-700 my-6"></div>
+
+                <!-- Información Laboral -->
+                <div class="space-y-6">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
+                        <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 mr-2">work</span>
+                        Información Laboral
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="form-group">
+                            {{ form.hire_date.label(class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1") }}
+                            {{ form.hire_date(class="form-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150", type="date") }}
+                            {% for error in form.hire_date.errors %}
+                                <span class="text-sm text-red-600 dark:text-red-400 mt-1">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+
+                        <div class="form-group">
+                            {{ form.parent_id.label(class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1") }}
+                            {{ form.parent_id(class="form-select w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150") }}
+                            {% for error in form.parent_id.errors %}
+                                <span class="text-sm text-red-600 dark:text-red-400 mt-1">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-6 py-4 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-200 dark:border-gray-700 rounded-b-xl flex justify-end space-x-4">
+                <a href="{{ url_for('agents.list_agents') }}" 
+                   class="btn-secondary">
+                    <span class="material-symbols-outlined mr-2">keyboard_backspace</span>Volver
+                </a>
+                {{ form.submit(class="btn-primary flex items-center") }}
+            </div>
+        </form>
     </div>
 </div>
 {% endblock %}
