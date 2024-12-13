@@ -1,102 +1,134 @@
 {% extends "base.html" %}
 
-{% block content %}
-<div class="w-full max-w-lg mx-auto">
-    <!-- Header Section -->
-    <div class="flex flex-wrap -mx-3 mb-6">
-        <div class="w-full px-3">
-            <h1 class="text-2xl font-bold text-gray-900 mb-2">Configuración SMTP</h1>
-            <p class="text-sm text-gray-600">Configure los ajustes del servidor de correo saliente</p>
-        </div>
-    </div>
+{% set breadcrumbs = [
+    ('index', 'Inicio'),
+    ('config.config_index', 'Configuración'),
+    (None, 'Configuración SMTP')
+] %}
 
-    <form method="POST" class="space-y-8">
+{% block content %}
+<div class="space-y-6 px-6 pt-4">
+    <form method="POST" class="max-w-3xl mx-auto space-y-6">
         {{ form.hidden_tag() }}
         
         <!-- Server Configuration -->
-        <div class="bg-white rounded-lg shadow-sm p-6">
-            <h3 class="text-lg font-medium text-gray-900 mb-4">Configuración del Servidor</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    {{ form.mail_server.label(class="block text-sm font-medium text-gray-700 mb-1") }}
-                    {{ form.mail_server(class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm") }}
-                </div>
-                <div>
-                    {{ form.mail_port.label(class="block text-sm font-medium text-gray-700 mb-1") }}
-                    {{ form.mail_port(class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm") }}
-                </div>
+        <div class="card-container">
+            <div class="border-b border-gray-200 dark:border-gray-700 p-4">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
+                    <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 mr-2">dns</span>
+                    Configuración del Servidor
+                </h3>
             </div>
-
-            <div class="mt-4 flex space-x-6">
-                <div class="flex items-center">
-                    {{ form.mail_use_tls(class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded") }}
-                    {{ form.mail_use_tls.label(class="ml-2 block text-sm text-gray-700") }}
+            
+            <div class="p-4 space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        {{ form.mail_server.label(class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1") }}
+                        {{ form.mail_server(class="form-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150") }}
+                    </div>
+                    <div>
+                        {{ form.mail_port.label(class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1") }}
+                        {{ form.mail_port(class="form-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150") }}
+                    </div>
                 </div>
-                <div class="flex items-center">
-                    {{ form.mail_use_ssl(class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded") }}
-                    {{ form.mail_use_ssl.label(class="ml-2 block text-sm text-gray-700") }}
+
+                <div class="flex space-x-6">
+                    <div class="flex items-center">
+                        {{ form.mail_use_tls(class="form-checkbox rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500") }}
+                        {{ form.mail_use_tls.label(class="ml-2 block text-sm text-gray-700 dark:text-gray-300") }}
+                    </div>
+                    <div class="flex items-center">
+                        {{ form.mail_use_ssl(class="form-checkbox rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500") }}
+                        {{ form.mail_use_ssl.label(class="ml-2 block text-sm text-gray-700 dark:text-gray-300") }}
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Credentials -->
-        <div class="bg-white rounded-lg shadow-sm p-6">
-            <h3 class="text-lg font-medium text-gray-900 mb-4">Credenciales</h3>
-            <div class="space-y-4">
+        <div class="card-container">
+            <div class="border-b border-gray-200 dark:border-gray-700 p-4">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
+                    <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 mr-2">key</span>
+                    Credenciales
+                </h3>
+            </div>
+            
+            <div class="p-4 space-y-4">
                 <div>
-                    {{ form.mail_username.label(class="block text-sm font-medium text-gray-700 mb-1") }}
-                    {{ form.mail_username(class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm") }}
+                    {{ form.mail_username.label(class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1") }}
+                    {{ form.mail_username(class="form-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150") }}
                 </div>
                 <div>
-                    {{ form.mail_password.label(class="block text-sm font-medium text-gray-700 mb-1") }}
-                    {{ form.mail_password(class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm") }}
+                    {{ form.mail_password.label(class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1") }}
+                    {{ form.mail_password(class="form-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150") }}
                 </div>
                 <div>
-                    {{ form.mail_default_sender.label(class="block text-sm font-medium text-gray-700 mb-1") }}
-                    {{ form.mail_default_sender(class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm") }}
+                    {{ form.mail_default_sender.label(class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1") }}
+                    {{ form.mail_default_sender(class="form-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150") }}
                 </div>
             </div>
         </div>
 
         <!-- Test Configuration -->
-        <div class="bg-white rounded-lg shadow-sm p-6">
-            <h3 class="text-lg font-medium text-gray-900 mb-4">Prueba de Configuración</h3>
-            <div class="flex gap-4">
-                <input type="email" 
-                       name="test_email" 
-                       class="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                       placeholder="correo@ejemplo.com">
-                <button type="submit" 
-                        formaction="{{ url_for('config.send_test_email') }}"
-                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
-                    <i class="fas fa-paper-plane mr-2"></i>
-                    Enviar Correo de Prueba
-                </button>
+        <div class="card-container">
+            <div class="border-b border-gray-200 dark:border-gray-700 p-4">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
+                    <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 mr-2">send</span>
+                    Prueba de Configuración
+                </h3>
+            </div>
+            
+            <div class="p-4">
+                <div class="flex gap-4">
+                    <input type="email" 
+                           name="test_email" 
+                           class="form-input flex-1 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150"
+                           placeholder="correo@ejemplo.com">
+                    <button type="submit" 
+                            formaction="{{ url_for('config.send_test_email') }}"
+                            class="btn-primary flex items-center">
+                        <span class="material-symbols-outlined mr-2">send</span>
+                        Enviar Prueba
+                    </button>
+                </div>
             </div>
         </div>
 
         {% if current_config %}
         <!-- Current Configuration -->
-        <div class="bg-white rounded-lg shadow-sm p-6">
-            <h3 class="text-lg font-medium text-gray-900 mb-4">Configuración Actual</h3>
-            <div class="space-y-2">
-                {% for key, value in current_config.items() %}
-                <div class="flex justify-between py-2 border-b border-gray-200 last:border-0">
-                    <span class="font-medium text-gray-700">{{ key }}:</span>
-                    <span class="text-gray-600">{{ value }}</span>
+        <div class="card-container">
+            <div class="border-b border-gray-200 dark:border-gray-700 p-4">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
+                    <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 mr-2">info</span>
+                    Configuración Actual
+                </h3>
+            </div>
+            
+            <div class="p-4">
+                <div class="space-y-2">
+                    {% for key, value in current_config.items() %}
+                    <div class="flex justify-between py-2 border-b border-gray-200 dark:border-gray-700 last:border-0">
+                        <span class="font-medium text-gray-700 dark:text-gray-300">{{ key }}:</span>
+                        <span class="text-gray-600 dark:text-gray-400">{{ value }}</span>
+                    </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
             </div>
         </div>
         {% endif %}
 
         <!-- Action Buttons -->
-        <div class="flex justify-end space-x-4 pt-6">
+        <div class="flex justify-end space-x-4">
             <a href="{{ url_for('config.config_index') }}" 
-               class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                Cancelar
+               class="btn-secondary flex items-center">
+                <span class="material-symbols-outlined mr-2">arrow_back</span>
+                Volver
             </a>
-            {{ form.submit(class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700") }}
+            <button type="submit" class="btn-primary flex items-center">
+                <span class="material-symbols-outlined mr-2">save</span>
+                Guardar Cambios
+            </button>
         </div>
     </form>
 </div>

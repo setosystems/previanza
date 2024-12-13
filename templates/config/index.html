@@ -1,76 +1,83 @@
 {% extends "base.html" %}
 
+{% set breadcrumbs = [
+    ('index', 'Inicio'),
+    (None, 'Configuración')
+] %}
+
 {% block content %}
-<div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <!-- Header Section -->
-    <div class="flex flex-wrap -mx-3 mb-6">
-        <div class="w-full px-3">
-            <h1 class="text-2xl font-bold text-gray-900 mb-2">Configuración del Sistema</h1>
-            <p class="text-sm text-gray-600">Gestione las configuraciones generales del sistema</p>
+<div class="space-y-6 px-6 pt-4">
+    <div class="card-container">
+        <div class="p-4">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
+                <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 mr-2">settings</span>
+                Configuración del Sistema
+            </h3>
+            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">Gestione las configuraciones generales del sistema</p>
         </div>
     </div>
 
     <!-- Cards Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <!-- Configuración de Comisiones -->
-        <div class="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow duration-300">
+        <div class="card-container p-6">
             <div class="flex flex-col items-center text-center">
-                <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-                    <i class="fas fa-percentage text-blue-600 text-2xl"></i>
+                <div class="w-16 h-16 bg-primary-100 dark:bg-primary-900/50 rounded-full flex items-center justify-center mb-4">
+                    <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 text-3xl">payments</span>
                 </div>
-                <h3 class="text-lg font-medium text-gray-900 mb-2">Configuración de Comisiones</h3>
-                <p class="text-sm text-gray-500 mb-4">Configure las reglas de comisiones para los agentes.</p>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Configuración de Comisiones</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Configure las reglas de comisiones para los agentes.</p>
                 <a href="{{ url_for('config.commission_settings') }}" 
-                   class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
-                    <i class="fas fa-cog mr-2"></i>
+                   class="btn-primary flex items-center">
+                    <span class="material-symbols-outlined mr-2">tune</span>
                     Ir a Comisiones
                 </a>
             </div>
         </div>
 
         <!-- Configuración de Notificaciones -->
-        <div class="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow duration-300">
+        <div class="card-container p-6">
             <div class="flex flex-col items-center text-center">
-                <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mb-4">
-                    <i class="fas fa-bell text-yellow-600 text-2xl"></i>
+                <div class="w-16 h-16 bg-yellow-100 dark:bg-yellow-900/50 rounded-full flex items-center justify-center mb-4">
+                    <span class="material-symbols-outlined text-yellow-600 dark:text-yellow-400 text-3xl">notifications</span>
                 </div>
-                <h3 class="text-lg font-medium text-gray-900 mb-2">Configuración de Notificaciones</h3>
-                <p class="text-sm text-gray-500 mb-4">Gestione las notificaciones del sistema.</p>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Configuración de Notificaciones</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Gestione las notificaciones del sistema.</p>
                 <a href="{{ url_for('config.config_index') }}" 
-                   class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700">
-                    <i class="fas fa-bell mr-2"></i>
+                   class="btn-secondary flex items-center">
+                    <span class="material-symbols-outlined mr-2">tune</span>
                     Ir a Notificaciones
                 </a>
             </div>
         </div>
 
         <!-- Gestión de Roles de Usuario -->
-        <div class="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow duration-300">
+        <div class="card-container p-6">
             <div class="flex flex-col items-center text-center">
-                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                    <i class="fas fa-users-cog text-green-600 text-2xl"></i>
+                <div class="w-16 h-16 bg-green-100 dark:bg-green-900/50 rounded-full flex items-center justify-center mb-4">
+                    <span class="material-symbols-outlined text-green-600 dark:text-green-400 text-3xl">manage_accounts</span>
                 </div>
-                <h3 class="text-lg font-medium text-gray-900 mb-2">Gestión de Roles de Usuario</h3>
-                <p class="text-sm text-gray-500 mb-4">Administre los roles y permisos de los usuarios.</p>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Gestión de Roles de Usuario</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Administre los roles y permisos de los usuarios.</p>
                 <a href="{{ url_for('config.config_index') }}" 
-                   class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700">
-                    <i class="fas fa-users mr-2"></i>
+                   class="btn-secondary flex items-center">
+                    <span class="material-symbols-outlined mr-2">tune</span>
                     Ir a Roles de Usuario
                 </a>
             </div>
         </div>
 
         <!-- Configuración SMTP -->
-        <div class="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow duration-300">
+        <div class="card-container p-6">
             <div class="flex flex-col items-center text-center">
-                <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-4">
-                    <i class="fas fa-envelope-open-text text-purple-600 text-2xl"></i>
+                <div class="w-16 h-16 bg-purple-100 dark:bg-purple-900/50 rounded-full flex items-center justify-center mb-4">
+                    <span class="material-symbols-outlined text-purple-600 dark:text-purple-400 text-3xl">mail</span>
                 </div>
-                <h3 class="text-lg font-medium text-gray-900 mb-2">Configuración SMTP</h3>
-                <p class="text-sm text-gray-500 mb-4">Configure los ajustes del servidor de correo saliente.</p>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Configuración SMTP</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Configure los ajustes del servidor de correo saliente.</p>
                 <a href="{{ url_for('config.smtp_config') }}" 
-                   class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700">
-                    <i class="fas fa-envelope mr-2"></i>
+                   class="btn-secondary flex items-center">
+                    <span class="material-symbols-outlined mr-2">tune</span>
                     Ir a Configuración SMTP
                 </a>
             </div>

@@ -1,52 +1,62 @@
 {% extends "base.html" %}
 
-{% block content %}
-<div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col">
-    <div class="flex flex-wrap -mx-3 mb-6">
-        <div class="w-full px-3">
-            <h1 class="text-2xl font-bold text-gray-900 mb-4">Gestión de Comisiones</h1>
-        </div>
-    </div>
+{% set breadcrumbs = [
+    ('index', 'Inicio'),
+    ('config.config_index', 'Configuración'),
+    (None, 'Gestión de Comisiones')
+] %}
 
+{% block content %}
+<div class="space-y-6 px-6 pt-4">
     <!-- Comisiones por Producto -->
-    <div class="bg-white rounded-lg shadow-sm overflow-hidden mb-8 flex-1 overflow-auto">
-        <div class="px-6 py-4 border-b border-gray-200">
-            <h2 class="text-lg font-medium text-gray-900">Comisiones por Producto</h2>
-        </div>
-        
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+    <div class="card-container">
+        <div class="overflow-hidden rounded-xl">
+            <div class="border-b border-gray-200 dark:border-gray-700 p-4">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
+                    <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 mr-2">payments</span>
+                    Comisiones por Producto
+                </h3>
+            </div>
+
+            <table class="table w-full">
+                <colgroup>
+                    <col class="w-[35%]">  <!-- Producto -->
+                    <col class="w-[20%]">  <!-- Comisión Estándar -->
+                    <col class="w-[10%]">  <!-- Checkbox Sobrecomisión -->
+                    <col class="w-[20%]">  <!-- Porcentaje Sobrecomisión -->
+                    <col class="w-[15%]">  <!-- Acciones -->
+                </colgroup>
+                <thead class="bg-gray-50 dark:bg-gray-700">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comisión Estándar (%)</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sobrecomisión</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Porcentaje Sobrecomisión (%)</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                        <th class="table-header text-gray-600 dark:text-gray-300">Producto</th>
+                        <th class="table-header text-gray-600 dark:text-gray-300">Comisión Estándar (%)</th>
+                        <th class="table-header text-gray-600 dark:text-gray-300">Sobrecomisión</th>
+                        <th class="table-header text-gray-600 dark:text-gray-300">Porcentaje Sobrecomisión (%)</th>
+                        <th class="table-header text-gray-600 dark:text-gray-300">Acciones</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-700 bg-white dark:bg-gray-800">
                     {% for product in products %}
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ product.name }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+                    <tr class="table-row hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
+                        <td class="table-cell text-gray-900 dark:text-gray-100">{{ product.name }}</td>
+                        <td class="table-cell">
                             <input type="number" 
-                                   class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                   class="form-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150"
                                    value="{{ product.commission_percentage }}"
                                    min="0" 
                                    max="100" 
                                    step="0.01"
                                    data-product-id="{{ product.id }}">
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="table-cell text-center">
                             <input type="checkbox" 
-                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                   class="form-checkbox rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
                                    {% if product.sobrecomision %}checked{% endif %}
                                    data-product-id="{{ product.id }}">
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="table-cell">
                             <input type="number" 
-                                   class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                   class="form-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150"
                                    value="{{ product.override_percentage }}"
                                    min="0" 
                                    max="100" 
@@ -54,10 +64,10 @@
                                    data-product-id="{{ product.id }}"
                                    {% if not product.sobrecomision %}disabled{% endif %}>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <button class="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                        <td class="table-cell">
+                            <button class="btn-primary flex items-center"
                                     data-product-id="{{ product.id }}">
-                                Guardar
+                                <span class="material-symbols-outlined mr-2">save</span>Guardar
                             </button>
                         </td>
                     </tr>
@@ -68,60 +78,71 @@
     </div>
 
     <!-- Comisiones Personalizadas por Agente -->
-    <div class="bg-white rounded-lg shadow-sm overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-200">
-            <h2 class="text-lg font-medium text-gray-900">Comisiones Personalizadas por Agente</h2>
-        </div>
-        
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+    <div class="card-container">
+        <div class="overflow-hidden rounded-xl">
+            <div class="border-b border-gray-200 dark:border-gray-700 p-4">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
+                    <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 mr-2">group</span>
+                    Comisiones Personalizadas por Agente
+                </h3>
+            </div>
+
+            <table class="table w-full">
+                <colgroup>
+                    <col class="w-[25%]">  <!-- Agente -->
+                    <col class="w-[25%]">  <!-- Producto (select) -->
+                    <col class="w-[15%]">  <!-- Comisión -->
+                    <col class="w-[10%]">  <!-- Checkbox Sobrecomisión -->
+                    <col class="w-[15%]">  <!-- Porcentaje Sobrecomisión -->
+                    <col class="w-[10%]">  <!-- Acciones -->
+                </colgroup>
+                <thead class="bg-gray-50 dark:bg-gray-700">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Agente</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comisión (%)</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sobrecomisión</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Porcentaje Sobrecomisión (%)</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                        <th class="table-header text-gray-600 dark:text-gray-300">Agente</th>
+                        <th class="table-header text-gray-600 dark:text-gray-300">Producto</th>
+                        <th class="table-header text-gray-600 dark:text-gray-300">Comisión (%)</th>
+                        <th class="table-header text-gray-600 dark:text-gray-300">Sobrecomisión</th>
+                        <th class="table-header text-gray-600 dark:text-gray-300">Porcentaje Sobrecomisión (%)</th>
+                        <th class="table-header text-gray-600 dark:text-gray-300">Acciones</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-700 bg-white dark:bg-gray-800">
                     {% for agent in agents %}
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ agent.name }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <select class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                    <tr class="table-row hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
+                        <td class="table-cell text-gray-900 dark:text-gray-100">{{ agent.name }}</td>
+                        <td class="table-cell">
+                            <select class="form-select w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150"
                                     data-agent-id="{{ agent.id }}">
                                 {% for product in products %}
                                 <option value="{{ product.id }}">{{ product.name }}</option>
                                 {% endfor %}
                             </select>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="table-cell">
                             <input type="number" 
-                                   class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                   class="form-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150"
                                    min="0" 
                                    max="100" 
                                    step="0.01"
                                    placeholder="Comisión personalizada">
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="table-cell text-center">
                             <input type="checkbox" 
-                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                   class="form-checkbox rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500">
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
+                        <td class="table-cell">
                             <input type="number" 
-                                   class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                   class="form-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150"
                                    min="0" 
                                    max="100" 
                                    step="0.01"
                                    disabled
                                    placeholder="Sobrecomisión personalizada">
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <button class="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                        <td class="table-cell">
+                            <button class="btn-primary flex items-center"
                                     data-agent-id="{{ agent.id }}">
-                                Guardar
+                                <span class="material-symbols-outlined mr-2">save</span>Guardar
                             </button>
                         </td>
                     </tr>
