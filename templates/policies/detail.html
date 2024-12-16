@@ -1,174 +1,203 @@
 {% extends "base.html" %}
 
+{% set breadcrumbs = [
+    ('index', 'Inicio'),
+    ('policies.list_policies', 'Pólizas'),
+    (None, 'Póliza ' ~ policy.policy_number)
+] %}
+
 {% block content %}
-<div class="container-fluid">
-    <div class="max-w-4xl mx-auto">
-        <div class="mb-6">
+<div class="space-y-6 px-6 pt-4">
+    <!-- Encabezado -->
+    <div class="card-container">
+        <div class="p-4">
             <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="page-title">Póliza {{ policy.policy_number }}</h1>
-                    <p class="subtitle">Detalles de la póliza</p>
+                <div class="flex items-center">
+                    <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 mr-2">description</span>
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Póliza {{ policy.policy_number }}</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Detalles de la póliza</p>
+                    </div>
                 </div>
                 {% if current_user.role != UserRole.AGENTE %}
-                <div class="flex space-x-4">
-                    <a href="{{ url_for('policies.edit_policy', id=policy.id) }}" class="btn-primary">
-                        <i class="fas fa-edit mr-2"></i>Editar Póliza
-                    </a>
-                </div>
+                <a href="{{ url_for('policies.edit_policy', id=policy.id) }}" class="btn-primary">
+                    <span class="material-symbols-outlined mr-2">edit</span>Editar Póliza
+                </a>
                 {% endif %}
             </div>
         </div>
+    </div>
 
-        <!-- Información Principal -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <!-- Detalles de la Póliza -->
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="section-title flex items-center">
-                        <i class="fas fa-file-contract text-primary-600 mr-2"></i>
-                        Detalles de la Póliza
-                    </h3>
-                </div>
-                <div class="card-body space-y-4">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <p class="text-sm font-medium text-gray-500">Prima</p>
-                            <p class="text-xl font-semibold text-primary-600">${{ "{:,.2f}".format(policy.premium) }}</p>
-                        </div>
-                        <div>
-                            <p class="text-sm font-medium text-gray-500">Estado de Pago</p>
-                            <span class="badge {% if policy.payment_status.name == 'PAGADO' %}badge-success{% elif policy.payment_status.name == 'PENDIENTE' %}badge-warning{% else %}badge-danger{% endif %}">
-                                {{ policy.payment_status.value }}
-                            </span>
-                        </div>
-                        <div>
-                            <p class="text-sm font-medium text-gray-500">Fecha de Inicio</p>
-                            <p class="text-gray-900">{{ policy.start_date.strftime('%d/%m/%Y') }}</p>
-                        </div>
-                        <div>
-                            <p class="text-sm font-medium text-gray-500">Fecha de Fin</p>
-                            <p class="text-gray-900">{{ policy.end_date.strftime('%d/%m/%Y') }}</p>
-                        </div>
-                        <div>
-                            <p class="text-sm font-medium text-gray-500">Estado de Emisión</p>
-                            <span class="badge {% if policy.emision_status.name == 'EMITIDA' %}badge-success{% else %}badge-warning{% endif %}">
-                                {{ policy.emision_status.value }}
-                            </span>
-                        </div>
+    <!-- Información Principal -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Detalles de la Póliza -->
+        <div class="card-container">
+            <div class="border-b border-gray-200 dark:border-gray-700 p-4">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
+                    <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 mr-2">policy</span>
+                    Detalles de la Póliza
+                </h3>
+            </div>
+            <div class="p-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Prima</p>
+                        <p class="text-xl font-semibold text-primary-600 dark:text-primary-400">${{ "{:,.2f}".format(policy.premium) }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Estado de Pago</p>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                            {% if policy.payment_status.name == 'PAGADO' %}
+                                bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+                            {% elif policy.payment_status.name == 'PENDIENTE' %}
+                                bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
+                            {% else %}
+                                bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
+                            {% endif %}">
+                            {{ policy.payment_status.value }}
+                        </span>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Fecha de Inicio</p>
+                        <p class="text-gray-900 dark:text-gray-100">{{ policy.start_date.strftime('%d/%m/%Y') }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Fecha de Fin</p>
+                        <p class="text-gray-900 dark:text-gray-100">{{ policy.end_date.strftime('%d/%m/%Y') }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Estado de Emisión</p>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                            {% if policy.emision_status.name == 'EMITIDA' %}
+                                bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+                            {% else %}
+                                bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
+                            {% endif %}">
+                            {{ policy.emision_status.value }}
+                        </span>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Información del Cliente -->
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="section-title flex items-center">
-                        <i class="fas fa-user text-primary-600 mr-2"></i>
-                        Cliente
-                    </h3>
-                </div>
-                <div class="card-body space-y-4">
-                    <div class="grid grid-cols-1 gap-4">
-                        <div>
-                            <p class="text-sm font-medium text-gray-500">Nombre</p>
-                            <p class="text-gray-900">{{ policy.client.name }}</p>
-                        </div>
-                        <div>
-                            <p class="text-sm font-medium text-gray-500">Email</p>
-                            <p class="text-gray-900">{{ policy.client.email }}</p>
-                        </div>
-                        <div>
-                            <p class="text-sm font-medium text-gray-500">Teléfono</p>
-                            <p class="text-gray-900">{{ policy.client.phone or 'No especificado' }}</p>
-                        </div>
+        <!-- Información del Cliente -->
+        <div class="card-container">
+            <div class="border-b border-gray-200 dark:border-gray-700 p-4">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
+                    <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 mr-2">person</span>
+                    Cliente
+                </h3>
+            </div>
+            <div class="p-4">
+                <div class="space-y-4">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Nombre</p>
+                        <p class="text-gray-900 dark:text-gray-100">{{ policy.client.name }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Email</p>
+                        <p class="text-gray-900 dark:text-gray-100">{{ policy.client.email }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Teléfono</p>
+                        <p class="text-gray-900 dark:text-gray-100">{{ policy.client.phone or 'No especificado' }}</p>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Información del Producto -->
-            <div class="card md:col-span-2">
-                <div class="card-header">
-                    <h3 class="section-title flex items-center">
-                        <i class="fas fa-box text-primary-600 mr-2"></i>
-                        Producto
-                    </h3>
-                </div>
-                <div class="card-body space-y-4">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <p class="text-sm font-medium text-gray-500">Nombre del Producto</p>
-                            <p class="text-gray-900">{{ policy.product.name }}</p>
-                        </div>
-                        <div>
-                            <p class="text-sm font-medium text-gray-500">Aseguradora</p>
-                            <p class="text-gray-900">{{ policy.product.aseguradora }}</p>
-                        </div>
-                        <div class="col-span-2">
-                            <p class="text-sm font-medium text-gray-500">Descripción</p>
-                            <p class="text-gray-900">{{ policy.product.description or 'Sin descripción' }}</p>
-                        </div>
+        <!-- Información del Producto -->
+        <div class="card-container md:col-span-2">
+            <div class="border-b border-gray-200 dark:border-gray-700 p-4">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
+                    <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 mr-2">inventory_2</span>
+                    Producto
+                </h3>
+            </div>
+            <div class="p-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Nombre del Producto</p>
+                        <p class="text-gray-900 dark:text-gray-100">{{ policy.product.name }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Aseguradora</p>
+                        <p class="text-gray-900 dark:text-gray-100">{{ policy.product.aseguradora }}</p>
+                    </div>
+                    <div class="col-span-2">
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Descripción</p>
+                        <p class="text-gray-900 dark:text-gray-100">{{ policy.product.description or 'Sin descripción' }}</p>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Comisiones -->
-        <div class="card">
-            <div class="card-header">
-                <div class="flex justify-between items-center">
-                    <h3 class="section-title flex items-center">
-                        <i class="fas fa-money-bill-wave text-primary-600 mr-2"></i>
+        <div class="card-container md:col-span-2">
+            <div class="border-b border-gray-200 dark:border-gray-700 p-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
+                        <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 mr-2">payments</span>
                         Comisiones
                     </h3>
                     {% if current_user.role == UserRole.ADMIN %}
-                    <button 
-                        type="button"
-                        data-policy-id="{{ policy.id }}"
-                        class="btn-secondary"
-                        id="recalculateBtn">
-                        <i class="fas fa-sync-alt mr-2"></i>Recalcular
+                    <button type="button"
+                            data-policy-id="{{ policy.id }}"
+                            class="btn-secondary"
+                            id="recalculateBtn">
+                        <span class="material-symbols-outlined mr-2">sync</span>Recalcular
                     </button>
                     {% endif %}
                 </div>
             </div>
-            <div class="card-body">
+            <div class="p-4">
                 {% if commissions %}
-                <div class="table-container">
-                    <table class="table">
-                        <thead>
+                <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead class="bg-gray-50 dark:bg-gray-800">
                             <tr>
-                                <th class="table-header">Agente</th>
-                                <th class="table-header">Tipo</th>
-                                <th class="table-header text-right">Porcentaje</th>
-                                <th class="table-header text-right">Monto</th>
-                                <th class="table-header">Estado</th>
-                                <th class="table-header">Fecha</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Agente</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tipo</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Porcentaje</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Monto</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Estado</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Fecha</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
                             {% for commission in commissions %}
-                            <tr class="table-row">
-                                <td class="table-cell">{{ commission.agent.name }}</td>
-                                <td class="table-cell">
-                                    <span class="badge {% if commission.commission_type == 'direct' %}badge-primary{% else %}badge-secondary{% endif %}">
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ commission.agent.name }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                        {% if commission.commission_type == 'direct' %}
+                                            bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200
+                                        {% else %}
+                                            bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200
+                                        {% endif %}">
                                         {{ "Directa" if commission.commission_type == 'direct' else "Sobrecomisión" }}
                                     </span>
                                 </td>
-                                <td class="table-cell text-right">{{ commission.percentage_applied }}%</td>
-                                <td class="table-cell text-right">${{ "{:,.2f}".format(commission.amount) }}</td>
-                                <td class="table-cell">
-                                    <span class="badge {% if commission.payment_status == 'PAGADO' %}badge-success{% else %}badge-warning{% endif %}">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900 dark:text-gray-100">{{ commission.percentage_applied }}%</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900 dark:text-gray-100">${{ "{:,.2f}".format(commission.amount) }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                        {% if commission.payment_status == 'PAGADO' %}
+                                            bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+                                        {% else %}
+                                            bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
+                                        {% endif %}">
                                         {{ commission.payment_status }}
                                     </span>
                                 </td>
-                                <td class="table-cell">{{ commission.date.strftime('%d/%m/%Y') }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ commission.date.strftime('%d/%m/%Y') }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
-                        <tfoot>
+                        <tfoot class="bg-gray-50 dark:bg-gray-800">
                             <tr>
-                                <td colspan="3" class="table-cell font-medium">Total Comisiones</td>
-                                <td class="table-cell text-right font-medium">${{ "{:,.2f}".format(total_commission) }}</td>
+                                <td colspan="3" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Total Comisiones</td>
+                                <td class="px-6 py-3 text-right text-sm font-medium text-gray-900 dark:text-gray-100">${{ "{:,.2f}".format(total_commission) }}</td>
                                 <td colspan="2"></td>
                             </tr>
                         </tfoot>
@@ -176,20 +205,21 @@
                 </div>
                 {% else %}
                 <div class="text-center py-8">
-                    <div class="mb-4">
-                        <i class="fas fa-money-bill-wave text-gray-400 text-4xl"></i>
+                    <div class="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="material-symbols-outlined text-gray-400 dark:text-gray-500">payments_off</span>
                     </div>
-                    <p class="text-gray-500">No hay comisiones registradas para esta póliza.</p>
+                    <p class="text-gray-500 dark:text-gray-400">No hay comisiones registradas para esta póliza.</p>
                 </div>
                 {% endif %}
             </div>
         </div>
+    </div>
 
-        <div class="flex justify-center mt-6">
-            <a href="{{ url_for('policies.list_policies') }}" class="btn-secondary">
-                <i class="fas fa-arrow-left mr-2"></i>Volver a la Lista de Pólizas
-            </a>
-        </div>
+    <!-- Botón de Volver -->
+    <div class="flex justify-center">
+        <a href="{{ url_for('policies.list_policies') }}" class="btn-secondary">
+            <span class="material-symbols-outlined mr-2">arrow_back</span>Volver a la Lista de Pólizas
+        </a>
     </div>
 </div>
 

@@ -1,38 +1,52 @@
 {% extends "base.html" %}
 
+{% set breadcrumbs = [
+    ('index', 'Inicio'),
+    ('reports.dashboard', 'Reportes'),
+    (None, 'Diagrama de Jerarquía')
+] %}
+
 {% block content %}
-<div class="container-fluid">
-    <div class="mb-6">
-        <h1 class="page-title">Diagrama de Jerarquía de Agentes</h1>
-        <p class="subtitle">Visualización de la estructura organizacional</p>
+<div class="space-y-6 px-4 md:px-6 pt-4">
+    <!-- Encabezado -->
+    <div class="card-container">
+        <div class="p-4">
+            <div class="flex items-center">
+                <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 mr-2">account_tree</span>
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Diagrama de Jerarquía de Agentes</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Visualización de la estructura organizacional</p>
+                </div>
+            </div>
+        </div>
     </div>
 
     {% if error_message %}
-    <div class="bg-red-50 p-4 rounded-lg mb-6">
+    <div class="bg-red-50 dark:bg-red-900/50 rounded-lg p-4">
         <div class="flex">
             <div class="flex-shrink-0">
-                <i class="fas fa-exclamation-circle text-red-400"></i>
+                <span class="material-symbols-outlined text-red-400 dark:text-red-300">error</span>
             </div>
             <div class="ml-3">
-                <h3 class="text-sm font-medium text-red-800">Error</h3>
-                <p class="text-sm text-red-700">{{ error_message }}</p>
+                <h3 class="text-sm font-medium text-red-800 dark:text-red-200">Error</h3>
+                <p class="text-sm text-red-700 dark:text-red-300">{{ error_message }}</p>
             </div>
         </div>
     </div>
     {% endif %}
 
-    <div class="card">
-        <div class="card-header">
-            <h3 class="section-title flex items-center">
-                <i class="fas fa-sitemap text-primary-600 mr-2"></i>
+    <!-- Diagrama -->
+    <div class="card-container">
+        <div class="border-b border-gray-200 dark:border-gray-700 p-4">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
+                <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 mr-2">schema</span>
                 Estructura Jerárquica
             </h3>
         </div>
-        <div class="card-body">
-            <div id="tree-container" class="h-[600px] border border-gray-200 rounded-lg overflow-auto p-4">
-                <!-- El diagrama se renderizará aquí -->
+        <div class="p-4">
+            <div id="tree-container" class="h-[600px] border border-gray-200 dark:border-gray-700 rounded-lg overflow-auto bg-white dark:bg-gray-800">
                 <div id="loading" class="flex items-center justify-center h-full">
-                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 dark:border-primary-400"></div>
                 </div>
             </div>
         </div>
@@ -42,67 +56,74 @@
 
 {% block extra_css %}
 <style>
+/* Estilos base */
 .node {
     cursor: pointer;
 }
 
+/* Estilos para modo claro */
+:root {
+    --node-circle-stroke: #0284c7;
+    --node-circle-stroke-hover: #0ea5e9;
+    --node-circle-stroke-selected: #38bdf8;
+    --node-text-color: #374151;
+    --node-text-hover: #1f2937;
+    --link-color: #e5e7eb;
+}
+
+/* Estilos para modo oscuro */
+.dark {
+    --node-circle-stroke: #0ea5e9;
+    --node-circle-stroke-hover: #38bdf8;
+    --node-circle-stroke-selected: #7dd3fc;
+    --node-text-color: #9ca3af;
+    --node-text-hover: #f3f4f6;
+    --link-color: #374151;
+}
+
 .node circle {
-    fill: #fff;
-    stroke: #0284c7;
+    fill: transparent;
+    stroke: var(--node-circle-stroke);
     stroke-width: 2px;
 }
 
 .node text {
     font: 12px 'Inter', sans-serif;
-    fill: #374151;
+    fill: var(--node-text-color);
 }
 
 .link {
     fill: none;
-    stroke: #e5e7eb;
+    stroke: var(--link-color);
     stroke-width: 1.5px;
 }
 
 .node:hover circle {
-    stroke: #0ea5e9;
+    stroke: var(--node-circle-stroke-hover);
 }
 
 .node.selected circle {
-    stroke: #38bdf8;
+    stroke: var(--node-circle-stroke-selected);
     stroke-width: 3px;
 }
 
 .node:hover text {
-    fill: #1f2937;
+    fill: var(--node-text-hover);
     font-weight: 500;
 }
 
 /* Tooltip */
 .node-tooltip {
-    position: absolute;
-    padding: 0.5rem;
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 0.375rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    pointer-events: none;
-    font-size: 0.875rem;
-    z-index: 10;
-}
-
-.node-tooltip p {
-    margin: 0;
-    line-height: 1.25;
+    @apply absolute p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 
+           rounded-lg shadow-lg pointer-events-none text-sm z-10;
 }
 
 .node-tooltip .name {
-    font-weight: 500;
-    color: #1f2937;
+    @apply font-medium text-gray-900 dark:text-gray-100;
 }
 
 .node-tooltip .role {
-    color: #6b7280;
-    font-size: 0.75rem;
+    @apply text-gray-500 dark:text-gray-400 text-xs;
 }
 </style>
 {% endblock %}

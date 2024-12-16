@@ -1,137 +1,157 @@
 {% extends "base.html" %}
 
+{% set breadcrumbs = [
+    ('index', 'Inicio'),
+    ('policies.list_policies', 'Pólizas'),
+    (None, 'Carga Masiva')
+] %}
+
 {% block content %}
-<div class="container-fluid">
-    <div class="max-w-2xl mx-auto">
-        <div class="mb-6">
-            <h1 class="page-title">Carga Masiva de Pólizas</h1>
-            <p class="subtitle">Importe múltiples pólizas usando un archivo Excel</p>
-        </div>
-
-        {% if summary %}
-        <div class="card mb-8">
-            <div class="card-header">
-                <h3 class="section-title flex items-center">
-                    <i class="fas fa-chart-bar text-primary-600 mr-2"></i>
-                    Resumen de la Carga
-                </h3>
-            </div>
-            <div class="card-body">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div class="stat-card">
-                        <div class="flex items-center">
-                            <div class="w-10 h-10 bg-success-50 rounded-full flex-center mr-3">
-                                <i class="fas fa-plus text-success-500"></i>
-                            </div>
-                            <div>
-                                <p class="stat-title">Creadas</p>
-                                <p class="stat-value">{{ summary.created }}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="stat-card">
-                        <div class="flex items-center">
-                            <div class="w-10 h-10 bg-primary-50 rounded-full flex-center mr-3">
-                                <i class="fas fa-sync text-primary-500"></i>
-                            </div>
-                            <div>
-                                <p class="stat-title">Actualizadas</p>
-                                <p class="stat-value">{{ summary.updated }}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="stat-card">
-                        <div class="flex items-center">
-                            <div class="w-10 h-10 bg-danger-50 rounded-full flex-center mr-3">
-                                <i class="fas fa-times text-danger-500"></i>
-                            </div>
-                            <div>
-                                <p class="stat-title">Errores</p>
-                                <p class="stat-value">{{ summary.errors }}</p>
-                            </div>
-                        </div>
-                    </div>
+<div class="space-y-6 px-6 pt-4">
+    <!-- Encabezado -->
+    <div class="card-container">
+        <div class="p-4">
+            <div class="flex items-center">
+                <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 mr-2">upload_file</span>
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Carga Masiva de Pólizas</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Importe múltiples pólizas usando un archivo Excel</p>
                 </div>
-
-                {% if summary.error_details %}
-                <div class="bg-danger-50 rounded-lg p-4">
-                    <h4 class="font-medium text-danger-700 mb-2">Detalles de los errores:</h4>
-                    <div class="space-y-2">
-                        {% for error in summary.error_details %}
-                        <div class="bg-white rounded p-3 border border-danger-200">
-                            <p class="text-sm text-danger-700">
-                                <span class="font-medium">Fila {{ error.row }}:</span> 
-                                {{ error.message }}
-                            </p>
-                            {% if error.data %}
-                            <p class="text-xs text-gray-500 mt-1">
-                                Datos de la fila: {{ error.data }}
-                            </p>
-                            {% endif %}
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endif %}
             </div>
         </div>
-        {% endif %}
+    </div>
 
-        <div class="card">
-            <div class="card-header">
-                <h3 class="section-title">Subir Archivo</h3>
+    {% if summary %}
+    <!-- Resumen de la Carga -->
+    <div class="card-container">
+        <div class="p-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="card-container p-6">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-green-100 dark:bg-green-900/50 rounded-full flex items-center justify-center mr-4">
+                            <span class="material-symbols-outlined text-green-600 dark:text-green-400 text-2xl">add_circle</span>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Creadas</p>
+                            <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100">{{ summary.created }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-container p-6">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center mr-4">
+                            <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-2xl">update</span>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Actualizadas</p>
+                            <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100">{{ summary.updated }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-container p-6">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-red-100 dark:bg-red-900/50 rounded-full flex items-center justify-center mr-4">
+                            <span class="material-symbols-outlined text-red-600 dark:text-red-400 text-2xl">error</span>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Errores</p>
+                            <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100">{{ summary.errors }}</p>
+                        </div>
+                    </div>
+                </div>
             </div>
-            
-            <form method="POST" enctype="multipart/form-data" class="card-body space-y-6">
-                <div class="form-group">
-                    <label for="file" class="form-label">Selecciona archivo XLSX:</label>
-                    <input type="file" 
-                           id="file" 
-                           name="file" 
-                           accept=".xlsx" 
-                           required
-                           class="form-input">
-                </div>
 
-                <div class="bg-gray-50 rounded-lg p-4">
-                    <h4 class="font-medium text-gray-900 mb-2">Instrucciones</h4>
-                    <p class="text-sm text-gray-600 mb-4">El archivo XLSX debe tener las siguientes columnas en orden:</p>
-                    <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
-                        <li>Número de Póliza</li>
-                        <li>Fecha de Inicio (YYYY-MM-DD)</li>
-                        <li>Fecha de Fin (YYYY-MM-DD)</li>
-                        <li>Prima</li>
-                        <li>Número de Documento del Cliente</li>
-                        <li>Nombre del Producto</li>
-                        <li>Número de Documento del Agente</li>
-                        <li>Estado de Emisión</li>
-                        <li>Estado de Pago</li>
-                    </ul>
+            {% if summary.error_details %}
+            <div class="bg-red-50 dark:bg-red-900/50 rounded-lg p-4">
+                <h4 class="font-medium text-red-800 dark:text-red-200 mb-2">Detalles de los errores:</h4>
+                <div class="space-y-2">
+                    {% for error in summary.error_details %}
+                    <div class="bg-white dark:bg-gray-800 rounded p-3 border border-red-200 dark:border-red-700">
+                        <p class="text-sm text-red-800 dark:text-red-200">
+                            <span class="font-medium">Fila {{ error.row }}:</span> 
+                            {{ error.message }}
+                        </p>
+                        {% if error.data %}
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            Datos de la fila: {{ error.data }}
+                        </p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
                 </div>
-
-                <div class="alert alert-warning">
-                    <i class="fas fa-exclamation-triangle mr-2"></i>
-                    <span>Si una póliza con el mismo número ya existe, sus datos serán actualizados.</span>
-                </div>
-            
-                <div class="flex justify-end space-x-4">
-                    <a href="{{ url_for('policies.download_policy_sample') }}" class="btn-secondary">
-                        <i class="fas fa-download mr-2"></i>Descargar plantilla
-                    </a>
-                    <button type="submit" class="btn-primary">
-                        <i class="fas fa-upload mr-2"></i>Subir Archivo
-                    </button>
-                </div>
-            </form>
+            </div>
+            {% endif %}
         </div>
+    </div>
+    {% endif %}
 
-        <div class="flex justify-center mt-6">
-            <a href="{{ url_for('policies.list_policies') }}" class="btn-secondary">
-                <i class="fas fa-arrow-left mr-2"></i>Volver a la Lista de Pólizas
-            </a>
+    <!-- Formulario de Carga -->
+    <div class="card-container">
+        <div class="border-b border-gray-200 dark:border-gray-700 p-4">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
+                <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 mr-2">cloud_upload</span>
+                Subir Archivo
+            </h3>
         </div>
+        
+        <form method="POST" enctype="multipart/form-data" class="p-4 space-y-6">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Selecciona archivo XLSX:
+                </label>
+                <input type="file" 
+                       name="file" 
+                       accept=".xlsx"
+                       required
+                       class="block w-full text-sm text-gray-500 dark:text-gray-400
+                              file:mr-4 file:py-2 file:px-4 
+                              file:rounded-lg file:border-0
+                              file:text-sm file:font-medium
+                              file:bg-primary-50/50 dark:file:bg-primary-900/30 file:text-primary-600 dark:file:text-primary-400
+                              hover:file:bg-primary-100/70 dark:hover:file:bg-primary-800/40
+                              transition-colors duration-150">
+            </div>
+
+            <div class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4">
+                <h4 class="font-medium text-gray-900 dark:text-gray-100 mb-2">Instrucciones</h4>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">El archivo XLSX debe tener las siguientes columnas en orden:</p>
+                <ul class="list-disc list-inside space-y-1 ml-2 text-sm text-gray-600 dark:text-gray-400">
+                    <li>Número de Póliza</li>
+                    <li>Fecha de Inicio (YYYY-MM-DD)</li>
+                    <li>Fecha de Fin (YYYY-MM-DD)</li>
+                    <li>Prima</li>
+                    <li>Número de Documento del Cliente</li>
+                    <li>Nombre del Producto</li>
+                    <li>Número de Documento del Agente</li>
+                    <li>Estado de Emisión</li>
+                    <li>Estado de Pago</li>
+                </ul>
+            </div>
+
+            <div class="bg-yellow-50 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-200 p-4 rounded-lg flex items-center">
+                <span class="material-symbols-outlined mr-2">warning</span>
+                <span>Si una póliza con el mismo número ya existe, sus datos serán actualizados.</span>
+            </div>
+        
+            <div class="flex justify-end space-x-4">
+                <a href="{{ url_for('policies.download_policy_sample') }}" 
+                   class="btn-secondary">
+                    <span class="material-symbols-outlined mr-2">download</span>Descargar plantilla
+                </a>
+                <button type="submit" class="btn-primary">
+                    <span class="material-symbols-outlined mr-2">upload</span>Subir Archivo
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Botón de Volver -->
+    <div class="flex justify-center">
+        <a href="{{ url_for('policies.list_policies') }}" class="btn-secondary">
+            <span class="material-symbols-outlined mr-2">arrow_back</span>Volver a la Lista de Pólizas
+        </a>
     </div>
 </div>
 {% endblock %}

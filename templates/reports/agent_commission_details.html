@@ -8,16 +8,38 @@
 
 {% block content %}
 <div class="space-y-6 px-6 pt-4">
-    <div class="card-container max-w-7xl mx-auto">
-        <div class="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 p-4">
-            <h3 class="section-title text-gray-900 dark:text-gray-100">Detalle de Comisiones</h3>
-            <a href="{{ url_for('reports.commission_report') }}" class="btn-secondary">
-                <span class="material-symbols-outlined mr-2">arrow_back</span>Volver
-            </a>
-        </div>
+    <div class="card-container">
         <div class="p-4">
-            <form method="POST" action="{{ url_for('reports.update_multiple_commission_status') }}">
-                <div class="overflow-x-auto">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center">
+                    <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 mr-2">account_balance_wallet</span>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Detalle de Comisiones - {{ agent.name }}</h3>
+                </div>
+                <a href="{{ url_for('reports.commission_report') }}" class="btn-secondary">
+                    <span class="material-symbols-outlined mr-2">arrow_back</span>Volver
+                </a>
+            </div>
+
+            <form method="POST" action="{{ url_for('reports.update_multiple_commission_status') }}" class="space-y-6">
+                <input type="hidden" name="agent_id" value="{{ agent.id }}">
+                
+                <!-- Resumen de Comisiones -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="card-container p-6">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-primary-100 dark:bg-primary-900/50 rounded-full flex items-center justify-center mr-4">
+                                <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 text-2xl">payments</span>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Comisiones</p>
+                                <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100">${{ "{:,.2f}".format(total_commission) }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabla de Comisiones -->
+                <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                         <thead class="bg-gray-50 dark:bg-gray-800">
                             <tr>
@@ -33,20 +55,38 @@
                         </thead>
                         <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
                             {% for commission in commissions %}
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ commission.Commission.date.strftime('%Y-%m-%d') }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ commission.Policy.policy_number }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ commission.Product.name }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900 dark:text-gray-100">${{ "{:,.2f}".format(commission.Policy.premium) }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900 dark:text-gray-100">${{ "{:,.2f}".format(commission.Commission.amount) }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ "Directa" if commission.Commission.commission_type == 'direct' else "Sobrecomisión" }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                    <span class="badge {{ 'badge-success' if commission.Commission.payment_status == 'PAGADO' else 'badge-warning' }}">
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                                    {{ commission.Commission.date.strftime('%d/%m/%Y') }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                                    {{ commission.Policy.policy_number }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                                    {{ commission.Product.name }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900 dark:text-gray-100">
+                                    ${{ "{:,.2f}".format(commission.Policy.premium) }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900 dark:text-gray-100">
+                                    ${{ "{:,.2f}".format(commission.Commission.amount) }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+                                    {{ "Directa" if commission.Commission.commission_type == 'direct' else "Sobrecomisión" }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                        {% if commission.Commission.payment_status == 'PAGADO' %}
+                                            bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+                                        {% else %}
+                                            bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
+                                        {% endif %}">
                                         {{ commission.Commission.payment_status }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                    <select name="status_{{ commission.Commission.id }}" class="form-select form-select-sm">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <select name="status_{{ commission.Commission.id }}" 
+                                            class="form-select w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150">
                                         <option value="">Seleccionar estado</option>
                                         <option value="PENDIENTE" {% if commission.Commission.payment_status == 'PENDIENTE' %}selected{% endif %}>Pendiente</option>
                                         <option value="PAGADO" {% if commission.Commission.payment_status == 'PAGADO' %}selected{% endif %}>Pagado</option>
@@ -65,10 +105,9 @@
                         </tfoot>
                     </table>
                 </div>
-                
-                <!-- Botón de Guardar -->
-                <div class="flex justify-end mt-6">
-                    <input type="hidden" name="agent_id" value="{{ agent.id }}">
+
+                <!-- Botones de Acción -->
+                <div class="flex justify-end space-x-4">
                     <button type="submit" class="btn-primary flex items-center">
                         <span class="material-symbols-outlined mr-2">save</span>Guardar Cambios
                     </button>

@@ -90,22 +90,31 @@
                     </h3>
                     
                     {% if product.image_url %}
-                    <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                    <div class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
                         <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Imagen Actual</h4>
                         <img src="{{ url_for('static', filename=product.image_url) }}" 
                              alt="{{ product.name }}"
-                             class="max-w-xs rounded-lg shadow-sm">
+                             class="max-w-xs mx-auto rounded-lg shadow-sm">
                     </div>
                     {% endif %}
                     
                     <div class="form-group">
                         {{ form.image.label(class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1") }}
-                        {{ form.image(class="form-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150") }}
+                        {{ form.image(class="block w-full text-sm text-gray-500 dark:text-gray-400
+                                          file:mr-4 file:py-2 file:px-4 
+                                          file:rounded-lg file:border-0
+                                          file:text-sm file:font-medium
+                                          file:bg-primary-50/50 dark:file:bg-primary-900/30 file:text-primary-600 dark:file:text-primary-400
+                                          hover:file:bg-primary-100/70 dark:hover:file:bg-primary-800/40
+                                          transition-colors duration-150") }}
                         {% for error in form.image.errors %}
                             <span class="text-sm text-red-600 dark:text-red-400 mt-1">{{ error }}</span>
                         {% endfor %}
-                        <div id="imagePreview" class="mt-4 p-4 border border-dashed border-gray-300 dark:border-gray-600 rounded-lg"></div>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Deja este campo vacío si no deseas cambiar la imagen actual.</p>
+                        <div id="imagePreview" class="mt-4 p-4 border border-dashed border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"></div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 flex items-center">
+                            <span class="material-symbols-outlined text-gray-400 dark:text-gray-500 mr-2">info</span>
+                            Deja este campo vacío si no deseas cambiar la imagen actual.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -115,7 +124,9 @@
                    class="btn-secondary">
                     <span class="material-symbols-outlined mr-2">keyboard_backspace</span>Volver
                 </a>
-                {{ form.submit(class="btn-primary flex items-center") }}
+                <button type="submit" class="btn-primary flex items-center">
+                    <span class="material-symbols-outlined mr-2">save</span>Guardar Cambios
+                </button>
             </div>
         </form>
     </div>
