@@ -1,55 +1,51 @@
 {% extends "base.html" %}
 
+{% set breadcrumbs = [
+    ('index', 'Inicio'),
+    ('reports.commission_report', 'Reporte de Comisiones'),
+    (None, 'Comisiones de ' ~ agent.name)
+] %}
+
 {% block content %}
-<div class="container-fluid">
-    <div class="mb-6">
-        <div class="flex items-center justify-between">
-            <div>
-                <h1 class="page-title">Comisiones de {{ agent.name }}</h1>
-                <p class="subtitle">Detalle de comisiones del agente</p>
-            </div>
+<div class="space-y-6 px-6 pt-4">
+    <div class="card-container max-w-7xl mx-auto">
+        <div class="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 p-4">
+            <h3 class="section-title text-gray-900 dark:text-gray-100">Detalle de Comisiones</h3>
             <a href="{{ url_for('reports.commission_report') }}" class="btn-secondary">
-                <i class="fas fa-arrow-left mr-2"></i>Volver
+                <span class="material-symbols-outlined mr-2">arrow_back</span>Volver
             </a>
         </div>
-    </div>
-
-    <!-- Tabla de Comisiones -->
-    <div class="card">
-        <div class="card-header">
-            <h3 class="section-title">Detalle de Comisiones</h3>
-        </div>
-        <div class="card-body">
+        <div class="p-4">
             <form method="POST" action="{{ url_for('reports.update_multiple_commission_status') }}">
-                <div class="table-container">
-                    <table class="table">
-                        <thead>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead class="bg-gray-50 dark:bg-gray-800">
                             <tr>
-                                <th class="table-header">Fecha</th>
-                                <th class="table-header">Póliza</th>
-                                <th class="table-header">Producto</th>
-                                <th class="table-header text-right">Prima</th>
-                                <th class="table-header text-right">Comisión</th>
-                                <th class="table-header">Tipo</th>
-                                <th class="table-header">Estado</th>
-                                <th class="table-header">Nuevo Estado</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Fecha</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Póliza</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Producto</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Prima</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Comisión</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tipo</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Estado</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Nuevo Estado</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
                             {% for commission in commissions %}
-                            <tr class="table-row">
-                                <td class="table-cell">{{ commission.Commission.date.strftime('%Y-%m-%d') }}</td>
-                                <td class="table-cell">{{ commission.Policy.policy_number }}</td>
-                                <td class="table-cell">{{ commission.Product.name }}</td>
-                                <td class="table-cell text-right">${{ "{:,.2f}".format(commission.Policy.premium) }}</td>
-                                <td class="table-cell text-right">${{ "{:,.2f}".format(commission.Commission.amount) }}</td>
-                                <td class="table-cell">{{ "Directa" if commission.Commission.commission_type == 'direct' else "Sobrecomisión" }}</td>
-                                <td class="table-cell">
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ commission.Commission.date.strftime('%Y-%m-%d') }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ commission.Policy.policy_number }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ commission.Product.name }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900 dark:text-gray-100">${{ "{:,.2f}".format(commission.Policy.premium) }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900 dark:text-gray-100">${{ "{:,.2f}".format(commission.Commission.amount) }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ "Directa" if commission.Commission.commission_type == 'direct' else "Sobrecomisión" }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">
                                     <span class="badge {{ 'badge-success' if commission.Commission.payment_status == 'PAGADO' else 'badge-warning' }}">
                                         {{ commission.Commission.payment_status }}
                                     </span>
                                 </td>
-                                <td class="table-cell">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">
                                     <select name="status_{{ commission.Commission.id }}" class="form-select form-select-sm">
                                         <option value="">Seleccionar estado</option>
                                         <option value="PENDIENTE" {% if commission.Commission.payment_status == 'PENDIENTE' %}selected{% endif %}>Pendiente</option>
@@ -60,10 +56,10 @@
                             </tr>
                             {% endfor %}
                         </tbody>
-                        <tfoot>
+                        <tfoot class="bg-gray-50 dark:bg-gray-800">
                             <tr>
-                                <td colspan="4" class="table-cell font-medium">Total</td>
-                                <td class="table-cell text-right font-medium">${{ "{:,.2f}".format(total_commission) }}</td>
+                                <td colspan="4" class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Total</td>
+                                <td class="px-6 py-3 text-right text-sm font-medium text-gray-900 dark:text-gray-100">${{ "{:,.2f}".format(total_commission) }}</td>
                                 <td colspan="3"></td>
                             </tr>
                         </tfoot>
@@ -73,8 +69,8 @@
                 <!-- Botón de Guardar -->
                 <div class="flex justify-end mt-6">
                     <input type="hidden" name="agent_id" value="{{ agent.id }}">
-                    <button type="submit" class="btn-primary">
-                        <i class="fas fa-save mr-2"></i>Guardar Cambios
+                    <button type="submit" class="btn-primary flex items-center">
+                        <span class="material-symbols-outlined mr-2">save</span>Guardar Cambios
                     </button>
                 </div>
             </form>
