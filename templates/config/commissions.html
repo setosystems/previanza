@@ -8,8 +8,29 @@
 
 {% block content %}
 <div class="space-y-6 px-6 pt-4">
+    <!-- Tabs -->
+    <div class="card-container md:hidden">
+        <div class="border-b border-gray-200 dark:border-gray-700">
+            <nav class="flex -mb-px" aria-label="Tabs">
+                <button onclick="switchTab('products')" 
+                        class="tab-button flex-1 py-4 px-1 text-center border-b-2 font-medium text-sm active" 
+                        data-tab="products">
+                    <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 mr-2">payments</span>
+                    Comisiones por Producto
+                </button>
+                <button onclick="switchTab('agents')" 
+                        class="tab-button flex-1 py-4 px-1 text-center border-b-2 font-medium text-sm" 
+                        data-tab="agents">
+                    <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 mr-2">group</span>
+                    Comisiones por Agente
+                </button>
+            </nav>
+        </div>
+    </div>
+
     <!-- Comisiones por Producto -->
-    <div class="card-container">
+    <div class="card-container hidden md:block">
+        <!-- Vista de escritorio original -->
         <div class="overflow-hidden rounded-xl">
             <div class="border-b border-gray-200 dark:border-gray-700 p-4">
                 <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
@@ -17,7 +38,6 @@
                     Comisiones por Producto
                 </h3>
             </div>
-
             <table class="table w-full">
                 <colgroup>
                     <col class="w-[35%]">  <!-- Producto -->
@@ -77,8 +97,72 @@
         </div>
     </div>
 
-    <!-- Comisiones Personalizadas por Agente -->
-    <div class="card-container">
+    <!-- Tab Content para móvil: Comisiones por Producto -->
+    <div id="products-tab" class="card-container tab-content md:hidden">
+        <!-- Vista de tarjetas para móvil -->
+        <div class="md:hidden">
+            {% for product in products %}
+            <div class="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 p-4 space-y-4">
+                <div class="flex justify-between items-start">
+                    <h4 class="text-base font-semibold text-gray-900 dark:text-gray-100">{{ product.name }}</h4>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- Comisión Estándar -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Comisión Estándar (%)
+                        </label>
+                        <input type="number" 
+                               class="form-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150"
+                               value="{{ product.commission_percentage }}"
+                               min="0" 
+                               max="100" 
+                               step="0.01"
+                               data-product-id="{{ product.id }}">
+                    </div>
+
+                    <!-- Sobrecomisión -->
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" 
+                               class="form-checkbox rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
+                               {% if product.sobrecomision %}checked{% endif %}
+                               data-product-id="{{ product.id }}">
+                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Habilitar Sobrecomisión
+                        </label>
+                    </div>
+
+                    <!-- Porcentaje Sobrecomisión -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Porcentaje Sobrecomisión (%)
+                        </label>
+                        <input type="number" 
+                               class="form-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150"
+                               value="{{ product.override_percentage }}"
+                               min="0" 
+                               max="100" 
+                               step="0.01"
+                               data-product-id="{{ product.id }}"
+                               {% if not product.sobrecomision %}disabled{% endif %}>
+                    </div>
+
+                    <div class="flex justify-end">
+                        <button class="btn-primary flex items-center"
+                                data-product-id="{{ product.id }}">
+                            <span class="material-symbols-outlined mr-2">save</span>Guardar
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Comisiones por Agente -->
+    <div class="card-container hidden md:block">
+        <!-- Vista de escritorio original -->
         <div class="overflow-hidden rounded-xl">
             <div class="border-b border-gray-200 dark:border-gray-700 p-4">
                 <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
@@ -86,7 +170,6 @@
                     Comisiones Personalizadas por Agente
                 </h3>
             </div>
-
             <table class="table w-full">
                 <colgroup>
                     <col class="w-[25%]">  <!-- Agente -->
@@ -151,11 +234,112 @@
             </table>
         </div>
     </div>
+
+    <!-- Tab Content para móvil: Comisiones por Agente -->
+    <div id="agents-tab" class="card-container tab-content hidden md:hidden">
+        <!-- Vista de tarjetas para móvil -->
+        <div class="md:hidden">
+            {% for agent in agents %}
+            <div class="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 p-4 space-y-4">
+                <div class="flex justify-between items-start">
+                    <h4 class="text-base font-semibold text-gray-900 dark:text-gray-100">{{ agent.name }}</h4>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- Producto -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Producto
+                        </label>
+                        <select class="form-select w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150"
+                                data-agent-id="{{ agent.id }}">
+                            {% for product in products %}
+                            <option value="{{ product.id }}">{{ product.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Comisión -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Comisión (%)
+                        </label>
+                        <input type="number" 
+                               class="form-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150"
+                               min="0" 
+                               max="100" 
+                               step="0.01"
+                               placeholder="Comisión personalizada">
+                    </div>
+
+                    <!-- Sobrecomisión -->
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" 
+                               class="form-checkbox rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500">
+                        <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Habilitar Sobrecomisión
+                        </label>
+                    </div>
+
+                    <!-- Porcentaje Sobrecomisión -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            Porcentaje Sobrecomisión (%)
+                        </label>
+                        <input type="number" 
+                               class="form-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150"
+                               min="0" 
+                               max="100" 
+                               step="0.01"
+                               disabled
+                               placeholder="Sobrecomisión personalizada">
+                    </div>
+
+                    <div class="flex justify-end">
+                        <button class="btn-primary flex items-center"
+                                data-agent-id="{{ agent.id }}">
+                            <span class="material-symbols-outlined mr-2">save</span>Guardar
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
 </div>
 
 {% block scripts %}
 <script>
+// Estilos para las pestañas
+const tabButtons = document.querySelectorAll('.tab-button');
+const activeClasses = 'border-primary-500 text-primary-600 dark:border-primary-400 dark:text-primary-400';
+const inactiveClasses = 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300';
+
+function switchTab(tabId) {
+    // Ocultar todos los contenidos
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.add('hidden');
+    });
+
+    // Mostrar el contenido seleccionado
+    document.getElementById(`${tabId}-tab`).classList.remove('hidden');
+
+    // Actualizar estilos de las pestañas
+    tabButtons.forEach(button => {
+        if (button.dataset.tab === tabId) {
+            button.classList.remove(...inactiveClasses.split(' '));
+            button.classList.add(...activeClasses.split(' '));
+        } else {
+            button.classList.remove(...activeClasses.split(' '));
+            button.classList.add(...inactiveClasses.split(' '));
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar la primera pestaña como activa
+    switchTab('products');
+
     // Mantener el JavaScript existente
 });
 </script>

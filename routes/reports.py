@@ -115,7 +115,7 @@ def dashboard():
     .order_by(func.sum(Policy.premium).desc())\
     .all()
 
-    return render_template('reports/dashboard.html',
+    return render_template('index.html',
         total_policies=total_policies,
         total_premium=total_premium,
         total_commissions=total_commissions,

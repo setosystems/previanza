@@ -204,8 +204,8 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     // Configuración de gráficos
-    const salesData = {{ daily_sales|tojson }};
-    const activityData = {{ weekly_activity|tojson }};
+    const salesData = JSON.parse('{{ daily_sales|tojson|safe }}');
+    const activityData = JSON.parse('{{ weekly_activity|tojson|safe }}');
 
     // Gráfico de Ventas
     new Chart(document.getElementById('salesChart'), {

@@ -10,7 +10,7 @@
     <!-- Bloque de Búsqueda -->
     <div class="card-container">
         <div class="p-4">
-            <div class="flex items-center justify-between mb-6">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                 <div class="flex items-center">
                     <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 mr-2">payments</span>
                     <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Reporte de Comisiones</h3>
@@ -19,6 +19,7 @@
 
             <form method="GET" class="flex flex-col md:flex-row gap-4">
                 <div class="flex-1">
+                    <label for="agent_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Agente</label>
                     <div class="relative">
                         <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <span class="material-symbols-outlined text-gray-400 dark:text-gray-500">person</span>
@@ -36,8 +37,8 @@
                     </div>
                 </div>
 
-                <div class="flex-1 flex justify-center items-center space-x-2">
-                    <label for="start_date" class="text-gray-700 dark:text-gray-300">Fecha Inicio</label>
+                <div class="flex-1">
+                    <label for="start_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha Inicio</label>
                     <div class="relative">
                         <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <span class="material-symbols-outlined text-gray-400 dark:text-gray-500">calendar_today</span>
@@ -46,12 +47,12 @@
                                id="start_date" 
                                name="start_date" 
                                value="{{ start_date or '' }}"
-                               class="form-input pl-10 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150">
+                               class="form-input pl-10 w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150">
                     </div>
                 </div>
 
-                <div class="flex-1 flex justify-center items-center space-x-2">
-                    <label for="end_date" class="text-gray-700 dark:text-gray-300">Fecha Fin</label>
+                <div class="flex-1">
+                    <label for="end_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha Fin</label>
                     <div class="relative">
                         <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <span class="material-symbols-outlined text-gray-400 dark:text-gray-500">calendar_today</span>
@@ -60,19 +61,21 @@
                                id="end_date" 
                                name="end_date" 
                                value="{{ end_date or '' }}"
-                               class="form-input pl-10 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150">
+                               class="form-input pl-10 w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150">
                     </div>
                 </div>
 
-                <button type="submit" class="btn-primary flex items-center">
-                    <span class="material-symbols-outlined mr-2">search</span>Filtrar
-                </button>
+                <div class="flex items-center justify-end md:self-end">
+                    <button type="submit" class="btn-primary flex items-center">
+                        <span class="material-symbols-outlined mr-2">search</span>Filtrar
+                    </button>
+                </div>
             </form>
         </div>
     </div>
 
     <!-- Tabla de Comisiones -->
-    <div class="card-container">
+    <div class="card-container hidden md:block">
         <div class="overflow-hidden rounded-xl">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-800">
@@ -133,6 +136,62 @@
                     </tr>
                 </tfoot>
             </table>
+        </div>
+    </div>
+
+    <!-- Vista de tarjetas para móvil -->
+    <div class="md:hidden grid grid-cols-1 gap-4 px-4">
+        {% for result in results %}
+        <div class="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200 dark:border-gray-700 
+                    rounded-lg shadow-sm hover:shadow-md transition-all duration-200 
+                    hover:bg-white/80 dark:hover:bg-gray-800/80">
+            <div class="p-4 space-y-3">
+                <!-- Encabezado -->
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">
+                            {{ result.agent_name }}
+                        </h3>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1
+                            {% if result.is_active %}
+                                bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+                            {% else %}
+                                bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
+                            {% endif %}">
+                            {{ 'Activo' if result.is_active else 'Inactivo' }}
+                        </span>
+                    </div>
+                    <div class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                        ${{ "{:,.2f}".format(result.total_commission) }}
+                    </div>
+                </div>
+
+                <!-- Acciones -->
+                <div class="flex justify-end space-x-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                    <a href="{{ url_for('reports.agent_commission_details', agent_id=result.agent_id|int) }}" 
+                       class="btn-icon text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/50">
+                        <span class="material-symbols-outlined">visibility</span>
+                    </a>
+                    <form action="{{ url_for('reports.generate_commission_report', agent_id=result.agent_id|int) }}" 
+                          method="POST" 
+                          class="inline">
+                        <button type="submit" 
+                                class="btn-icon text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/50">
+                            <span class="material-symbols-outlined">description</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+        <!-- Total General -->
+        <div class="bg-primary-50/50 dark:bg-primary-900/50 backdrop-blur-sm border border-primary-200 dark:border-primary-700 
+                    rounded-lg shadow-sm p-4 flex justify-between items-center">
+            <span class="text-primary-900 dark:text-primary-100 font-medium">Total General</span>
+            <span class="text-lg font-semibold text-primary-900 dark:text-primary-100">
+                ${{ "{:,.2f}".format(total_commission) }}
+            </span>
         </div>
     </div>
 </div>

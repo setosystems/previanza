@@ -81,173 +81,170 @@
     </div>
 
     {% if policies %}
-        <!-- Reemplazar la sección de tabla por esto -->
-        <div class="card-container">
-            <!-- Vista de tabla para desktop -->
-            <div class="hidden md:block overflow-hidden rounded-xl">
-                <!-- Mantener la tabla existente aquí -->
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead class="bg-gray-50 dark:bg-gray-700">
-                        <tr>
-                            <th class="table-header text-gray-600 dark:text-gray-300 first:rounded-tl-xl last:rounded-tr-xl">
-                                Número de Póliza
-                            </th>
-                            <th class="table-header text-gray-600 dark:text-gray-300">Cliente</th>
-                            <th class="table-header text-gray-600 dark:text-gray-300">Producto</th>
-                            <th class="table-header text-gray-600 dark:text-gray-300 text-right">Prima</th>
-                            <th class="table-header text-gray-600 dark:text-gray-300 text-center">Estado Emisión</th>
-                            <th class="table-header text-gray-600 dark:text-gray-300 text-center">Estado Pago</th>
-                            <th class="table-header text-gray-600 dark:text-gray-300 text-center">Fecha Inicio</th>
-                            <th class="table-header text-gray-600 dark:text-gray-300 text-center">Fecha Fin</th>
-                            <th class="table-header text-gray-600 dark:text-gray-300 text-center">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100 dark:divide-gray-700 bg-white dark:bg-gray-800 last:border-b-0">
-                        {% for policy in policies %}
-                        <tr class="table-row hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
-                            <td class="table-cell text-gray-900 dark:text-gray-100">{{ policy.policy_number }}</td>
-                            <td class="table-cell text-gray-700 dark:text-gray-300">{{ policy.client.name }}</td>
-                            <td class="table-cell text-gray-700 dark:text-gray-300">{{ policy.product.name }}</td>
-                            <td class="table-cell text-gray-700 dark:text-gray-300 text-right">${{ "%.2f"|format(policy.premium) }}</td>
-                            <td class="table-cell text-center">
-                                {% set status_classes = {
-                                    'Emitida': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-                                    'Pendiente': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-                                    'Anulada': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
-                                    'Otros': 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
-                                } %}
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ status_classes[policy.emision_status.value] }}">
-                                    {{ policy.emision_status.value }}
-                                </span>
-                            </td>
-                            <td class="table-cell text-center">
-                                {% set payment_classes = {
-                                    'Pagado': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-                                    'Pendiente': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
-                                    'Abonado': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-                                    'Anulado': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
-                                    'Otros': 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
-                                } %}
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ payment_classes[policy.payment_status.value] }}">
-                                    {{ policy.payment_status.value }}
-                                </span>
-                            </td>
-                            <td class="table-cell text-gray-700 dark:text-gray-300 text-center">{{ policy.start_date.strftime('%Y-%m-%d') }}</td>
-                            <td class="table-cell text-gray-700 dark:text-gray-300 text-center">{{ policy.end_date.strftime('%Y-%m-%d') }}</td>
-                            <td class="table-cell">
-                                <div class="flex justify-center space-x-2">
-                                    <a href="{{ url_for('policies.policy_detail', id=policy.id) }}" 
-                                       class="p-1 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-150"
-                                       title="Ver Detalles">
-                                        <span class="material-symbols-outlined">visibility</span>
-                                    </a>
-                                    {% if current_user.role in [UserRole.ADMIN, UserRole.DIGITADOR] %}
-                                    <a href="{{ url_for('policies.edit_policy', id=policy.id) }}" 
-                                       class="btn-icon text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300"
-                                       title="Editar">
-                                        <span class="material-symbols-outlined">edit</span>
-                                    </a>
-                                    {% if current_user.role == UserRole.ADMIN %}
-                                    <button onclick="confirmDelete('{{ policy.id }}', '{{ policy.policy_number }}')"
-                                            class="btn-icon text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
-                                            title="Eliminar">
-                                        <span class="material-symbols-outlined">delete</span>
-                                    </button>
-                                    {% endif %}
-                                    {% endif %}
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Vista de tarjetas para móvil -->
-            <div class="md:hidden space-y-4 p-4">
-                {% for policy in policies %}
-                <div class="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200 dark:border-gray-700 
-                            rounded-lg shadow-sm hover:shadow-md transition-all duration-200 
-                            hover:bg-white/80 dark:hover:bg-gray-800/80">
-                    <div class="p-4">
-                        <!-- Encabezado con número de póliza y estado -->
-                        <div class="flex justify-between items-start mb-3">
-                            <div>
-                                <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">
-                                    Póliza #{{ policy.policy_number }}
-                                </h3>
-                                <p class="text-sm font-medium text-gray-600 dark:text-gray-300">
-                                    {{ policy.product.name }}
-                                </p>
-                            </div>
-                            <div class="flex flex-col items-end gap-2">
-                                <!-- Estado de Emisión -->
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                    {% if policy.emision_status.name == 'EMITIDA' %}
-                                        bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
-                                    {% elif policy.emision_status.name == 'PENDIENTE' %}
-                                        bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
-                                    {% else %}
-                                        bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
-                                    {% endif %}">
-                                    {{ policy.emision_status.value }}
-                                </span>
-                                <!-- Estado de Pago -->
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                    {% if policy.payment_status.name == 'PAGADO' %}
-                                        bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
-                                    {% elif policy.payment_status.name == 'PENDIENTE' %}
-                                        bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
-                                    {% else %}
-                                        bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
-                                    {% endif %}">
-                                    {{ policy.payment_status.value }}
-                                </span>
-                            </div>
-                        </div>
-
-                        <!-- Información principal -->
-                        <div class="space-y-3 border-t border-gray-200 dark:border-gray-700 pt-3 
-                                    bg-gray-50/50 dark:bg-gray-900/50 -mx-4 px-4 py-3">
-                            <!-- Cliente -->
-                            <div class="flex items-center text-sm">
-                                <span class="material-symbols-outlined text-gray-400 w-5 h-5 mr-2">person</span>
-                                <span class="text-gray-700 dark:text-gray-200 font-medium">{{ policy.client.name }}</span>
-                            </div>
-                            <!-- Agente -->
-                            <div class="flex items-center text-sm">
-                                <span class="material-symbols-outlined text-gray-400 w-5 h-5 mr-2">badge</span>
-                                <span class="text-gray-600 dark:text-gray-300">{{ policy.agent.name }}</span>
-                            </div>
-                            <!-- Fechas -->
-                            <div class="flex items-center text-sm">
-                                <span class="material-symbols-outlined text-gray-400 w-5 h-5 mr-2">date_range</span>
-                                <span class="text-gray-600 dark:text-gray-300">
-                                    {{ policy.start_date.strftime('%d/%m/%Y') }} - {{ policy.end_date.strftime('%d/%m/%Y') }}
-                                </span>
-                            </div>
-                        </div>
-
-                        <!-- Prima y Acciones -->
-                        <div class="flex justify-between items-center mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
-                            <div class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                                ${{ "{:,.2f}".format(policy.premium) }}
-                            </div>
-                            <div class="flex space-x-2">
+        <!-- Vista de tabla para desktop -->
+        <div class="card-container hidden md:block">
+            <!-- Mantener la tabla existente aquí -->
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead class="bg-gray-50 dark:bg-gray-700">
+                    <tr>
+                        <th class="table-header text-gray-600 dark:text-gray-300 first:rounded-tl-xl last:rounded-tr-xl">
+                            Número de Póliza
+                        </th>
+                        <th class="table-header text-gray-600 dark:text-gray-300">Cliente</th>
+                        <th class="table-header text-gray-600 dark:text-gray-300">Producto</th>
+                        <th class="table-header text-gray-600 dark:text-gray-300 text-right">Prima</th>
+                        <th class="table-header text-gray-600 dark:text-gray-300 text-center">Estado Emisión</th>
+                        <th class="table-header text-gray-600 dark:text-gray-300 text-center">Estado Pago</th>
+                        <th class="table-header text-gray-600 dark:text-gray-300 text-center">Fecha Inicio</th>
+                        <th class="table-header text-gray-600 dark:text-gray-300 text-center">Fecha Fin</th>
+                        <th class="table-header text-gray-600 dark:text-gray-300 text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-700 bg-white dark:bg-gray-800 last:border-b-0">
+                    {% for policy in policies %}
+                    <tr class="table-row hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
+                        <td class="table-cell text-gray-900 dark:text-gray-100">{{ policy.policy_number }}</td>
+                        <td class="table-cell text-gray-700 dark:text-gray-300">{{ policy.client.name }}</td>
+                        <td class="table-cell text-gray-700 dark:text-gray-300">{{ policy.product.name }}</td>
+                        <td class="table-cell text-gray-700 dark:text-gray-300 text-right">${{ "%.2f"|format(policy.premium) }}</td>
+                        <td class="table-cell text-center">
+                            {% set status_classes = {
+                                'Emitida': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+                                'Pendiente': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+                                'Anulada': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+                                'Otros': 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+                            } %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ status_classes[policy.emision_status.value] }}">
+                                {{ policy.emision_status.value }}
+                            </span>
+                        </td>
+                        <td class="table-cell text-center">
+                            {% set payment_classes = {
+                                'Pagado': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+                                'Pendiente': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+                                'Abonado': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+                                'Anulado': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+                                'Otros': 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+                            } %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ payment_classes[policy.payment_status.value] }}">
+                                {{ policy.payment_status.value }}
+                            </span>
+                        </td>
+                        <td class="table-cell text-gray-700 dark:text-gray-300 text-center">{{ policy.start_date.strftime('%Y-%m-%d') }}</td>
+                        <td class="table-cell text-gray-700 dark:text-gray-300 text-center">{{ policy.end_date.strftime('%Y-%m-%d') }}</td>
+                        <td class="table-cell">
+                            <div class="flex justify-center space-x-2">
                                 <a href="{{ url_for('policies.policy_detail', id=policy.id) }}" 
-                                   class="btn-icon text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/50">
+                                   class="p-1 rounded-full hover:bg-blue-50 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-150"
+                                   title="Ver Detalles">
                                     <span class="material-symbols-outlined">visibility</span>
                                 </a>
+                                {% if current_user.role in [UserRole.ADMIN, UserRole.DIGITADOR] %}
                                 <a href="{{ url_for('policies.edit_policy', id=policy.id) }}" 
-                                   class="btn-icon text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/50">
+                                   class="btn-icon text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300"
+                                   title="Editar">
                                     <span class="material-symbols-outlined">edit</span>
                                 </a>
+                                {% if current_user.role == UserRole.ADMIN %}
+                                <button onclick="confirmDelete('{{ policy.id }}', '{{ policy.policy_number }}')"
+                                        class="btn-icon text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
+                                        title="Eliminar">
+                                    <span class="material-symbols-outlined">delete</span>
+                                </button>
+                                {% endif %}
+                                {% endif %}
                             </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Vista de tarjetas para móvil -->
+        <div class="md:hidden grid grid-cols-1 gap-4 px-4">
+            {% for policy in policies %}
+            <div class="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200 dark:border-gray-700 
+                        rounded-lg shadow-sm hover:shadow-md transition-all duration-200 
+                        hover:bg-white/80 dark:hover:bg-gray-800/80">
+                <div class="p-4">
+                    <!-- Encabezado con número de póliza y estado -->
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">
+                                Póliza #{{ policy.policy_number }}
+                            </h3>
+                            <p class="text-sm font-medium text-gray-600 dark:text-gray-300">
+                                {{ policy.product.name }}
+                            </p>
+                        </div>
+                        <div class="flex flex-col items-end gap-2">
+                            <!-- Estado de Emisión -->
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                {% if policy.emision_status.name == 'EMITIDA' %}
+                                    bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+                                {% elif policy.emision_status.name == 'PENDIENTE' %}
+                                    bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
+                                {% else %}
+                                    bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
+                                {% endif %}">
+                                {{ policy.emision_status.value }}
+                            </span>
+                            <!-- Estado de Pago -->
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                {% if policy.payment_status.name == 'PAGADO' %}
+                                    bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+                                {% elif policy.payment_status.name == 'PENDIENTE' %}
+                                    bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
+                                {% else %}
+                                    bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
+                                {% endif %}">
+                                {{ policy.payment_status.value }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Información principal -->
+                    <div class="space-y-3 border-t border-gray-200 dark:border-gray-700 pt-3 
+                                bg-gray-50/50 dark:bg-gray-900/50 -mx-4 px-4 py-3">
+                        <!-- Cliente -->
+                        <div class="flex items-center text-sm">
+                            <span class="material-symbols-outlined text-gray-400 w-5 h-5 mr-2">person</span>
+                            <span class="text-gray-700 dark:text-gray-200 font-medium">{{ policy.client.name }}</span>
+                        </div>
+                        <!-- Agente -->
+                        <div class="flex items-center text-sm">
+                            <span class="material-symbols-outlined text-gray-400 w-5 h-5 mr-2">badge</span>
+                            <span class="text-gray-700 dark:text-gray-200">{{ policy.agent.name }}</span>
+                        </div>
+                        <!-- Fechas -->
+                        <div class="flex items-center text-sm">
+                            <span class="material-symbols-outlined text-gray-400 w-5 h-5 mr-2">date_range</span>
+                            <span class="text-gray-700 dark:text-gray-200">
+                                {{ policy.start_date.strftime('%d/%m/%Y') }} - {{ policy.end_date.strftime('%d/%m/%Y') }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Prima y Acciones -->
+                    <div class="flex justify-between items-center mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
+                        <div class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                            ${{ "{:,.2f}".format(policy.premium) }}
+                        </div>
+                        <div class="flex space-x-2">
+                            <a href="{{ url_for('policies.policy_detail', id=policy.id) }}" 
+                               class="btn-icon text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/50">
+                                <span class="material-symbols-outlined">visibility</span>
+                            </a>
+                            <a href="{{ url_for('policies.edit_policy', id=policy.id) }}" 
+                               class="btn-icon text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/50">
+                                <span class="material-symbols-outlined">edit</span>
+                            </a>
                         </div>
                     </div>
                 </div>
-                {% endfor %}
             </div>
+            {% endfor %}
         </div>
 
         <!-- Paginación -->
