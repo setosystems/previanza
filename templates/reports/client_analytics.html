@@ -1,36 +1,50 @@
 {% extends "base.html" %}
 
+{% set breadcrumbs = [
+    ('index', 'Inicio'),
+    ('reports.dashboard', 'Reportes'),
+    (None, 'Análisis de Clientes')
+] %}
+
 {% block content %}
-<div class="container-fluid">
-    <div class="mb-6">
-        <h1 class="page-title">Análisis de Clientes</h1>
-        <p class="subtitle">Estadísticas y métricas de clientes</p>
+<div class="space-y-6 px-6 pt-4">
+    <!-- Encabezado -->
+    <div class="card-container">
+        <div class="p-4">
+            <div class="flex items-center">
+                <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 mr-2">analytics</span>
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Análisis de Clientes</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Estadísticas y métricas de clientes</p>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Top Clientes -->
-    <div class="card mb-8">
-        <div class="card-header">
-            <h3 class="section-title flex items-center">
-                <i class="fas fa-trophy text-primary-600 mr-2"></i>
+    <div class="card-container">
+        <div class="border-b border-gray-200 dark:border-gray-700 p-4">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
+                <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 mr-2">military_tech</span>
                 Top 10 Clientes por Prima
             </h3>
         </div>
-        <div class="card-body">
-            <div class="table-container">
-                <table class="table">
-                    <thead>
+        <div class="p-4">
+            <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead class="bg-gray-50 dark:bg-gray-800">
                         <tr>
-                            <th class="table-header">Cliente</th>
-                            <th class="table-header text-center">Número de Pólizas</th>
-                            <th class="table-header text-right">Prima Total</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Cliente</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Número de Pólizas</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Prima Total</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
                         {% for client in top_clients %}
-                        <tr class="table-row">
-                            <td class="table-cell">{{ client.name }}</td>
-                            <td class="table-cell text-center">{{ client.policy_count }}</td>
-                            <td class="table-cell text-right">${{ "{:,.2f}".format(client.total_premium) }}</td>
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">{{ client.name }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900 dark:text-gray-100">{{ client.policy_count }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900 dark:text-gray-100">${{ "{:,.2f}".format(client.total_premium) }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -42,14 +56,14 @@
     <!-- Gráficos -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Distribución de Clientes -->
-        <div class="card">
-            <div class="card-header">
-                <h3 class="section-title flex items-center">
-                    <i class="fas fa-chart-pie text-primary-600 mr-2"></i>
+        <div class="card-container">
+            <div class="border-b border-gray-200 dark:border-gray-700 p-4">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
+                    <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 mr-2">pie_chart</span>
                     Distribución de Clientes por Número de Pólizas
                 </h3>
             </div>
-            <div class="card-body">
+            <div class="p-4">
                 <div class="h-80">
                     <canvas id="client-distribution-chart"></canvas>
                 </div>
@@ -57,14 +71,14 @@
         </div>
 
         <!-- Tendencia de Clientes -->
-        <div class="card">
-            <div class="card-header">
-                <h3 class="section-title flex items-center">
-                    <i class="fas fa-chart-line text-primary-600 mr-2"></i>
+        <div class="card-container">
+            <div class="border-b border-gray-200 dark:border-gray-700 p-4">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
+                    <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 mr-2">trending_up</span>
                     Tendencia de Adquisición de Clientes
                 </h3>
             </div>
-            <div class="card-body">
+            <div class="p-4">
                 <div class="h-80">
                     <canvas id="client-trend-chart"></canvas>
                 </div>
@@ -81,11 +95,32 @@ document.addEventListener('DOMContentLoaded', function() {
     const chartConfig = {
         plugins: {
             legend: {
-                position: 'bottom'
+                position: 'bottom',
+                labels: {
+                    color: document.documentElement.classList.contains('dark') ? '#9ca3af' : '#374151'
+                }
             }
         },
         responsive: true,
-        maintainAspectRatio: false
+        maintainAspectRatio: false,
+        scales: {
+            x: {
+                grid: {
+                    color: document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb'
+                },
+                ticks: {
+                    color: document.documentElement.classList.contains('dark') ? '#9ca3af' : '#374151'
+                }
+            },
+            y: {
+                grid: {
+                    color: document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb'
+                },
+                ticks: {
+                    color: document.documentElement.classList.contains('dark') ? '#9ca3af' : '#374151'
+                }
+            }
+        }
     };
 
     // Gráfico de Distribución
@@ -108,13 +143,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     beginAtZero: true,
                     title: {
                         display: true,
-                        text: 'Número de Pólizas'
+                        text: 'Número de Pólizas',
+                        color: document.documentElement.classList.contains('dark') ? '#9ca3af' : '#374151'
                     }
                 },
                 x: {
                     title: {
                         display: true,
-                        text: 'Cliente'
+                        text: 'Cliente',
+                        color: document.documentElement.classList.contains('dark') ? '#9ca3af' : '#374151'
                     }
                 }
             }
@@ -142,13 +179,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     beginAtZero: true,
                     title: {
                         display: true,
-                        text: 'Número de Clientes'
+                        text: 'Número de Clientes',
+                        color: document.documentElement.classList.contains('dark') ? '#9ca3af' : '#374151'
                     }
                 },
                 x: {
                     title: {
                         display: true,
-                        text: 'Mes'
+                        text: 'Mes',
+                        color: document.documentElement.classList.contains('dark') ? '#9ca3af' : '#374151'
                     }
                 }
             }

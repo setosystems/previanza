@@ -79,8 +79,9 @@
 
     <!-- Tabla de clientes -->
     <div class="card-container">
-        <div class="overflow-hidden rounded-xl">
-            <table class="table w-full">
+        <!-- Vista de tabla para desktop -->
+        <div class="hidden md:block overflow-hidden rounded-xl">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-700">
                     <tr>
                         <th class="table-header text-gray-600 dark:text-gray-300 first:rounded-tl-xl last:rounded-tr-xl">
@@ -142,6 +143,71 @@
                     {% endfor %}
                 </tbody>
             </table>
+        </div>
+
+        <!-- Vista de tarjetas para móvil -->
+        <div class="md:hidden space-y-4 p-4">
+            {% for client in clients %}
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
+                <div class="p-4 space-y-3">
+                    <!-- Encabezado de la tarjeta -->
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="text-base font-medium text-gray-900 dark:text-gray-100">
+                                {{ client.name }}
+                            </h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">
+                                {{ client.document_type.value }} {{ client.document_number }}
+                            </p>
+                        </div>
+                        <div class="flex space-x-2">
+                            <a href="{{ url_for('clients.client_detail', id=client.id) }}" 
+                               class="btn-icon text-blue-600 dark:text-blue-400">
+                                <span class="material-symbols-outlined">visibility</span>
+                            </a>
+                            <a href="{{ url_for('clients.edit_client', id=client.id) }}" 
+                               class="btn-icon text-green-600 dark:text-green-400">
+                                <span class="material-symbols-outlined">edit</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Información del cliente -->
+                    <div class="space-y-2 pt-2 border-t border-gray-100 dark:border-gray-700">
+                        <div class="flex items-center text-sm">
+                            <span class="material-symbols-outlined text-gray-400 w-5 h-5 mr-2">mail</span>
+                            <span class="text-gray-600 dark:text-gray-300">{{ client.email }}</span>
+                        </div>
+                        {% if client.phone %}
+                        <div class="flex items-center text-sm">
+                            <span class="material-symbols-outlined text-gray-400 w-5 h-5 mr-2">phone</span>
+                            <span class="text-gray-600 dark:text-gray-300">{{ client.phone }}</span>
+                        </div>
+                        {% endif %}
+                        {% if client.city %}
+                        <div class="flex items-center text-sm">
+                            <span class="material-symbols-outlined text-gray-400 w-5 h-5 mr-2">location_on</span>
+                            <span class="text-gray-600 dark:text-gray-300">{{ client.city }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Estadísticas rápidas -->
+                    <div class="flex justify-between pt-2 border-t border-gray-100 dark:border-gray-700">
+                        <div class="text-sm">
+                            <span class="text-gray-500 dark:text-gray-400">Pólizas:</span>
+                            <span class="font-medium text-gray-900 dark:text-gray-100">{{ client.policies|length }}</span>
+                        </div>
+                        <div class="text-sm">
+                            <span class="text-gray-500 dark:text-gray-400">Estado:</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                Activo
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
         </div>
     </div>
 

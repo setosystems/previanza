@@ -10,9 +10,8 @@
     <!-- Barra de búsqueda -->
     <div class="card-container">
         <div class="p-4">
-            <div class="flex items-center space-x-4">
-                <!-- Campos de búsqueda -->
-                <form method="GET" class="flex-1 flex items-center space-x-4">
+            <form method="GET" class="space-y-4">
+                <div class="flex flex-col md:flex-row gap-4">
                     <div class="flex-1">
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -37,7 +36,7 @@
                                    name="aseguradora" 
                                    class="form-input h-10 pl-10 w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150" 
                                    value="{{ request.args.get('aseguradora', '') }}"
-                                   placeholder="Nombre de la aseguradora">
+                                   placeholder="Aseguradora">
                         </div>
                     </div>
 
@@ -47,6 +46,7 @@
                             <span class="material-symbols-outlined">search</span>
                         </button>
                         
+                        {% if current_user.role in [UserRole.ADMIN, UserRole.DIGITADOR] %}
                         <div class="flex items-center space-x-2 ml-4">
                             <a href="{{ url_for('products.create_product') }}" 
                                class="bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white h-10 w-10 flex items-center justify-center rounded-lg transition-colors"
@@ -54,150 +54,224 @@
                                 <span class="material-symbols-outlined">add</span>
                             </a>
                         </div>
+                        {% endif %}
                     </div>
-                </form>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if products %}
+        <!-- Vista de tabla para desktop -->
+        <div class="card-container hidden md:block">
+            <div class="overflow-hidden rounded-xl">
+                <table class="table w-full">
+                    <thead class="bg-gray-50 dark:bg-gray-700">
+                        <tr>
+                            <th class="table-header text-gray-600 dark:text-gray-300 first:rounded-tl-xl">Imagen</th>
+                            <th class="table-header text-gray-600 dark:text-gray-300">Nombre</th>
+                            <th class="table-header text-gray-600 dark:text-gray-300">Aseguradora</th>
+                            <th class="table-header text-gray-600 dark:text-gray-300">Comisión</th>
+                            <th class="table-header text-gray-600 dark:text-gray-300">Sobrecomisión</th>
+                            <th class="table-header text-gray-600 dark:text-gray-300 last:rounded-tr-xl">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 dark:divide-gray-700 bg-white dark:bg-gray-800 last:border-b-0">
+                        {% for product in products %}
+                        <tr class="table-row hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
+                            <td class="table-cell">
+                                {% if product.image_url %}
+                                <img src="{{ url_for('static', filename=product.image_url) }}" 
+                                     alt="{{ product.name }}"
+                                     class="h-12 w-12 object-cover rounded-lg">
+                                {% else %}
+                                <div class="h-12 w-12 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-gray-400 dark:text-gray-500">image_not_supported</span>
+                                </div>
+                                {% endif %}
+                            </td>
+                            <td class="table-cell text-gray-900 dark:text-gray-100">
+                                <div>
+                                    <p class="font-medium">{{ product.name }}</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ product.description }}</p>
+                                </div>
+                            </td>
+                            <td class="table-cell text-gray-700 dark:text-gray-300">{{ product.aseguradora }}</td>
+                            <td class="table-cell text-gray-700 dark:text-gray-300">{{ product.commission_percentage }}%</td>
+                            <td class="table-cell text-center">
+                                {% if product.sobrecomision %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                    {{ product.override_percentage }}%
+                                </span>
+                                {% else %}
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200">
+                                    No aplica
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td class="table-cell">
+                                <div class="flex justify-center space-x-2">
+                                    <a href="{{ url_for('products.edit_product', id=product.id) }}" 
+                                       class="btn-icon text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300"
+                                       title="Editar Producto">
+                                        <span class="material-symbols-outlined">edit</span>
+                                    </a>
+                                    {% if current_user.role == UserRole.ADMIN %}
+                                    <button onclick="confirmDelete('{{ product.id }}', '{{ product.name }}')"
+                                            class="btn-icon text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
+                                            title="Eliminar Producto">
+                                        <span class="material-symbols-outlined">delete</span>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
-    </div>
 
-    <!-- Tabla de productos -->
-    <div class="card-container">
-        <div class="overflow-hidden rounded-xl">
-            <table class="table w-full">
-                <thead class="bg-gray-50 dark:bg-gray-700">
-                    <tr>
-                        <th class="table-header text-gray-600 dark:text-gray-300 first:rounded-tl-xl">Imagen</th>
-                        <th class="table-header text-gray-600 dark:text-gray-300">Nombre</th>
-                        <th class="table-header text-gray-600 dark:text-gray-300">Aseguradora</th>
-                        <th class="table-header text-gray-600 dark:text-gray-300">Comisión</th>
-                        <th class="table-header text-gray-600 dark:text-gray-300">Sobrecomisión</th>
-                        <th class="table-header text-gray-600 dark:text-gray-300 last:rounded-tr-xl">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100 dark:divide-gray-700 bg-white dark:bg-gray-800 last:border-b-0">
-                    {% for product in products %}
-                    <tr class="table-row hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
-                        <td class="table-cell">
-                            {% if product.image_url %}
-                            <img src="{{ url_for('static', filename=product.image_url) }}" 
-                                 alt="{{ product.name }}"
-                                 class="h-12 w-12 object-cover rounded-lg">
-                            {% else %}
-                            <div class="h-12 w-12 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
-                                <span class="material-symbols-outlined text-gray-400 dark:text-gray-500">image_not_supported</span>
-                            </div>
-                            {% endif %}
-                        </td>
-                        <td class="table-cell text-gray-900 dark:text-gray-100">
-                            <div>
-                                <p class="font-medium">{{ product.name }}</p>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ product.description }}</p>
-                            </div>
-                        </td>
-                        <td class="table-cell text-gray-700 dark:text-gray-300">{{ product.aseguradora }}</td>
-                        <td class="table-cell text-gray-700 dark:text-gray-300">{{ product.commission_percentage }}%</td>
-                        <td class="table-cell text-center">
-                            {% if product.sobrecomision %}
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                                {{ product.override_percentage }}%
-                            </span>
-                            {% else %}
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200">
-                                No aplica
-                            </span>
-                            {% endif %}
-                        </td>
-                        <td class="table-cell">
-                            <div class="flex justify-center space-x-2">
-                                <a href="{{ url_for('products.edit_product', id=product.id) }}" 
-                                   class="btn-icon text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300"
-                                   title="Editar Producto">
-                                    <span class="material-symbols-outlined">edit</span>
-                                </a>
-                                {% if current_user.role == UserRole.ADMIN %}
-                                <button onclick="confirmDelete('{{ product.id }}', '{{ product.name }}')"
-                                        class="btn-icon text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
-                                        title="Eliminar Producto">
-                                    <span class="material-symbols-outlined">delete</span>
-                                </button>
-                                {% endif %}
-                            </div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- Paginación -->
-    {% if pagination %}
-    <div class="card-container">
-        <div class="flex flex-col sm:flex-row items-center justify-between px-4 py-3 gap-4">
-            <!-- Selector de elementos por página -->
-            <div class="flex flex-wrap items-center gap-3">
-                <div class="flex items-center gap-2">
-                    <span class="text-sm text-gray-600 dark:text-gray-400">Ver</span>
-                    <select name="per_page" 
-                            onchange="window.location.href=this.value"
-                            class="form-select w-20 rounded-md text-sm border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 bg-white dark:bg-gray-700 focus:border-primary-500 focus:ring-primary-500 transition-colors">
-                        {% for count in [10, 25, 50, 100] %}
-                        <option value="{{ url_for('products.list_products', per_page=count) }}"
-                                {% if request.args.get('per_page', '10')|int == count %}selected{% endif %}>
-                            {{ count }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                    <span class="text-sm text-gray-600 dark:text-gray-400">registros</span>
+        <!-- Vista de tarjetas para móvil -->
+        <div class="md:hidden grid grid-cols-1 sm:grid-cols-2 gap-4 px-4">
+            {% for product in products %}
+            <div class="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200 dark:border-gray-700 
+                        rounded-lg shadow-sm hover:shadow-md transition-all duration-200 
+                        hover:bg-white/80 dark:hover:bg-gray-800/80 overflow-hidden">
+                <!-- Imagen del producto -->
+                <div class="aspect-video w-full relative bg-gray-100 dark:bg-gray-900">
+                    {% if product.image_url %}
+                    <img src="{{ url_for('static', filename=product.image_url) }}" 
+                         alt="{{ product.name }}"
+                         class="w-full h-full object-cover">
+                    {% else %}
+                    <div class="w-full h-full flex items-center justify-center">
+                        <span class="material-symbols-outlined text-4xl text-gray-400 dark:text-gray-600">
+                            image_not_supported
+                        </span>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Badge de comisión -->
+                    <div class="absolute top-2 right-2">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                   bg-primary-100 text-primary-800 dark:bg-primary-900 dark:text-primary-200">
+                            {{ product.commission_percentage }}% Comisión
+                        </span>
+                    </div>
                 </div>
 
-                <div class="h-4 w-px bg-gray-300 dark:bg-gray-600 hidden sm:block"></div>
+                <!-- Información del producto -->
+                <div class="p-4 space-y-3">
+                    <div>
+                        <h3 class="text-base font-semibold text-gray-900 dark:text-gray-100">
+                            {{ product.name }}
+                        </h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                            {{ product.aseguradora }}
+                        </p>
+                    </div>
 
-                <!-- Información de registros -->
-                <span class="text-sm text-gray-600 dark:text-gray-400">
-                    {{ (pagination.page - 1) * pagination.per_page + 1 }}
-                    -
-                    {{ min(pagination.page * pagination.per_page, pagination.total) }}
-                    de
-                    {{ pagination.total }}
-                    {{ 'registro' if pagination.total == 1 else 'registros' }}
-                </span>
-            </div>
-
-            <!-- Paginación -->
-            <nav class="flex items-center justify-center sm:justify-end gap-1">
-                {% if pagination.has_prev %}
-                <a href="{{ url_for('products.list_products', page=pagination.prev_num, per_page=request.args.get('per_page', 10)) }}"
-                   class="relative inline-flex items-center rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-primary-600 transition-colors">
-                    <span class="sr-only">Anterior</span>
-                    <span class="material-symbols-outlined text-sm">chevron_left</span>
-                </a>
-                {% endif %}
-
-                {% for page in pagination.iter_pages() %}
-                    {% if page %}
-                        <a href="{{ url_for('products.list_products', page=page, per_page=request.args.get('per_page', 10)) }}"
-                           class="relative inline-flex items-center justify-center min-w-[2.5rem] h-10 text-sm font-medium rounded-md transition-colors
-                                  {% if page == pagination.page %}
-                                      text-white bg-primary-600 hover:bg-primary-700 shadow-sm
-                                  {% else %}
-                                      text-gray-700 hover:bg-gray-50 hover:text-primary-600
-                                  {% endif %}">
-                            {{ page }}
-                        </a>
+                    {% if product.description %}
+                    <p class="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
+                        {{ product.description }}
+                    </p>
                     {% endif %}
-                {% endfor %}
 
-                {% if pagination.has_next %}
-                <a href="{{ url_for('products.list_products', page=pagination.next_num, per_page=request.args.get('per_page', 10)) }}"
-                   class="relative inline-flex items-center rounded-md p-2 text-gray-400 hover:bg-gray-50 hover:text-primary-600 transition-colors">
-                    <span class="sr-only">Siguiente</span>
-                    <span class="material-symbols-outlined text-sm">chevron_right</span>
-                </a>
-                {% endif %}
-            </nav>
+                    <!-- Acciones -->
+                    <div class="flex justify-end space-x-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                        <a href="{{ url_for('products.edit_product', id=product.id) }}" 
+                           class="btn-icon text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/50">
+                            <span class="material-symbols-outlined">edit</span>
+                        </a>
+                        {% if current_user.role == UserRole.ADMIN %}
+                        <button onclick="confirmDelete('{{ product.id }}', '{{ product.name }}')"
+                                class="btn-icon text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/50">
+                            <span class="material-symbols-outlined">delete</span>
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
         </div>
-    </div>
+
+        <!-- Paginación -->
+        {% if pagination %}
+        <div class="card-container">
+            <div class="flex flex-col sm:flex-row items-center justify-between px-4 py-3 gap-4">
+                <!-- Selector de elementos por página -->
+                <div class="flex flex-wrap items-center gap-3">
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm text-gray-600 dark:text-gray-400">Ver</span>
+                        <select name="per_page" 
+                                onchange="window.location.href=this.value"
+                                class="form-select w-20 rounded-md text-sm border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 bg-white dark:bg-gray-700 focus:border-primary-500 focus:ring-primary-500 transition-colors">
+                            {% for count in [10, 25, 50, 100] %}
+                            <option value="{{ url_for('products.list_products', per_page=count) }}"
+                                    {% if request.args.get('per_page', '10')|int == count %}selected{% endif %}>
+                                {{ count }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <span class="text-sm text-gray-600 dark:text-gray-400">registros</span>
+                    </div>
+
+                    <div class="h-4 w-px bg-gray-300 dark:bg-gray-600 hidden sm:block"></div>
+
+                    <!-- Información de registros -->
+                    <span class="text-sm text-gray-600 dark:text-gray-400">
+                        {{ (pagination.page - 1) * pagination.per_page + 1 }}
+                        -
+                        {{ min(pagination.page * pagination.per_page, pagination.total) }}
+                        de
+                        {{ pagination.total }}
+                        {{ 'registro' if pagination.total == 1 else 'registros' }}
+                    </span>
+                </div>
+
+                <!-- Paginación -->
+                <nav class="flex items-center justify-center sm:justify-end gap-1">
+                    {% if pagination.has_prev %}
+                    <a href="{{ url_for('products.list_products', page=pagination.prev_num, per_page=request.args.get('per_page', 10)) }}"
+                       class="relative inline-flex items-center rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-primary-600 transition-colors">
+                        <span class="sr-only">Anterior</span>
+                        <span class="material-symbols-outlined text-sm">chevron_left</span>
+                    </a>
+                    {% endif %}
+
+                    {% for page in pagination.iter_pages() %}
+                        {% if page %}
+                            <a href="{{ url_for('products.list_products', page=page, per_page=request.args.get('per_page', 10)) }}"
+                               class="relative inline-flex items-center justify-center min-w-[2.5rem] h-10 text-sm font-medium rounded-md transition-colors
+                                      {% if page == pagination.page %}
+                                          text-white bg-primary-600 hover:bg-primary-700 shadow-sm
+                                      {% else %}
+                                          text-gray-700 hover:bg-gray-50 hover:text-primary-600
+                                      {% endif %}">
+                                {{ page }}
+                            </a>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if pagination.has_next %}
+                    <a href="{{ url_for('products.list_products', page=pagination.next_num, per_page=request.args.get('per_page', 10)) }}"
+                       class="relative inline-flex items-center rounded-md p-2 text-gray-400 hover:bg-gray-50 hover:text-primary-600 transition-colors">
+                        <span class="sr-only">Siguiente</span>
+                        <span class="material-symbols-outlined text-sm">chevron_right</span>
+                    </a>
+                    {% endif %}
+                </nav>
+            </div>
+        </div>
+        {% endif %}
+    {% else %}
+        <div class="card-container">
+            <div class="text-center py-12">
+                <span class="material-symbols-outlined text-gray-400 dark:text-gray-600 text-5xl">inventory_2_off</span>
+                <p class="text-gray-500 dark:text-gray-400 mt-3">No se encontraron productos</p>
+            </div>
+        </div>
     {% endif %}
 </div>
 {% endblock %}
