@@ -1,47 +1,121 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar Sesión - Previanza</title>
-    <link href="https://fonts.googleapis.com/css?family=Exo:100,200,400|Source+Sans+Pro:300,400,700" rel="stylesheet">
-    <link href="{{ url_for('static', filename='css/login.css') }}" rel="stylesheet">
-</head>
-<body>
-    <div class="body"></div>
-    <div class="grad"></div>
-    <div class="header">
-        <div>PREVIANZA<span>SGP</span></div>
-    </div>
-    <div class="login">
-        <form method="POST" action="{{ url_for('auth.login') }}">
-            {{ form.csrf_token }}
-            <input type="text" 
-                   name="username" 
-                   placeholder="Usuario" 
-                   required 
-                   autocomplete="off">
-            <input type="password" 
-                   name="password" 
-                   placeholder="Contraseña" 
-                   required 
-                   autocomplete="off">
-            <input type="submit" value="Acceder">
-            
-            {% with messages = get_flashed_messages() %}
-                {% if messages %}
-                    {% for message in messages %}
-                        <div class="error-message">
-                            {{ message }}
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
+{% extends "base.html" %}
 
-            <a href="{{ url_for('auth.reset_password_request') }}" class="forgot-password">
-                ¿Olvidaste tu contraseña?
-            </a>
-        </form>
+{% set hide_nav = true %}
+
+{% block content %}
+<div class="relative min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 overflow-hidden">
+    <!-- Fondo con imagen -->
+    <div class="absolute inset-0 z-0">
+        <img src="{{ url_for('static', filename='img/bg.webp') }}" 
+             alt="" 
+             class="w-full h-full object-cover">
     </div>
-</body>
-</html> 
+    
+    <!-- Overlay con blur -->
+    <div class="absolute inset-0 z-10 bg-gray-50/80 dark:bg-gray-900/80 backdrop-blur-sm"></div>
+
+    <!-- Contenido -->
+    <div class="relative z-20 max-w-md w-full">
+        <!-- Switch de tema -->
+        <div class="absolute top-4 right-4">
+            <button type="button"
+                    @click="darkMode = !darkMode; $dispatch('dark-mode-toggle', darkMode)"
+                    class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+                    :class="darkMode ? 'bg-primary-600' : 'bg-gray-200'">
+                <span class="sr-only">Cambiar tema</span>
+                <span aria-hidden="true"
+                      class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                      :class="darkMode ? 'translate-x-5' : 'translate-x-0'">
+                </span>
+            </button>
+        </div>
+
+        <!-- Logo centrado -->
+        <div class="flex justify-center mb-8">
+            <img src="{{ url_for('static', filename='img/logo_light.svg') }}" 
+                 alt="Logo Previanza" 
+                 class="h-12 w-auto block dark:hidden">
+            <img src="{{ url_for('static', filename='img/logo_black.svg') }}" 
+                 alt="Logo Previanza" 
+                 class="h-12 w-auto hidden dark:block">
+        </div>
+
+        <div class="text-center mb-8">
+            <h1 class="text-2xl font-semibold text-gray-900 dark:text-gray-100">Iniciar Sesión</h1>
+            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Ingrese sus credenciales para continuar</p>
+        </div>
+
+        <div class="mt-8">
+            <form method="POST" class="space-y-6">
+                {{ form.csrf_token }}
+                
+                <!-- Usuario -->
+                <div class="form-group">
+                    <label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Usuario
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <span class="material-symbols-outlined text-gray-400 dark:text-gray-500">person</span>
+                        </span>
+                        <input type="text" 
+                               id="username"
+                               name="username" 
+                               required
+                               autocomplete="off"
+                               class="form-input w-full pl-10 rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-800/50 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150 backdrop-blur-sm"
+                               placeholder="Nombre de usuario">
+                    </div>
+                </div>
+
+                <!-- Contraseña -->
+                <div class="form-group">
+                    <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Contraseña
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <span class="material-symbols-outlined text-gray-400 dark:text-gray-500">lock</span>
+                        </span>
+                        <input type="password" 
+                               id="password"
+                               name="password" 
+                               required
+                               autocomplete="off"
+                               class="form-input w-full pl-10 rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-800/50 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150 backdrop-blur-sm"
+                               placeholder="••••••••">
+                    </div>
+                </div>
+
+                <!-- Mensajes de error -->
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="p-4 rounded-xl bg-red-50 dark:bg-red-900/50 text-red-600 dark:text-red-200 text-sm">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <!-- Botón de acceso -->
+                <div>
+                    <button type="submit" 
+                            class="btn-primary w-full flex items-center justify-center rounded-xl py-3 gap-2">
+                        <span class="material-symbols-outlined">login</span>
+                        Acceder
+                    </button>
+                </div>
+
+                <!-- Enlace de recuperación -->
+                <div class="text-center">
+                    <a href="{{ url_for('auth.reset_password_request') }}" 
+                       class="text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+                        ¿Olvidaste tu contraseña?
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 

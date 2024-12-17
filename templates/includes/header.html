@@ -26,46 +26,18 @@
                 {% endif %}
             </div>
 
-            <!-- Botones de configuración y logout -->
+            <!-- Switch de tema -->
             <div class="flex items-center gap-1">
-                <div class="relative" x-data="{ open: false, darkMode: localStorage.theme === 'dark' }">
-                    <button @click="open = !open" 
-                            class="p-2 text-secondary-600 hover:text-secondary-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                            :aria-expanded="open">
-                        <span class="material-symbols-outlined text-sm">settings</span>
-                    </button>
-                    
-                    <!-- Dropdown menu -->
-                    <div x-show="open" 
-                         @click.away="open = false"
-                         x-transition:enter="transition ease-out duration-100"
-                         x-transition:enter-start="transform opacity-0 scale-95"
-                         x-transition:enter-end="transform opacity-100 scale-100"
-                         x-transition:leave="transition ease-in duration-75"
-                         x-transition:leave-start="transform opacity-100 scale-100"
-                         x-transition:leave-end="transform opacity-0 scale-95"
-                         class="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-800 ring-1 ring-black ring-opacity-5 dark:ring-gray-700 divide-y divide-gray-100 dark:divide-gray-700 focus:outline-none z-50">
-                        <div class="px-4 py-3">
-                            <div class="flex items-center justify-between">
-                                <span class="text-sm text-gray-700 dark:text-gray-300">Modo Oscuro</span>
-                                <button 
-                                    @click="darkMode = !darkMode; $dispatch('dark-mode-toggle', darkMode)"
-                                    class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2"
-                                    :class="darkMode ? 'bg-primary-600' : 'bg-gray-200'">
-                                    <span class="sr-only">Usar modo oscuro</span>
-                                    <span aria-hidden="true"
-                                          class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
-                                          :class="darkMode ? 'translate-x-5' : 'translate-x-0'">
-                                    </span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <a href="{{ url_for('auth.logout') }}" 
-                   class="p-2 text-secondary-600 hover:text-secondary-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                    <span class="material-symbols-outlined text-sm">logout</span>
-                </a>
+                <button type="button"
+                        @click="darkMode = !darkMode; $dispatch('dark-mode-toggle', darkMode)"
+                        class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+                        :class="darkMode ? 'bg-primary-600' : 'bg-gray-200'">
+                    <span class="sr-only">Cambiar tema</span>
+                    <span aria-hidden="true"
+                          class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                          :class="darkMode ? 'translate-x-5' : 'translate-x-0'">
+                    </span>
+                </button>
             </div>
         </div>
     </div>
