@@ -42,11 +42,9 @@ def smtp_config():
                     'MAIL_DEFAULT_SENDER': form.mail_default_sender.data
                 }
                 
-                # Crear una nueva instancia de Flask-Mail con la configuración de prueba
-                test_mail = Mail()
-                test_app = current_app._get_current_object()
-                test_app.config.update(test_config)
-                test_mail.init_app(test_app)
+                # Actualizar la configuración de la aplicación temporalmente
+                current_app.config.update(test_config)
+                mail.init_app(current_app)
                 
                 # Intentar enviar un correo de prueba
                 msg = Message(
@@ -55,7 +53,7 @@ def smtp_config():
                     recipients=[form.mail_default_sender.data]
                 )
                 msg.body = 'Esta es una prueba de configuración SMTP.'
-                test_mail.send(msg)
+                mail.send(msg)
                 
                 # Si llegamos aquí, la prueba fue exitosa
                 logging.info("SMTP test successful")
@@ -77,10 +75,6 @@ def smtp_config():
                 
                 db.session.add(new_config)
                 db.session.commit()
-                
-                # Actualizar la configuración de la aplicación
-                current_app.config.update(test_config)
-                mail.init_app(current_app)
                 
                 flash('Configuración SMTP verificada y guardada exitosamente.', 'success')
                 return redirect(url_for('config.config_index'))
