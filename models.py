@@ -371,6 +371,33 @@ class AgentCommissionOverride(db.Model):
 
     __table_args__ = (db.UniqueConstraint('agent_id', 'product_id'),)
 
+class SMTPConfig(db.Model):
+    """
+    Modelo para la configuración SMTP.
+    Solo debe existir un registro activo a la vez.
+    """
+    id = db.Column(Integer, primary_key=True)
+    mail_server = db.Column(String(255), nullable=False)
+    mail_port = db.Column(Integer, nullable=False)
+    mail_use_tls = db.Column(Boolean, nullable=False, default=False)
+    mail_use_ssl = db.Column(Boolean, nullable=False, default=False)
+    mail_username = db.Column(String(255), nullable=False)
+    mail_password = db.Column(String(512), nullable=False)  # Se guardará encriptada
+    mail_default_sender = db.Column(String(255), nullable=False)
+    is_active = db.Column(Boolean, default=True)
+    last_updated = db.Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
+
+    @classmethod
+    def get_active_config(cls):
+        """Obtiene la configuración activa actual."""
+        return cls.query.filter_by(is_active=True).first()
+
+    @classmethod
+    def deactivate_all(cls):
+        """Desactiva todas las configuraciones existentes."""
+        cls.query.update({cls.is_active: False})
+        db.session.commit()
+
 try:
     from utils.email import send_commission_notification, send_override_commission_notification
 except ImportError:

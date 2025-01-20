@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app, jsonify
 from flask_login import login_required
 from decorators import admin_required
-from models import Product, db, User, UserRole, AgentCommissionOverride, Commission, Policy
+from models import Product, db, User, UserRole, AgentCommissionOverride, Commission, Policy, SMTPConfig
 from forms import ProductForm, SMTPConfigForm
 from config import Config
 import os
@@ -11,6 +11,7 @@ import logging
 from smtplib import SMTPException
 from sqlalchemy import func
 from datetime import datetime, timedelta
+from utils.crypto import encrypt_value, decrypt_value
 
 bp = Blueprint('config', __name__, url_prefix='/config')
 
@@ -27,58 +28,96 @@ def smtp_config():
     form = SMTPConfigForm()
     if form.validate_on_submit():
         logging.info("SMTP configuration form submitted")
-        logging.debug(f"Form data: {form.data}")
         
         try:
-            # Update environment variables
-            os.environ['MAIL_SERVER'] = form.mail_server.data
-            os.environ['MAIL_PORT'] = str(form.mail_port.data)
-            os.environ['MAIL_USE_TLS'] = str(form.mail_use_tls.data)
-            os.environ['MAIL_USE_SSL'] = str(form.mail_use_ssl.data)
-            os.environ['MAIL_USERNAME'] = form.mail_username.data
-            os.environ['MAIL_PASSWORD'] = form.mail_password.data
-            os.environ['MAIL_DEFAULT_SENDER'] = form.mail_default_sender.data
-
-            logging.info("Environment variables updated")
-
-            # Update app configuration
-            current_app.config['MAIL_SERVER'] = form.mail_server.data
-            current_app.config['MAIL_PORT'] = form.mail_port.data
-            current_app.config['MAIL_USE_TLS'] = form.mail_use_tls.data
-            current_app.config['MAIL_USE_SSL'] = form.mail_use_ssl.data
-            current_app.config['MAIL_USERNAME'] = form.mail_username.data
-            current_app.config['MAIL_PASSWORD'] = form.mail_password.data
-            current_app.config['MAIL_DEFAULT_SENDER'] = form.mail_default_sender.data
-
-            logging.info("App configuration updated")
-
-            # Reinitialize Flask-Mail with new configuration
-            mail.init_app(current_app)
-            logging.info("Flask-Mail reinitialized with new configuration")
-
-            flash('Configuración SMTP actualizada exitosamente.', 'success')
-            return redirect(url_for('config.config_index'))
+            # Probar la conexión SMTP antes de guardar
+            try:
+                test_config = {
+                    'MAIL_SERVER': form.mail_server.data,
+                    'MAIL_PORT': form.mail_port.data,
+                    'MAIL_USE_TLS': form.mail_use_tls.data,
+                    'MAIL_USE_SSL': form.mail_use_ssl.data,
+                    'MAIL_USERNAME': form.mail_username.data,
+                    'MAIL_PASSWORD': form.mail_password.data,
+                    'MAIL_DEFAULT_SENDER': form.mail_default_sender.data
+                }
+                
+                # Crear una nueva instancia de Flask-Mail con la configuración de prueba
+                test_mail = Mail()
+                test_app = current_app._get_current_object()
+                test_app.config.update(test_config)
+                test_mail.init_app(test_app)
+                
+                # Intentar enviar un correo de prueba
+                msg = Message(
+                    'Prueba de Configuración SMTP',
+                    sender=form.mail_default_sender.data,
+                    recipients=[form.mail_default_sender.data]
+                )
+                msg.body = 'Esta es una prueba de configuración SMTP.'
+                test_mail.send(msg)
+                
+                # Si llegamos aquí, la prueba fue exitosa
+                logging.info("SMTP test successful")
+                
+                # Desactivar configuración anterior
+                SMTPConfig.deactivate_all()
+                
+                # Crear nueva configuración
+                new_config = SMTPConfig(
+                    mail_server=form.mail_server.data,
+                    mail_port=form.mail_port.data,
+                    mail_use_tls=form.mail_use_tls.data,
+                    mail_use_ssl=form.mail_use_ssl.data,
+                    mail_username=form.mail_username.data,
+                    mail_password=encrypt_value(form.mail_password.data),
+                    mail_default_sender=form.mail_default_sender.data,
+                    is_active=True
+                )
+                
+                db.session.add(new_config)
+                db.session.commit()
+                
+                # Actualizar la configuración de la aplicación
+                current_app.config.update(test_config)
+                mail.init_app(current_app)
+                
+                flash('Configuración SMTP verificada y guardada exitosamente.', 'success')
+                return redirect(url_for('config.config_index'))
+                
+            except SMTPException as e:
+                logging.error(f"SMTP test failed: {str(e)}")
+                flash(f'Error al probar la configuración SMTP: {str(e)}', 'error')
+                return render_template('config/smtp.html', form=form)
+                
         except Exception as e:
             logging.error(f"Error updating SMTP configuration: {str(e)}")
             flash(f'Error al actualizar la configuración SMTP: {str(e)}', 'error')
+            db.session.rollback()
     else:
-        # Pre-fill form with current configuration
-        form.mail_server.data = current_app.config['MAIL_SERVER']
-        form.mail_port.data = current_app.config['MAIL_PORT']
-        form.mail_use_tls.data = current_app.config['MAIL_USE_TLS']
-        form.mail_use_ssl.data = current_app.config['MAIL_USE_SSL']
-        form.mail_username.data = current_app.config['MAIL_USERNAME']
-        form.mail_default_sender.data = current_app.config['MAIL_DEFAULT_SENDER']
+        # Pre-fill form with current active configuration
+        active_config = SMTPConfig.get_active_config()
+        if active_config:
+            form.mail_server.data = active_config.mail_server
+            form.mail_port.data = active_config.mail_port
+            form.mail_use_tls.data = active_config.mail_use_tls
+            form.mail_use_ssl.data = active_config.mail_use_ssl
+            form.mail_username.data = active_config.mail_username
+            form.mail_default_sender.data = active_config.mail_default_sender
+            # No prellenamos la contraseña por seguridad
 
     # Display current SMTP configuration (without exposing password)
-    current_config = {
-        'MAIL_SERVER': current_app.config['MAIL_SERVER'],
-        'MAIL_PORT': current_app.config['MAIL_PORT'],
-        'MAIL_USE_TLS': current_app.config['MAIL_USE_TLS'],
-        'MAIL_USE_SSL': current_app.config['MAIL_USE_SSL'],
-        'MAIL_USERNAME': current_app.config['MAIL_USERNAME'],
-        'MAIL_DEFAULT_SENDER': current_app.config['MAIL_DEFAULT_SENDER'],
-    }
+    active_config = SMTPConfig.get_active_config()
+    current_config = None
+    if active_config:
+        current_config = {
+            'MAIL_SERVER': active_config.mail_server,
+            'MAIL_PORT': active_config.mail_port,
+            'MAIL_USE_TLS': active_config.mail_use_tls,
+            'MAIL_USE_SSL': active_config.mail_use_ssl,
+            'MAIL_USERNAME': active_config.mail_username,
+            'MAIL_DEFAULT_SENDER': active_config.mail_default_sender,
+        }
 
     return render_template('config/smtp.html', form=form, current_config=current_config)
 

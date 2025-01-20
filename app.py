@@ -4,7 +4,7 @@ from flask import Flask, render_template, redirect, url_for, send_from_directory
 from flask_login import LoginManager, current_user
 from flask_migrate import Migrate
 from config import Config, basedir
-from models import DocumentType, db, User, UserRole, Policy, Commission, Client, Product
+from models import DocumentType, db, User, UserRole, Policy, Commission, Client, Product, SMTPConfig
 from sqlalchemy.exc import OperationalError
 import time
 from extensions import mail
@@ -12,6 +12,7 @@ import os
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
 from sqlalchemy.sql import func
+from sqlalchemy.sql import text
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -26,6 +27,27 @@ def create_app():
     # Initialize extensions
     db.init_app(app)
     migrate = Migrate(app, db)
+    
+    # Cargar configuración SMTP desde la base de datos
+    with app.app_context():
+        try:
+            # Verificar si la tabla existe
+            db.session.execute(text('SELECT 1 FROM information_schema.tables WHERE table_name = \'smtp_config\''))
+            smtp_config = SMTPConfig.get_active_config()
+            if smtp_config:
+                app.config.update({
+                    'MAIL_SERVER': smtp_config.mail_server,
+                    'MAIL_PORT': smtp_config.mail_port,
+                    'MAIL_USE_TLS': smtp_config.mail_use_tls,
+                    'MAIL_USE_SSL': smtp_config.mail_use_ssl,
+                    'MAIL_USERNAME': smtp_config.mail_username,
+                    'MAIL_PASSWORD': decrypt_value(smtp_config.mail_password),
+                    'MAIL_DEFAULT_SENDER': smtp_config.mail_default_sender
+                })
+                logging.info("SMTP configuration loaded from database")
+        except Exception as e:
+            logging.info("Using default SMTP configuration from config.py")
+    
     mail.init_app(app)
 
     # Configure login manager

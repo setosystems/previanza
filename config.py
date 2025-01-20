@@ -9,13 +9,13 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # Email configuration
-    MAIL_SERVER = os.environ.get('MAIL_SERVER') or 'mail.vaporcigarrillos.com'
+    MAIL_SERVER = os.environ.get('MAIL_SERVER') or 'setosystems.com'
     MAIL_PORT = int(os.environ.get('MAIL_PORT') or 465)
     MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS', 'False').lower() == 'true'
     MAIL_USE_SSL = os.environ.get('MAIL_USE_SSL', 'True').lower() == 'true'
-    MAIL_USERNAME = os.environ.get('MAIL_USERNAME') or 'paul@vaporcigarrillos.com'
-    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD') or 'Videogames.2017'
-    MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER') or 'paul@vaporcigarrillos.com'
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME') or 'previanza@setosystems.com'
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD') or 'Previanza.2025*'
+    MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER') or 'previanza@setosystems.com'
 
     # Password reset token expiration
     PASSWORD_RESET_EXPIRATION = timedelta(hours=1)
