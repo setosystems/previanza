@@ -1,42 +1,33 @@
-from cryptography.fernet import Fernet
-import os
-import base64
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+import logging
+import bcrypt
 
-def get_encryption_key():
-    """
-    Obtiene o genera una clave de encriptación.
-    La clave se deriva de una variable de entorno SECRET_KEY usando PBKDF2.
-    """
-    secret_key = os.environ.get('SECRET_KEY', 'default-secret-key')
-    
-    # Usar PBKDF2 para derivar una clave segura
-    kdf = PBKDF2HMAC(
-        algorithm=hashes.SHA256(),
-        length=32,
-        salt=b'smtp-config-salt',  # Salt fijo para consistencia
-        iterations=100000,
-    )
-    key = base64.urlsafe_b64encode(kdf.derive(secret_key.encode()))
-    return key
+logger = logging.getLogger(__name__)
 
-def encrypt_value(value):
+def hash_value(value):
     """
-    Encripta un valor usando Fernet.
+    Genera un hash seguro de un valor usando bcrypt.
     """
     if not value:
         return None
     
-    f = Fernet(get_encryption_key())
-    return f.encrypt(value.encode()).decode()
+    try:
+        # Generar salt y hash
+        salt = bcrypt.gensalt()
+        hashed = bcrypt.hashpw(value.encode(), salt)
+        return hashed.decode()
+    except Exception as e:
+        logger.error(f"Error al generar hash: {str(e)}")
+        raise
 
-def decrypt_value(encrypted_value):
+def verify_value(value, hashed_value):
     """
-    Desencripta un valor usando Fernet.
+    Verifica si un valor coincide con su hash.
     """
-    if not encrypted_value:
-        return None
+    if not value or not hashed_value:
+        return False
     
-    f = Fernet(get_encryption_key())
-    return f.decrypt(encrypted_value.encode()).decode() 
+    try:
+        return bcrypt.checkpw(value.encode(), hashed_value.encode())
+    except Exception as e:
+        logger.error(f"Error al verificar hash: {str(e)}")
+        return False 

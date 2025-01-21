@@ -6,7 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import enum
 from datetime import datetime, timedelta, timezone  # Agregar timezone a los imports
 import secrets
-from utils.email import send_commission_notification, send_override_commission_notification
+from utils.email import send_commission_notification, send_override_commission_notification, queue_commission_notification, queue_override_commission_notification
 from decimal import Decimal
 import logging
 
@@ -138,7 +138,7 @@ class User(UserMixin, db.Model):
         """
         Calcula y registra la comisión para una póliza.
         La comisión directa va al agente que vendió.
-        La sobrecomisión se distribuye equitativamente entre todos los supervisores en la cadena.
+        La sobrecomisión se distribuye equitativamente entre todos los supervisores.
         """
         if policy.payment_status != PaymentStatus.PAGADO:
             return None
@@ -203,8 +203,8 @@ class User(UserMixin, db.Model):
             db.session.add(main_commission)
             db.session.flush()
             
-            # Enviar notificación al agente
-            send_commission_notification(self, main_commission, policy)
+            # Encolar notificación al agente
+            queue_commission_notification(self, main_commission, policy)
 
             # Crear las comisiones para cada supervisor
             if supervisors and override_per_supervisor > 0:
@@ -220,21 +220,20 @@ class User(UserMixin, db.Model):
                     )
                     db.session.add(override_commission)
                     
-                    # Enviar notificación al supervisor
-                    send_override_commission_notification(
+                    # Encolar notificación al supervisor
+                    queue_override_commission_notification(
                         supervisor,
                         override_commission,
                         policy,
                         self
                     )
-
-            db.session.commit()
+            
             return main_commission
-
+            
         except Exception as e:
+            logging.error(f"Error en calculate_commission: {str(e)}")
             db.session.rollback()
-            logging.error(f"Error al calcular comisión: {str(e)}")
-            return None
+            raise
 
     def get_total_commissions(self, start_date=None, end_date=None):
         """
@@ -374,27 +373,30 @@ class AgentCommissionOverride(db.Model):
 class SMTPConfig(db.Model):
     """
     Modelo para la configuración SMTP.
-    Solo debe existir un registro activo a la vez.
     """
     id = db.Column(Integer, primary_key=True)
     mail_server = db.Column(String(255), nullable=False)
     mail_port = db.Column(Integer, nullable=False)
-    mail_use_tls = db.Column(Boolean, nullable=False, default=False)
-    mail_use_ssl = db.Column(Boolean, nullable=False, default=False)
+    mail_use_tls = db.Column(Boolean, default=False)
+    mail_use_ssl = db.Column(Boolean, default=True)
     mail_username = db.Column(String(255), nullable=False)
-    mail_password = db.Column(String(512), nullable=False)  # Se guardará encriptada
+    mail_password = db.Column(String(255), nullable=False)
     mail_default_sender = db.Column(String(255), nullable=False)
-    is_active = db.Column(Boolean, default=True)
-    last_updated = db.Column(DateTime(timezone=True), nullable=False, default=lambda: datetime.now(timezone.utc))
+    is_active = db.Column(Boolean, default=False)
+    last_updated = db.Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     @classmethod
     def get_active_config(cls):
-        """Obtiene la configuración activa actual."""
+        """
+        Obtiene la configuración SMTP activa.
+        """
         return cls.query.filter_by(is_active=True).first()
 
     @classmethod
     def deactivate_all(cls):
-        """Desactiva todas las configuraciones existentes."""
+        """
+        Desactiva todas las configuraciones SMTP existentes.
+        """
         cls.query.update({cls.is_active: False})
         db.session.commit()
 

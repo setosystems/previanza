@@ -11,7 +11,7 @@ import logging
 from smtplib import SMTPException
 from sqlalchemy import func
 from datetime import datetime, timedelta
-from utils.crypto import encrypt_value, decrypt_value
+from utils.crypto import hash_value
 
 bp = Blueprint('config', __name__, url_prefix='/config')
 
@@ -68,7 +68,7 @@ def smtp_config():
                     mail_use_tls=form.mail_use_tls.data,
                     mail_use_ssl=form.mail_use_ssl.data,
                     mail_username=form.mail_username.data,
-                    mail_password=encrypt_value(form.mail_password.data),
+                    mail_password=form.mail_password.data,  # Guardar la contraseña sin procesar
                     mail_default_sender=form.mail_default_sender.data,
                     is_active=True
                 )

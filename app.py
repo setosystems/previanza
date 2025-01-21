@@ -1,6 +1,6 @@
 import logging
 import click
-from flask import Flask, render_template, redirect, url_for, send_from_directory, flash
+from flask import Flask, render_template, redirect, url_for, send_from_directory, flash, jsonify
 from flask_login import LoginManager, current_user
 from flask_migrate import Migrate
 from config import Config, basedir
@@ -247,6 +247,10 @@ def create_app():
 
     # Agregar funciones globales a Jinja2
     app.jinja_env.globals.update(min=min)
+
+    @app.route('/health')
+    def health_check():
+        return jsonify({"status": "healthy"}), 200
 
     return app
 

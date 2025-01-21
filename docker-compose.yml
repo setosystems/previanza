@@ -6,20 +6,12 @@ services:
   web:
     build: .
     ports:
-      - "5003:5000"
+      - "5000:5000"
     environment:
       - FLASK_APP=app.py
       - FLASK_ENV=development
       - FLASK_DEBUG=1
       - DATABASE_URL=postgresql://admin:admin@db/previanza
-      - MAIL_SERVER=${MAIL_SERVER}
-      - MAIL_PORT=${MAIL_PORT}
-      - MAIL_USE_TLS=${MAIL_USE_TLS}
-      - MAIL_USE_SSL=${MAIL_USE_SSL}
-      - MAIL_USERNAME=${MAIL_USERNAME}
-      - MAIL_PASSWORD=${MAIL_PASSWORD}
-      - MAIL_DEFAULT_SENDER=${MAIL_DEFAULT_SENDER}
-      - SECRET_KEY=${SECRET_KEY}
       - UPLOAD_FOLDER=/app/static/uploads
       - PRODUCT_IMAGES_FOLDER=/app/static/img/products
       - SEND_FILE_MAX_AGE_DEFAULT=0
@@ -41,13 +33,33 @@ services:
       - app-network
     restart: always
     healthcheck:
-      test: ["CMD", "nc", "-z", "localhost", "5000"]
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 40s
     user: "root"
     entrypoint: ["/app/docker-entrypoint.sh"]
     command: ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "4", "--config", "/app/gunicorn_config.py", "wsgi:application"]
+
+  worker:
+    build: .
+    environment:
+      - FLASK_APP=app.py
+      - DATABASE_URL=postgresql://admin:admin@db/previanza
+    volumes:
+      - ./worker.py:/app/worker.py
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - app-network
+    restart: always
+    user: "root"
+    entrypoint: ["/app/docker-entrypoint.sh"]
+    command: ["python", "worker.py"]
 
   db:
     image: postgres:17
@@ -88,7 +100,7 @@ services:
       - "6381:6379"
     volumes:
       - redis_data:/data
-    command: redis-server --appendonly yes
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
     networks:
       - app-network
     healthcheck:

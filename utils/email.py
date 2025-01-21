@@ -1,6 +1,6 @@
 from flask import current_app, render_template_string
 from flask_mail import Message
-from extensions import mail
+from extensions import mail, task_queue
 import logging
 from datetime import datetime
 
@@ -213,5 +213,37 @@ Sistema de Gestión de Comisiones
         
     except Exception as e:
         logging.error(f"Error al enviar notificación de sobrecomisión: {str(e)}")
+        return False
+
+def queue_commission_notification(agent, commission, policy):
+    """
+    Encola una notificación de comisión para envío asíncrono.
+    """
+    try:
+        task_queue.enqueue(
+            send_commission_notification,
+            agent, commission, policy,
+            job_timeout=300  # 5 minutos de timeout
+        )
+        logging.info(f"Notificación de comisión encolada para {agent.email}")
+        return True
+    except Exception as e:
+        logging.error(f"Error al encolar notificación de comisión: {str(e)}")
+        return False
+
+def queue_override_commission_notification(agent, commission, policy, child_agent):
+    """
+    Encola una notificación de sobrecomisión para envío asíncrono.
+    """
+    try:
+        task_queue.enqueue(
+            send_override_commission_notification,
+            agent, commission, policy, child_agent,
+            job_timeout=300  # 5 minutos de timeout
+        )
+        logging.info(f"Notificación de sobrecomisión encolada para {agent.email}")
+        return True
+    except Exception as e:
+        logging.error(f"Error al encolar notificación de sobrecomisión: {str(e)}")
         return False
 
