@@ -127,7 +127,7 @@
                 {% for product in products_performance %}
                 <div class="flex items-start space-x-4">
                     {% if product.image_url %}
-                    <img src="{{ url_for('static', filename=product.image_url) }}" 
+                    <img src="{{ url_for('products.serve_image', filename=product.image_url.split('/')[-1], size='thumbnail') }}" 
                          alt="{{ product.name }}" 
                          class="w-16 h-16 object-cover rounded-lg">
                     {% else %}

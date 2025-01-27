@@ -295,14 +295,28 @@ class Product(db.Model):
     Modelo para los productos.
     """
     id = db.Column(Integer, primary_key=True)
-    name = db.Column(String(100), nullable=False)
-    description = db.Column(db.String(2000))
-    aseguradora = db.Column(String(100))
+    name = db.Column(String(255), nullable=False)
+    description = db.Column(db.Text)
+    aseguradora = db.Column(String(255))
     sobrecomision = db.Column(Boolean, default=False)
     commission_percentage = db.Column(Numeric(5, 2), nullable=False, default=0)
     override_percentage = db.Column(Numeric(5, 2), nullable=False, default=0)
-    image_url = db.Column(String(255))  # Nuevo campo para la imagen
+    image_url = db.Column(String(255))
     policies = relationship('Policy', back_populates='product')
+
+    @property
+    def image_thumbnail_url(self):
+        """Retorna la URL de la miniatura de la imagen"""
+        if not self.image_url:
+            return None
+        return self.image_url.replace('original', 'thumbnail') if 'original' in self.image_url else self.image_url
+
+    @property
+    def image_medium_url(self):
+        """Retorna la URL de la imagen mediana"""
+        if not self.image_url:
+            return None
+        return self.image_url.replace('original', 'medium') if 'original' in self.image_url else self.image_url
 
 class EmisionStatus(enum.Enum):
     PENDIENTE = "Pendiente"

@@ -20,7 +20,10 @@ RUN apt-get update && apt-get install -y \
     && npm install -g tailwindcss \
     && rm -rf /var/lib/apt/lists/*
 
-# Copiar requirements primero
+# Verificar instalación de Node.js y npm
+RUN node --version && npm --version
+
+# Copiar archivos de requisitos
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
@@ -31,32 +34,35 @@ RUN mkdir -p static/css \
     reports \
     migrations
 
-# Copiar archivos estáticos
+# Copiar archivos CSS y la imagen por defecto
 COPY static/css/login.css static/css/
 COPY static/css/input.css static/css/
 
-# Asegurar permisos correctos
+# Establecer permisos
 RUN chmod -R 755 static
 
-# Inicializar npm y crear package.json
-RUN npm init -y && \
-    npm install -D @tailwindcss/forms
+# Configurar Tailwind CSS
+COPY package*.json ./
+RUN npm install
 
-# Copiar archivos de configuración de Tailwind y CSS
 COPY tailwind.config.js .
 COPY static/css/input.css static/css/input.css
 COPY static/css/login.css static/css/login.css
 
-# Compilar Tailwind CSS
+# Generar CSS con Tailwind
 RUN npx tailwindcss -i static/css/input.css -o static/css/output.css --minify
 
-# Copiar el resto del código
+# Copiar el resto de la aplicación
 COPY . .
 COPY gunicorn_config.py /app/gunicorn_config.py
 
-# Asegurarse de que los archivos CSS existan y tengan los permisos correctos
+# Asegurarse de que los archivos CSS y la imagen por defecto existan y tengan los permisos correctos
 RUN touch static/css/output.css && \
     chmod 644 static/css/output.css static/css/login.css
+
+# Copiar y configurar la imagen por defecto
+COPY static/img/products/default.jpg /app/static/img/products/
+RUN chmod 644 /app/static/img/products/default.jpg
 
 # Hacer ejecutable el script de entrada
 COPY docker-entrypoint.sh /app/

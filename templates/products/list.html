@@ -81,12 +81,14 @@
                         <tr class="table-row hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
                             <td class="table-cell">
                                 {% if product.image_url %}
-                                <img src="{{ url_for('static', filename=product.image_url) }}" 
+                                <img src="{{ url_for('products.serve_image', filename=product.image_url.split('/')[-1], size='thumbnail') }}" 
                                      alt="{{ product.name }}"
-                                     class="h-12 w-12 object-cover rounded-lg">
+                                     class="h-12 w-12 object-cover rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
+                                     loading="lazy"
+                                     onerror="this.onerror=null; this.src='{{ url_for('static', filename='img/products/default.jpg') }}';">
                                 {% else %}
                                 <div class="h-12 w-12 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
-                                    <span class="material-symbols-outlined text-gray-400 dark:text-gray-500">image_not_supported</span>
+                                    <span class="material-symbols-outlined text-gray-400 dark:text-gray-500">inventory_2</span>
                                 </div>
                                 {% endif %}
                             </td>
@@ -141,7 +143,7 @@
                 <!-- Imagen del producto -->
                 <div class="aspect-video w-full relative bg-gray-100 dark:bg-gray-900">
                     {% if product.image_url %}
-                    <img src="{{ url_for('static', filename=product.image_url) }}" 
+                    <img src="{{ url_for('products.serve_image', filename=product.image_url.split('/')[-1], size='medium') }}" 
                          alt="{{ product.name }}"
                          class="w-full h-full object-cover">
                     {% else %}
