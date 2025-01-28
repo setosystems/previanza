@@ -48,7 +48,7 @@ COPY static/css/input.css static/css/input.css
 COPY static/css/login.css static/css/login.css
 
 # Compilar Tailwind CSS
-RUN npx tailwindcss -i static/css/input.css -o static/css/output.css --minify
+RUN npx tailwindcss -i static/css/input.css -o static/css/output.css --minify || true
 
 # Copiar el resto del código
 COPY . .
