@@ -49,8 +49,8 @@ COPY tailwind.config.js .
 COPY static/css/input.css static/css/input.css
 COPY static/css/login.css static/css/login.css
 
-# Generar CSS con Tailwind
-RUN npx tailwindcss -i static/css/input.css -o static/css/output.css --minify
+# Compilar Tailwind CSS
+RUN npx tailwindcss -i static/css/input.css -o static/css/output.css --minify || true
 
 # Copiar el resto de la aplicación
 COPY . .
