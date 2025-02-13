@@ -140,14 +140,14 @@
                                     <span class="material-symbols-outlined">visibility</span>
                                 </a>
                                 {% if current_user.role in [UserRole.ADMIN, UserRole.DIGITADOR] %}
-                                <a href="{{ url_for('policies.edit_policy', id=policy.id) }}" 
-                                   class="btn-icon text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300"
+                                <a href="{{ url_for('policies.edit_policy', id=policy.id, page=pagination.page, per_page=pagination.per_page) }}" 
+                                   class="btn-icon text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/50"
                                    title="Editar">
                                     <span class="material-symbols-outlined">edit</span>
                                 </a>
                                 {% if current_user.role == UserRole.ADMIN %}
                                 <button onclick="confirmDelete('{{ policy.id }}', '{{ policy.policy_number }}')"
-                                        class="btn-icon text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
+                                        class="btn-icon text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/50"
                                         title="Eliminar">
                                     <span class="material-symbols-outlined">delete</span>
                                 </button>
@@ -236,7 +236,7 @@
                                class="btn-icon text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/50">
                                 <span class="material-symbols-outlined">visibility</span>
                             </a>
-                            <a href="{{ url_for('policies.edit_policy', id=policy.id) }}" 
+                            <a href="{{ url_for('policies.edit_policy', id=policy.id, page=pagination.page, per_page=pagination.per_page) }}" 
                                class="btn-icon text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/50">
                                 <span class="material-symbols-outlined">edit</span>
                             </a>
@@ -331,7 +331,13 @@
 <script>
 function confirmDelete(policyId, policyNumber) {
     if (confirm(`¿Está seguro que desea eliminar la póliza "${policyNumber}"?\nEsta acción no se puede deshacer.`)) {
-        window.location.href = "{{ url_for('policies.delete_policy', id='') }}" + policyId;
+        // Construir la URL base y los parámetros por separado
+        const baseUrl = `/policies/delete/${policyId}`;
+        const params = new URLSearchParams({
+            page: '{{ pagination.page }}',
+            per_page: '{{ pagination.per_page }}'
+        });
+        window.location.href = `${baseUrl}?${params.toString()}`;
     }
 }
 </script>

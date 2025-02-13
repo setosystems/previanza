@@ -189,6 +189,12 @@ class AgentForm(FlaskForm):
     parent_id = SelectField('Supervisor', coerce=int, validators=[Optional()])
     submit = SubmitField('Guardar')
 
+    def __init__(self, *args, **kwargs):
+        super(AgentForm, self).__init__(*args, **kwargs)
+        # Obtener todos los agentes existentes para el selector de supervisor
+        agents = User.query.filter_by(role=UserRole.AGENTE).all()
+        self.parent_id.choices = [(0, 'Sin Supervisor')] + [(agent.id, agent.name or agent.username) for agent in agents]
+
     def validate_username(self, username):
         if not self.id.data:
             user = User.query.filter_by(username=username.data).first()

@@ -3,6 +3,7 @@ from flask_login import login_required
 from models import User, db, UserRole
 from forms import AgentForm
 from decorators import admin_required
+from utils.url_helpers import get_return_url
 from sqlalchemy.exc import IntegrityError
 
 bp = Blueprint('agents', __name__, url_prefix='/agents')
@@ -47,90 +48,59 @@ def list_agents():
 @admin_required
 def create_agent():
     form = AgentForm()
-    form.parent_id.choices = [(0, 'Ninguno')] + [(a.id, a.username) for a in User.query.filter_by(role=UserRole.AGENTE).all()]
     if form.validate_on_submit():
         try:
             agent = User(
                 username=form.username.data,
                 email=form.email.data,
                 role=UserRole.AGENTE,
+                document_type=form.document_type.data,
+                document_number=form.document_number.data,
                 name=form.name.data,
                 phone=form.phone.data,
                 address=form.address.data,
                 date_of_birth=form.date_of_birth.data,
                 hire_date=form.hire_date.data,
-                document_type=form.document_type.data,
-                document_number=form.document_number.data,
                 parent_id=form.parent_id.data if form.parent_id.data != 0 else None
             )
-            agent.set_password(form.password.data)
+            if form.password.data:
+                agent.set_password(form.password.data)
             db.session.add(agent)
             db.session.commit()
-            flash('Agente creado exitosamente.')
-            return redirect(url_for('agents.list_agents'))
-        except IntegrityError as e:
+            flash('Agente creado exitosamente', 'success')
+            return redirect(get_return_url(url_for('agents.list_agents')))
+        except IntegrityError:
             db.session.rollback()
-            if 'uq_user_document' in str(e):
-                flash('Ya existe un agente con ese número de documento.', 'error')
-            elif 'username' in str(e):
-                flash('El nombre de usuario ya está en uso.', 'error')
-            elif 'email' in str(e):
-                flash('El correo electrónico ya está en uso.', 'error')
-            else:
-                flash('Error al crear el agente: Datos duplicados.', 'error')
+            flash('Error: Ya existe un usuario con ese nombre de usuario o email', 'error')
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al crear el agente: {str(e)}', 'error')
+    
     return render_template('agents/create.html', form=form)
 
-@bp.route('/edit/<int:id>', methods=['GET', 'POST'])
+@bp.route('/<int:id>/edit', methods=['GET', 'POST'])
 @login_required
 @admin_required
 def edit_agent(id):
     agent = User.query.get_or_404(id)
+    if agent.role != UserRole.AGENTE:
+        flash('El usuario no es un agente', 'error')
+        return redirect(url_for('agents.list_agents'))
+    
     form = AgentForm(obj=agent)
-    form.id.data = str(id)
-    
-    # Configurar las opciones del supervisor excluyendo al agente actual
-    supervisors = [(0, 'Ninguno')] + [
-        (a.id, a.username) 
-        for a in User.query.filter_by(role=UserRole.AGENTE).all() 
-        if a.id != id
-    ]
-    form.parent_id.choices = supervisors
-    
     if form.validate_on_submit():
         try:
-            # Actualizar campos básicos
             form.populate_obj(agent)
-            
-            # Manejar el campo de contraseña separadamente
-            if form.password.data:
-                agent.set_password(form.password.data)
-                
-            # Manejar el supervisor
-            agent.parent_id = form.parent_id.data if form.parent_id.data != 0 else None
-            
             db.session.commit()
-            flash('Agente actualizado exitosamente.')
-            return redirect(url_for('agents.list_agents'))
-            
-        except IntegrityError as e:
+            flash('Agente actualizado exitosamente', 'success')
+            return redirect(get_return_url(url_for('agents.list_agents')))
+        except IntegrityError:
             db.session.rollback()
-            if 'uq_user_document' in str(e):
-                flash('Ya existe un agente con ese número de documento.', 'error')
-            elif 'username' in str(e):
-                flash('El nombre de usuario ya está en uso.', 'error')
-            elif 'email' in str(e):
-                flash('El correo electrónico ya está en uso.', 'error')
-            else:
-                flash('Error al actualizar el agente: Datos duplicados.', 'error')
+            flash('Error: Ya existe un usuario con ese nombre de usuario o email', 'error')
         except Exception as e:
             db.session.rollback()
             flash(f'Error al actualizar el agente: {str(e)}', 'error')
-            
-    # Si hay errores en el formulario, mostrarlos
-    for field, errors in form.errors.items():
-        for error in errors:
-            flash(f'Error en {getattr(form, field).label.text}: {error}', 'error')
-            
+    
     return render_template('agents/edit.html', form=form, agent=agent)
 
 @bp.route('/delete/<int:id>')
@@ -138,7 +108,16 @@ def edit_agent(id):
 @admin_required
 def delete_agent(id):
     agent = User.query.get_or_404(id)
-    db.session.delete(agent)
-    db.session.commit()
-    flash('Agente eliminado exitosamente.')
-    return redirect(url_for('agents.list_agents'))
+    if agent.role != UserRole.AGENTE:
+        flash('El usuario no es un agente', 'error')
+        return redirect(url_for('agents.list_agents'))
+    
+    try:
+        db.session.delete(agent)
+        db.session.commit()
+        flash('Agente eliminado exitosamente', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error al eliminar el agente: {str(e)}', 'error')
+    
+    return redirect(get_return_url(url_for('agents.list_agents')))

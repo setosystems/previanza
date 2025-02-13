@@ -2,7 +2,7 @@
 
 {% set breadcrumbs = [
     ('index', 'Inicio'),
-    ('products.list_products', 'Productos'),
+    ('products.list_products', 'Productos', {'page': request.args.get('page'), 'per_page': request.args.get('per_page')}),
     (None, 'Nuevo Producto')
 ] %}
 
@@ -11,6 +11,15 @@
     <div class="card-container max-w-3xl mx-auto">
         <form method="POST" enctype="multipart/form-data" class="space-y-6">
             {{ form.hidden_tag() }}
+            
+            <!-- Campos ocultos para preservar el estado -->
+            <input type="hidden" name="return_page" value="{{ request.args.get('page', '1') }}">
+            <input type="hidden" name="return_per_page" value="{{ request.args.get('per_page', '10') }}">
+            {% for param in ['name', 'aseguradora'] %}
+                {% if request.args.get(param) %}
+                    <input type="hidden" name="return_{{ param }}" value="{{ request.args.get(param) }}">
+                {% endif %}
+            {% endfor %}
             
             <div class="p-4">
                 <!-- Información Básica -->

@@ -61,7 +61,7 @@
                         <td class="table-cell text-gray-900 dark:text-gray-100">{{ product.name }}</td>
                         <td class="table-cell">
                             <input type="number" 
-                                   class="form-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150"
+                                   class="form-input commission-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150"
                                    value="{{ product.commission_percentage }}"
                                    min="0" 
                                    max="100" 
@@ -70,13 +70,13 @@
                         </td>
                         <td class="table-cell text-center">
                             <input type="checkbox" 
-                                   class="form-checkbox rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
+                                   class="form-checkbox sobrecomision-toggle rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
                                    {% if product.sobrecomision %}checked{% endif %}
                                    data-product-id="{{ product.id }}">
                         </td>
                         <td class="table-cell">
                             <input type="number" 
-                                   class="form-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150"
+                                   class="form-input override-percentage-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150"
                                    value="{{ product.override_percentage }}"
                                    min="0" 
                                    max="100" 
@@ -85,7 +85,7 @@
                                    {% if not product.sobrecomision %}disabled{% endif %}>
                         </td>
                         <td class="table-cell">
-                            <button class="btn-primary flex items-center"
+                            <button class="btn-primary flex items-center save-commission"
                                     data-product-id="{{ product.id }}">
                                 <span class="material-symbols-outlined mr-2">save</span>Guardar
                             </button>
@@ -114,7 +114,7 @@
                             Comisión Estándar (%)
                         </label>
                         <input type="number" 
-                               class="form-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150"
+                               class="form-input commission-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150"
                                value="{{ product.commission_percentage }}"
                                min="0" 
                                max="100" 
@@ -125,7 +125,7 @@
                     <!-- Sobrecomisión -->
                     <div class="flex items-center gap-2">
                         <input type="checkbox" 
-                               class="form-checkbox rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
+                               class="form-checkbox sobrecomision-toggle rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
                                {% if product.sobrecomision %}checked{% endif %}
                                data-product-id="{{ product.id }}">
                         <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -139,7 +139,7 @@
                             Porcentaje Sobrecomisión (%)
                         </label>
                         <input type="number" 
-                               class="form-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150"
+                               class="form-input override-percentage-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150"
                                value="{{ product.override_percentage }}"
                                min="0" 
                                max="100" 
@@ -149,7 +149,7 @@
                     </div>
 
                     <div class="flex justify-end">
-                        <button class="btn-primary flex items-center"
+                        <button class="btn-primary flex items-center save-commission"
                                 data-product-id="{{ product.id }}">
                             <span class="material-symbols-outlined mr-2">save</span>Guardar
                         </button>
@@ -203,27 +203,30 @@
                         </td>
                         <td class="table-cell">
                             <input type="number" 
-                                   class="form-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150"
+                                   class="form-input commission-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150"
                                    min="0" 
                                    max="100" 
                                    step="0.01"
+                                   data-agent-id="{{ agent.id }}"
                                    placeholder="Comisión personalizada">
                         </td>
                         <td class="table-cell text-center">
                             <input type="checkbox" 
-                                   class="form-checkbox rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500">
+                                   class="form-checkbox sobrecomision-toggle rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
+                                   data-agent-id="{{ agent.id }}">
                         </td>
                         <td class="table-cell">
                             <input type="number" 
-                                   class="form-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150"
+                                   class="form-input override-percentage-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150"
                                    min="0" 
                                    max="100" 
                                    step="0.01"
+                                   data-agent-id="{{ agent.id }}"
                                    disabled
                                    placeholder="Sobrecomisión personalizada">
                         </td>
                         <td class="table-cell">
-                            <button class="btn-primary flex items-center"
+                            <button class="btn-primary flex items-center save-commission"
                                     data-agent-id="{{ agent.id }}">
                                 <span class="material-symbols-outlined mr-2">save</span>Guardar
                             </button>
@@ -265,17 +268,19 @@
                             Comisión (%)
                         </label>
                         <input type="number" 
-                               class="form-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150"
+                               class="form-input commission-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150"
                                min="0" 
                                max="100" 
                                step="0.01"
+                               data-agent-id="{{ agent.id }}"
                                placeholder="Comisión personalizada">
                     </div>
 
                     <!-- Sobrecomisión -->
                     <div class="flex items-center gap-2">
                         <input type="checkbox" 
-                               class="form-checkbox rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500">
+                               class="form-checkbox sobrecomision-toggle rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
+                               data-agent-id="{{ agent.id }}">
                         <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
                             Habilitar Sobrecomisión
                         </label>
@@ -287,16 +292,17 @@
                             Porcentaje Sobrecomisión (%)
                         </label>
                         <input type="number" 
-                               class="form-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150"
+                               class="form-input override-percentage-input w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150"
                                min="0" 
                                max="100" 
                                step="0.01"
+                               data-agent-id="{{ agent.id }}"
                                disabled
                                placeholder="Sobrecomisión personalizada">
                     </div>
 
                     <div class="flex justify-end">
-                        <button class="btn-primary flex items-center"
+                        <button class="btn-primary flex items-center save-commission"
                                 data-agent-id="{{ agent.id }}">
                             <span class="material-symbols-outlined mr-2">save</span>Guardar
                         </button>
@@ -309,6 +315,11 @@
 </div>
 
 {% block scripts %}
+<script>
+// Inicializar datos de productos
+window.productsData = {{ products_json|tojson|safe }};
+</script>
+<script src="{{ url_for('static', filename='js/commissions.js') }}"></script>
 <script>
 // Estilos para las pestañas
 const tabButtons = document.querySelectorAll('.tab-button');

@@ -4,6 +4,7 @@ from models import Product, db
 from forms import ProductForm
 from decorators import admin_required, admin_or_digitador_required
 from utils.image_handler import ImageHandler
+from utils.url_helpers import get_return_url
 from PIL import Image
 from io import BytesIO
 from pathlib import Path
@@ -58,7 +59,8 @@ def create_product():
                 description=form.description.data,
                 aseguradora=form.aseguradora.data,
                 commission_percentage=form.commission_percentage.data,
-                override_commission_percentage=form.override_commission_percentage.data
+                sobrecomision=form.sobrecomision.data,
+                override_percentage=form.override_percentage.data
             )
 
             # Manejar imagen si se proporcionó una
@@ -70,7 +72,7 @@ def create_product():
             db.session.commit()
             
             flash('Producto creado exitosamente', 'success')
-            return redirect(url_for('products.list_products'))
+            return redirect(get_return_url(url_for('products.list_products')))
             
         except Exception as e:
             db.session.rollback()
@@ -98,10 +100,10 @@ def edit_product(id):
                     image_handler.delete_product_image(product.image_url)
                 # Guardar nueva imagen
                 product.image_url = image_handler.save_product_image(form.image.data)
-            
+                
             db.session.commit()
             flash('Producto actualizado exitosamente', 'success')
-            return redirect(url_for('products.list_products'))
+            return redirect(get_return_url(url_for('products.list_products')))
             
         except Exception as e:
             db.session.rollback()
@@ -114,10 +116,20 @@ def edit_product(id):
 @admin_required
 def delete_product(id):
     product = Product.query.get_or_404(id)
-    db.session.delete(product)
-    db.session.commit()
-    flash('Producto eliminado exitosamente.')
-    return redirect(url_for('products.list_products'))
+    try:
+        # Eliminar imagen si existe
+        if product.image_url:
+            image_handler = ImageHandler()
+            image_handler.delete_product_image(product.image_url)
+            
+        db.session.delete(product)
+        db.session.commit()
+        flash('Producto eliminado exitosamente', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error al eliminar el producto: {str(e)}', 'error')
+    
+    return redirect(get_return_url(url_for('products.list_products')))
 
 @bp.route('/image/<filename>')
 def serve_image(filename):

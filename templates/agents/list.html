@@ -92,13 +92,13 @@
                             </td>
                             <td class="table-cell">
                                 <div class="flex justify-center space-x-2">
-                                    <a href="{{ url_for('agents.edit_agent', id=agent.id) }}" 
-                                       class="btn-icon text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300"
+                                    <a href="{{ url_for('agents.edit_agent', id=agent.id, page=pagination.page, per_page=pagination.per_page) }}" 
+                                       class="btn-icon text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/50"
                                        title="Editar Agente">
                                         <span class="material-symbols-outlined">edit</span>
                                     </a>
                                     <button onclick="confirmDelete('{{ agent.id }}', '{{ agent.username }}')"
-                                            class="btn-icon text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
+                                            class="btn-icon text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/50"
                                             title="Eliminar Agente">
                                         <span class="material-symbols-outlined">delete</span>
                                     </button>
@@ -162,7 +162,7 @@
 
                     <!-- Acciones -->
                     <div class="flex justify-end space-x-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                        <a href="{{ url_for('agents.edit_agent', id=agent.id) }}" 
+                        <a href="{{ url_for('agents.edit_agent', id=agent.id, page=pagination.page, per_page=pagination.per_page) }}" 
                            class="btn-icon text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/50">
                             <span class="material-symbols-outlined">edit</span>
                         </a>
@@ -262,7 +262,12 @@
 <script>
 function confirmDelete(agentId, agentName) {
     if (confirm(`¿Está seguro que desea eliminar al agente "${agentName}"?\nEsta acción no se puede deshacer.`)) {
-        window.location.href = "{{ url_for('agents.delete_agent', id='') }}" + agentId;
+        const baseUrl = `/agents/delete/${agentId}`;
+        const params = new URLSearchParams({
+            page: '{{ pagination.page }}',
+            per_page: '{{ pagination.per_page }}'
+        });
+        window.location.href = `${baseUrl}?${params.toString()}`;
     }
 }
 </script>

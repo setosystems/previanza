@@ -115,15 +115,15 @@
                                 <span class="material-symbols-outlined">visibility</span>
                             </a>
                             {% if current_user.role != UserRole.AGENTE %}
-                            <a href="{{ url_for('clients.edit_client', id=client.id) }}" 
-                               class="btn-icon text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300"
+                            <a href="{{ url_for('clients.edit_client', id=client.id, page=pagination.page, per_page=pagination.per_page) }}" 
+                               class="btn-icon text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/50"
                                title="Editar Cliente">
                                 <span class="material-symbols-outlined">edit</span>
                             </a>
                             {% endif %}
                             {% if current_user.role == UserRole.ADMIN %}
                             <button onclick="confirmDelete('{{ client.id }}', '{{ client.name }}')"
-                                    class="btn-icon text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
+                                    class="btn-icon text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/50"
                                     title="Eliminar Cliente">
                                 <span class="material-symbols-outlined">delete</span>
                             </button>
@@ -165,7 +165,7 @@
                            class="btn-icon text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/50">
                             <span class="material-symbols-outlined">visibility</span>
                         </a>
-                        <a href="{{ url_for('clients.edit_client', id=client.id) }}" 
+                        <a href="{{ url_for('clients.edit_client', id=client.id, page=pagination.page, per_page=pagination.per_page) }}" 
                            class="btn-icon text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/50">
                             <span class="material-symbols-outlined">edit</span>
                         </a>
@@ -292,7 +292,12 @@
 <script>
 function confirmDelete(clientId, clientName) {
     if (confirm(`¿Está seguro que desea eliminar al cliente "${clientName}"?\nEsta acción no se puede deshacer.`)) {
-        window.location.href = "{{ url_for('clients.delete_client', id='') }}" + clientId;
+        const baseUrl = `/clients/delete/${clientId}`;
+        const params = new URLSearchParams({
+            page: '{{ pagination.page }}',
+            per_page: '{{ pagination.per_page }}'
+        });
+        window.location.href = `${baseUrl}?${params.toString()}`;
     }
 }
 </script>

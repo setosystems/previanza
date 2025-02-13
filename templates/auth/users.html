@@ -272,7 +272,12 @@
 <script>
 function confirmDelete(userId, username) {
     if (confirm(`¿Está seguro que desea eliminar al usuario "${username}"?\nEsta acción no se puede deshacer.`)) {
-        window.location.href = "{{ url_for('auth.delete_user', user_id='') }}" + userId;
+        const baseUrl = `/auth/delete_user/${userId}`;
+        const params = new URLSearchParams({
+            page: '{{ pagination.page }}',
+            per_page: '{{ pagination.per_page }}'
+        });
+        window.location.href = `${baseUrl}?${params.toString()}`;
     }
 }
 </script>

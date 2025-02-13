@@ -2,7 +2,7 @@
 
 {% set breadcrumbs = [
     ('index', 'Inicio'),
-    ('policies.list_policies', 'Pólizas'),
+    ('policies.list_policies', 'Pólizas', {'page': request.args.get('page', '1'), 'per_page': request.args.get('per_page', '10')}),
     (None, 'Póliza ' ~ policy.policy_number)
 ] %}
 
@@ -217,7 +217,7 @@
 
     <!-- Botón de Volver -->
     <div class="flex justify-center">
-        <a href="{{ url_for('policies.list_policies') }}" class="btn-secondary">
+        <a href="{{ url_for('policies.list_policies', page=request.args.get('page', '1'), per_page=request.args.get('per_page', '10')) }}" class="btn-secondary">
             <span class="material-symbols-outlined mr-2">arrow_back</span>Volver a la Lista de Pólizas
         </a>
     </div>
@@ -231,7 +231,10 @@ document.addEventListener('DOMContentLoaded', function() {
         recalculateBtn.addEventListener('click', function() {
             const policyId = this.dataset.policyId;
             if (confirm('¿Está seguro de que desea recalcular las comisiones?')) {
-                window.location.href = "{{ url_for('policies.recalculate_commission', id=0) }}".replace('/0', '/' + policyId);
+                const baseUrl = "{{ url_for('policies.recalculate_commission', id=0) }}".replace('/0', '/' + policyId);
+                const currentUrl = new URL(window.location.href);
+                const searchParams = new URLSearchParams(currentUrl.search);
+                window.location.href = `${baseUrl}${searchParams.toString() ? '?' + searchParams.toString() : ''}`;
             }
         });
     }

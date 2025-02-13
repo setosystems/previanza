@@ -3,6 +3,7 @@ from flask_login import login_required
 from models import Client, Policy, User, db, DocumentType, UserRole
 from forms import ClientForm
 from decorators import admin_required, admin_or_digitador_required
+from utils.url_helpers import get_return_url
 from werkzeug.utils import secure_filename
 import openpyxl
 import os
@@ -62,77 +63,57 @@ def create_client():
     form = ClientForm()
     if form.validate_on_submit():
         try:
-            client = Client(
-                name=form.name.data,
-                email=form.email.data,
-                phone=form.phone.data,
-                address=form.address.data,
-                city=form.city.data,
-                document_type=DocumentType[form.document_type.data],
-                document_number=form.document_number.data,
-                birthdate=form.birthdate.data
-            )
+            client = Client()
+            form.populate_obj(client)
             db.session.add(client)
             db.session.commit()
-            flash('Cliente creado exitosamente.')
-            return redirect(url_for('clients.list_clients'))
-        except IntegrityError as e:
+            flash('Cliente creado exitosamente', 'success')
+            return redirect(get_return_url(url_for('clients.list_clients')))
+        except IntegrityError:
             db.session.rollback()
-            if 'uq_client_document' in str(e):
-                flash('Ya existe un cliente con ese número de documento.', 'error')
-            elif 'email' in str(e):
-                flash('Ya existe un cliente con ese correo electrónico.', 'error')
-            else:
-                flash('Error al crear el cliente: Datos duplicados.', 'error')
+            flash('Error: Ya existe un cliente con ese número de documento', 'error')
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error al crear el cliente: {str(e)}', 'error')
+    
     return render_template('clients/create.html', form=form)
 
-@bp.route('/edit/<int:id>', methods=['GET', 'POST'])
+@bp.route('/<int:id>/edit', methods=['GET', 'POST'])
 @login_required
 @admin_or_digitador_required
 def edit_client(id):
     client = Client.query.get_or_404(id)
     form = ClientForm(obj=client)
+    
     if form.validate_on_submit():
         try:
             form.populate_obj(client)
-            client.document_type = DocumentType[form.document_type.data]
             db.session.commit()
-            flash('Cliente actualizado exitosamente.')
-            return redirect(url_for('clients.list_clients'))
-        except IntegrityError as e:
+            flash('Cliente actualizado exitosamente', 'success')
+            return redirect(get_return_url(url_for('clients.list_clients')))
+        except IntegrityError:
             db.session.rollback()
-            if 'uq_client_document' in str(e):
-                flash('Ya existe un cliente con ese número de documento.', 'error')
-            elif 'email' in str(e):
-                flash('El correo electrónico ya está en uso.', 'error')
-            else:
-                flash('Error al actualizar el cliente: Datos duplicados.', 'error')
+            flash('Error: Ya existe un cliente con ese número de documento', 'error')
         except Exception as e:
             db.session.rollback()
             flash(f'Error al actualizar el cliente: {str(e)}', 'error')
+    
     return render_template('clients/edit.html', form=form, client=client)
 
 @bp.route('/delete/<int:id>')
 @login_required
-@admin_required
+@admin_or_digitador_required
 def delete_client(id):
     client = Client.query.get_or_404(id)
-    
     try:
-        if client.policies:
-            flash('No se puede eliminar el cliente porque tiene pólizas asociadas.', 'error')
-            return redirect(url_for('clients.list_clients'))
-        
         db.session.delete(client)
         db.session.commit()
-        flash('Cliente eliminado exitosamente.', 'success')
-        
+        flash('Cliente eliminado exitosamente', 'success')
     except Exception as e:
         db.session.rollback()
-        logging.error(f"Error al eliminar cliente {id}: {str(e)}")
-        flash('Error al eliminar el cliente.', 'error')
+        flash(f'Error al eliminar el cliente: {str(e)}', 'error')
     
-    return redirect(url_for('clients.list_clients'))
+    return redirect(get_return_url(url_for('clients.list_clients')))
 
 @bp.route('/bulk_upload', methods=['GET', 'POST'])
 @login_required
