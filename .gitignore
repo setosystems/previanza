@@ -40,10 +40,8 @@ Thumbs.db
 
 # Application specific
 static/uploads/*
-static/img/products/*
-static/samples/*
 !static/uploads/.gitkeep
-!static/img/products/.gitkeep
+static/samples/*
 !static/samples/.gitkeep
 reports/*
 !reports/.gitkeep
