@@ -101,6 +101,21 @@ def create_policy():
 def edit_policy(id):
     policy = Policy.query.get_or_404(id)
     form = PolicyForm(obj=policy)
+    # Establecer el ID de la póliza para la validación
+    form.id.data = str(policy.id)
+    
+    # Cargar las opciones de productos
+    products = Product.query.all()
+    form.product_id.choices = [(p.id, p.name) for p in products]
+    
+    # Cargar el cliente y agente actuales si el formulario no ha sido enviado
+    if not form.is_submitted():
+        if policy.client:
+            form.client.data = policy.client.name
+            form.client_id.data = policy.client_id
+        if policy.agent:
+            form.agent.data = policy.agent.name
+            form.agent_id.data = policy.agent_id
     
     if form.validate_on_submit():
         try:

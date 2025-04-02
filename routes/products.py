@@ -86,6 +86,8 @@ def create_product():
 def edit_product(id):
     product = Product.query.get_or_404(id)
     form = ProductForm(obj=product)
+    # Establecer el ID del producto para la validación
+    form.id.data = str(product.id)
     
     if form.validate_on_submit():
         try:

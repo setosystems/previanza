@@ -66,6 +66,8 @@ def register():
 def edit_user(user_id):
     user = User.query.get_or_404(user_id)
     form = UserEditForm(obj=user)
+    form.id.data = str(user.id)
+    
     form.parent_id.choices = [(0, 'Ninguno')] + [(u.id, u.username) for u in User.query.filter_by(role=UserRole.AGENTE).all() if u.id != user_id]
     
     form.role.data = user.role.name

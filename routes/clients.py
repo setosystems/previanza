@@ -84,6 +84,8 @@ def create_client():
 def edit_client(id):
     client = Client.query.get_or_404(id)
     form = ClientForm(obj=client)
+    # Establecer el ID del cliente para la validación
+    form.id.data = str(client.id)
     
     if form.validate_on_submit():
         try:
@@ -91,9 +93,6 @@ def edit_client(id):
             db.session.commit()
             flash('Cliente actualizado exitosamente', 'success')
             return redirect(get_return_url(url_for('clients.list_clients')))
-        except IntegrityError:
-            db.session.rollback()
-            flash('Error: Ya existe un cliente con ese número de documento', 'error')
         except Exception as e:
             db.session.rollback()
             flash(f'Error al actualizar el cliente: {str(e)}', 'error')

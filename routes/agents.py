@@ -88,15 +88,15 @@ def edit_agent(id):
         return redirect(url_for('agents.list_agents'))
     
     form = AgentForm(obj=agent)
+    # Establecer el ID del agente para la validación
+    form.id.data = str(agent.id)
+    
     if form.validate_on_submit():
         try:
             form.populate_obj(agent)
             db.session.commit()
             flash('Agente actualizado exitosamente', 'success')
             return redirect(get_return_url(url_for('agents.list_agents')))
-        except IntegrityError:
-            db.session.rollback()
-            flash('Error: Ya existe un usuario con ese nombre de usuario o email', 'error')
         except Exception as e:
             db.session.rollback()
             flash(f'Error al actualizar el agente: {str(e)}', 'error')

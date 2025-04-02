@@ -2,7 +2,8 @@ from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed, FileRequired
 from wtforms import StringField, PasswordField, SubmitField, SelectField, FloatField, DateField, HiddenField, IntegerField, BooleanField, DecimalField, EmailField, TextAreaField
 from wtforms.validators import DataRequired, Email, EqualTo, ValidationError, Optional, Length, NumberRange
-from models import User, UserRole, DocumentType, EmisionStatus, PaymentStatus
+from models import User, UserRole, DocumentType, EmisionStatus, PaymentStatus, Client, Policy
+import logging
 
 def validate_ecuador_id(cedula):
     """
@@ -68,6 +69,7 @@ class RegistrationForm(FlaskForm):
             raise ValidationError('Por favor, use una dirección de correo electrónico diferente.')
 
 class UserEditForm(FlaskForm):
+    id = HiddenField('ID')  # Campo oculto para guardar el ID del usuario
     username = StringField('Nombre de Usuario', validators=[DataRequired()])
     email = StringField('Correo Electrónico', validators=[DataRequired(), Email()])
     role = SelectField('Rol', choices=[(role.name, role.value) for role in UserRole])
@@ -79,27 +81,71 @@ class UserEditForm(FlaskForm):
     parent_id = SelectField('Superior', coerce=int, validators=[Optional()])
     
     # Campos agregados
-    document_type = SelectField('Tipo de Documento', choices=[(dt.name, dt.value) for dt in DocumentType], validators=[DataRequired()])  # Campo agregado
-    document_number = StringField('Número de Documento', validators=[DataRequired()])  # Campo agregado
+    document_type = SelectField('Tipo de Documento', choices=[(dt.name, dt.value) for dt in DocumentType], validators=[DataRequired()])
+    document_number = StringField('Número de Documento', validators=[DataRequired()])
 
     submit = SubmitField('Guardar Cambios')
 
-    def __init__(self, *args, **kwargs):
-        super(UserEditForm, self).__init__(*args, **kwargs)
-        self.original_username = kwargs.get('obj', None).username if kwargs.get('obj', None) else None
-        self.original_email = kwargs.get('obj', None).email if kwargs.get('obj', None) else None
-
     def validate_username(self, username):
-        if username.data != self.original_username:
+        if self.id.data:
+            user = User.query.filter(
+                User.username == username.data,
+                User.id != int(self.id.data)
+            ).first()
+            if user is not None:
+                raise ValidationError('Por favor, use un nombre de usuario diferente.')
+        else:
             user = User.query.filter_by(username=username.data).first()
             if user is not None:
                 raise ValidationError('Por favor, use un nombre de usuario diferente.')
 
     def validate_email(self, email):
-        if email.data != self.original_email:
+        if self.id.data:
+            user = User.query.filter(
+                User.email == email.data,
+                User.id != int(self.id.data)
+            ).first()
+            if user is not None:
+                raise ValidationError('Por favor, use una dirección de correo electrónico diferente.')
+        else:
             user = User.query.filter_by(email=email.data).first()
             if user is not None:
                 raise ValidationError('Por favor, use una dirección de correo electrónico diferente.')
+                
+    def validate_document_number(self, field):
+        """
+        Valida que la combinación tipo de documento y número de documento sea única.
+        """
+        try:
+            document_type_enum = DocumentType[self.document_type.data] if self.document_type.data else None
+            
+            # Si no hay tipo de documento o número, no validamos unicidad
+            if not document_type_enum or not field.data:
+                return
+                
+            # Verificar si es una edición (id existe) o creación nueva
+            if self.id.data:
+                # Es una edición - excluir el usuario actual de la validación
+                user = User.query.filter(
+                    User.document_type == document_type_enum,
+                    User.document_number == field.data,
+                    User.id != int(self.id.data)
+                ).first()
+                
+                if user is not None:
+                    raise ValidationError(f'Ya existe un usuario con el documento {document_type_enum.value}: {field.data}')
+            else:
+                # Es una creación nueva - verificar si la combinación documento+tipo existe
+                user = User.query.filter_by(
+                    document_type=document_type_enum,
+                    document_number=field.data
+                ).first()
+                
+                if user is not None:
+                    raise ValidationError(f'Ya existe un usuario con el documento {document_type_enum.value}: {field.data}')
+        except Exception as e:
+            # En caso de error en la validación, registramos el error pero no bloqueamos
+            logging.error(f"Error en validación de documento de usuario: {str(e)}")
 
 class RequestResetForm(FlaskForm):
     email = StringField('Correo Electrónico', validators=[DataRequired(), Email()])
@@ -116,6 +162,7 @@ class ResetPasswordForm(FlaskForm):
     submit = SubmitField('Restablecer Contraseña')
 
 class ClientForm(FlaskForm):
+    id = HiddenField('ID')  # Campo oculto para guardar el ID del cliente
     name = StringField('Nombre', validators=[DataRequired()])
     email = StringField('Correo Electrónico', validators=[DataRequired(), Email()])
     phone = StringField('Teléfono', validators=[DataRequired()])
@@ -126,10 +173,24 @@ class ClientForm(FlaskForm):
     birthdate = DateField('Fecha de Nacimiento', format='%Y-%m-%d', validators=[Optional()])
     submit = SubmitField('Guardar')
 
+    def validate_email(self, email):
+        # Verificar si es una edición (id existe) o creación nueva
+        if self.id.data:
+            # Es una edición - excluir el cliente actual de la validación
+            client = Client.query.filter_by(email=email.data).first()
+            if client is not None and str(client.id) != self.id.data:
+                raise ValidationError('Este correo electrónico ya está registrado. Por favor use uno diferente.')
+        else:
+            # Es una creación nueva - verificar si el email existe
+            client = Client.query.filter_by(email=email.data).first()
+            if client is not None:
+                raise ValidationError('Este correo electrónico ya está registrado. Por favor use uno diferente.')
+
     def validate_document_number(self, field):
         """
-        Valida el número de documento según el tipo seleccionado.
+        Valida el número de documento según el tipo seleccionado y verifica unicidad.
         """
+        # Primero validamos el formato según el tipo de documento
         if self.document_type.data == 'DNI':  # Si es cédula ecuatoriana
             if not validate_ecuador_id(field.data):
                 raise ValidationError('El número de cédula ingresado no es válido. Verifique que sea una cédula ecuatoriana válida.')
@@ -139,8 +200,41 @@ class ClientForm(FlaskForm):
         elif self.document_type.data == 'CARNET_EXTRANJERIA':
             if not field.data.isalnum() or len(field.data) < 4:
                 raise ValidationError('El número de carnet de extranjería no es válido.')
+        
+        # Ahora verificamos la unicidad, excluyendo el cliente actual si es una edición
+        try:
+            document_type_enum = DocumentType[self.document_type.data] if self.document_type.data else None
+            
+            # Si no hay tipo de documento o número, no validamos unicidad
+            if not document_type_enum or not field.data:
+                return
+                
+            # Verificar si es una edición (id existe) o creación nueva
+            if self.id.data:
+                # Es una edición - excluir el cliente actual de la validación
+                client = Client.query.filter(
+                    Client.document_type == document_type_enum,
+                    Client.document_number == field.data,
+                    Client.id != int(self.id.data)
+                ).first()
+                
+                if client is not None:
+                    raise ValidationError(f'Ya existe un cliente con el documento {document_type_enum.value}: {field.data}')
+            else:
+                # Es una creación nueva - verificar si la combinación documento+tipo existe
+                client = Client.query.filter_by(
+                    document_type=document_type_enum,
+                    document_number=field.data
+                ).first()
+                
+                if client is not None:
+                    raise ValidationError(f'Ya existe un cliente con el documento {document_type_enum.value}: {field.data}')
+        except Exception as e:
+            # En caso de error en la validación, registramos el error pero no bloqueamos
+            logging.error(f"Error en validación de documento: {str(e)}")
 
 class PolicyForm(FlaskForm):
+    id = HiddenField('ID')  # Campo oculto para guardar el ID de la póliza
     policy_number = StringField('Número de Póliza', validators=[DataRequired()])
     start_date = DateField('Fecha de Inicio', validators=[DataRequired()])
     end_date = DateField('Fecha de Fin', validators=[DataRequired()])
@@ -153,8 +247,29 @@ class PolicyForm(FlaskForm):
     emision_status = SelectField('Estado de Emisión', choices=[(status.name, status.value) for status in EmisionStatus], validators=[DataRequired()])
     payment_status = SelectField('Estado de Pago', choices=[(status.name, status.value) for status in PaymentStatus], validators=[DataRequired()])
     submit = SubmitField('Guardar')
+    
+    def validate_policy_number(self, field):
+        """
+        Valida que el número de póliza sea único, excluyendo la póliza actual si es una edición.
+        """
+        # Verificar si es una edición (id existe) o creación nueva
+        if self.id.data:
+            # Es una edición - excluir la póliza actual de la validación
+            policy = Policy.query.filter(
+                Policy.policy_number == field.data,
+                Policy.id != int(self.id.data)
+            ).first()
+            
+            if policy is not None:
+                raise ValidationError('Este número de póliza ya está registrado. Por favor use uno diferente.')
+        else:
+            # Es una creación nueva - verificar si el número de póliza existe
+            policy = Policy.query.filter_by(policy_number=field.data).first()
+            if policy is not None:
+                raise ValidationError('Este número de póliza ya está registrado. Por favor use uno diferente.')
 
 class ProductForm(FlaskForm):
+    id = HiddenField('ID')  # Campo oculto para guardar el ID del producto
     name = StringField('Nombre', validators=[DataRequired()])
     description = TextAreaField('Descripción')
     aseguradora = StringField('Aseguradora')
