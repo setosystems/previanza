@@ -346,6 +346,7 @@ class Policy(db.Model):
     agent_id = db.Column(Integer, ForeignKey('user.id'), nullable=False)
     emision_status = db.Column(Enum(EmisionStatus), nullable=False, default=EmisionStatus.PENDIENTE)
     payment_status = db.Column(Enum(PaymentStatus), nullable=False, default=PaymentStatus.PENDIENTE)
+    solicitation_date = db.Column(Date, nullable=True)
     client = relationship('Client', back_populates='policies')
     product = relationship('Product', back_populates='policies')
     agent = relationship('User', back_populates='policies')
@@ -364,6 +365,7 @@ class Commission(db.Model):
     percentage_applied = db.Column(Numeric(5, 2), nullable=False)
     parent_commission_id = db.Column(Integer, ForeignKey('commission.id'))
     payment_status = db.Column(String(50), nullable=False, default='PENDIENTE')
+    solicitation_date = db.Column(Date, nullable=True)
     
     policy = relationship('Policy', back_populates='commissions')
     agent = relationship('User', back_populates='commissions')

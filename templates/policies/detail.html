@@ -65,6 +65,11 @@
                         <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Fecha de Fin</p>
                         <p class="text-gray-900 dark:text-gray-100">{{ policy.end_date.strftime('%d/%m/%Y') }}</p>
                     </div>
+
+                    <div class="mb-4">
+                        <h4 class="text-xs uppercase font-medium text-gray-500 dark:text-gray-400 mb-1">Fecha de Solicitud</h4>
+                        <p class="text-gray-900 dark:text-gray-100">{{ policy.solicitation_date.strftime("%d/%m/%Y") if policy.solicitation_date else "No especificada" }}</p>
+                    </div>
                     <div>
                         <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Estado de Emisión</p>
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium

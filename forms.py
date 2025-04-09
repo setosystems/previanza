@@ -246,6 +246,7 @@ class PolicyForm(FlaskForm):
     agent_id = HiddenField('ID del Agente')
     emision_status = SelectField('Estado de Emisión', choices=[(status.name, status.value) for status in EmisionStatus], validators=[DataRequired()])
     payment_status = SelectField('Estado de Pago', choices=[(status.name, status.value) for status in PaymentStatus], validators=[DataRequired()])
+    solicitation_date = DateField("Fecha de Solicitud", validators=[Optional()])
     submit = SubmitField('Guardar')
     
     def validate_policy_number(self, field):

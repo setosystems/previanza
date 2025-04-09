@@ -97,6 +97,7 @@
                         <th class="table-header text-gray-600 dark:text-gray-300 text-center">Estado Pago</th>
                         <th class="table-header text-gray-600 dark:text-gray-300 text-center">Fecha Inicio</th>
                         <th class="table-header text-gray-600 dark:text-gray-300 text-center">Fecha Fin</th>
+                        <th class="table-header text-gray-600 dark:text-gray-300 text-center">Fecha Solicitud</th>
                         <th class="table-header text-gray-600 dark:text-gray-300 text-center">Acciones</th>
                     </tr>
                 </thead>
@@ -132,6 +133,7 @@
                         </td>
                         <td class="table-cell text-gray-700 dark:text-gray-300 text-center">{{ policy.start_date.strftime('%Y-%m-%d') }}</td>
                         <td class="table-cell text-gray-700 dark:text-gray-300 text-center">{{ policy.end_date.strftime('%Y-%m-%d') }}</td>
+                        <td class="table-cell text-gray-700 dark:text-gray-300 text-center">{{ policy.solicitation_date.strftime("%Y-%m-%d") if policy.solicitation_date else "No especificada" }}</td>
                         <td class="table-cell">
                             <div class="flex justify-center space-x-2">
                                 <a href="{{ url_for('policies.policy_detail', id=policy.id) }}" 
