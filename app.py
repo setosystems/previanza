@@ -1,6 +1,6 @@
 import logging
 import click
-from flask import Flask, render_template, redirect, url_for, send_from_directory, flash, jsonify
+from flask import Flask, render_template, redirect, url_for, send_from_directory, flash, jsonify, session
 from flask_login import LoginManager, current_user
 from flask_migrate import Migrate
 from config import Config, basedir
@@ -23,7 +23,10 @@ load_dotenv()  # Cargar variables de entorno desde .env
 def create_app():
     app = Flask(__name__, static_folder='static')
     app.config.from_object(Config)
-
+    
+    # Configurar sesiones persistentes basadas en cookies
+    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
+    
     # Initialize extensions
     db.init_app(app)
     migrate = Migrate(app, db)

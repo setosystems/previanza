@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, send_file
+from flask import Blueprint, render_template, redirect, url_for, flash, request, send_file, session
 from flask_login import login_required
 from models import Product, db
 from forms import ProductForm
@@ -15,36 +15,79 @@ bp = Blueprint('products', __name__, url_prefix='/products')
 @login_required
 @admin_or_digitador_required
 def list_products():
-    page = request.args.get('page', 1, type=int)
-    per_page = request.args.get('per_page', 10, type=int)
+    # Hacer la sesión permanente al entrar a esta vista
+    session.permanent = True
     
-    query = Product.query.order_by(Product.name)
+    # Guardar/recuperar parámetros de paginación, filtros y ordenamiento en la sesión
+    session_key = 'products_list_params'
     
-    # Aplicar filtros de búsqueda si existen
-    name = request.args.get('name', '')
-    aseguradora = request.args.get('aseguradora', '')
+    # Si hay parámetros en la solicitud, actualizar la sesión
+    if request.args:
+        # Limpiar la sesión si se hace una nueva búsqueda (cuando hay parámetros pero no hay page)
+        if 'name' in request.args and 'page' not in request.args:
+            if session_key in session:
+                session.pop(session_key)
+                
+        # Guardar los parámetros actuales en la sesión
+        session[session_key] = {
+            'name': request.args.get('name', ''),
+            'sort_by': request.args.get('sort_by', 'name'),
+            'sort_order': request.args.get('sort_order', 'asc'),
+            'page': request.args.get('page', 1, type=int),
+            'per_page': request.args.get('per_page', 10, type=int)
+        }
     
+    # Si no hay parámetros pero sí hay sesión guardada, recuperarla para mantener el estado
+    elif session_key in session:
+        return redirect(url_for('products.list_products', **session[session_key]))
+    
+    # Obtener los parámetros ya sea de la solicitud o de la sesión
+    params = session.get(session_key, {})
+    name = params.get('name', request.args.get('name', ''))
+    
+    # Parámetros de ordenamiento
+    sort_by = params.get('sort_by', request.args.get('sort_by', 'name'))
+    sort_order = params.get('sort_order', request.args.get('sort_order', 'asc'))
+    
+    # Mapeo de nombres de parámetros a atributos de modelo para ordenamiento
+    sort_columns = {
+        'name': Product.name,
+        'description': Product.description
+    }
+    
+    query = Product.query
     if name:
         query = query.filter(Product.name.ilike(f'%{name}%'))
-    if aseguradora:
-        query = query.filter(Product.aseguradora.ilike(f'%{aseguradora}%'))
     
-    # Obtener la paginación
+    # Aplicar ordenamiento
+    if sort_by in sort_columns:
+        if sort_order == 'desc':
+            query = query.order_by(sort_columns[sort_by].desc())
+        else:
+            query = query.order_by(sort_columns[sort_by].asc())
+    else:
+        # Ordenamiento por defecto
+        query = query.order_by(Product.name)
+    
+    page = params.get('page', request.args.get('page', 1, type=int))
+    per_page = params.get('per_page', request.args.get('per_page', 10, type=int))
+    
+    allowed_per_page = [10, 25, 50, 100]
+    if per_page not in allowed_per_page:
+        per_page = 10
+    
     pagination = query.paginate(
-        page=page,
+        page=page, 
         per_page=per_page,
         error_out=False
     )
     
-    total = query.count()
-    products = pagination.items
-    
-    return render_template('products/list.html',
-                         products=products,
+    return render_template('products/list.html', 
+                         products=pagination.items, 
                          pagination=pagination,
-                         total=total,
-                         page=page,
-                         per_page=per_page)
+                         title="Lista de Productos",
+                         sort_by=sort_by,
+                         sort_order=sort_order)
 
 @bp.route('/create', methods=['GET', 'POST'])
 @login_required

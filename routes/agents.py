@@ -1,6 +1,6 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import Blueprint, render_template, redirect, url_for, flash, request, session
 from flask_login import login_required
-from models import User, db, UserRole
+from models import User, db, UserRole, DocumentType
 from forms import AgentForm
 from decorators import admin_required
 from utils.url_helpers import get_return_url
@@ -12,36 +12,89 @@ bp = Blueprint('agents', __name__, url_prefix='/agents')
 @login_required
 @admin_required
 def list_agents():
-    page = request.args.get('page', 1, type=int)
-    per_page = request.args.get('per_page', 10, type=int)
+    # Hacer la sesión permanente al entrar a esta vista
+    session.permanent = True
     
-    query = User.query.filter_by(role=UserRole.AGENTE).order_by(User.username)
+    # Guardar/recuperar parámetros de paginación, filtros y ordenamiento en la sesión
+    session_key = 'agents_list_params'
     
-    # Aplicar filtros de búsqueda si existen
-    username = request.args.get('username', '')
-    email = request.args.get('email', '')
+    # Si hay parámetros en la solicitud, actualizar la sesión
+    if request.args:
+        # Limpiar la sesión si se hace una nueva búsqueda (cuando hay parámetros pero no hay page)
+        if 'name' in request.args and 'page' not in request.args:
+            if session_key in session:
+                session.pop(session_key)
+                
+        # Guardar los parámetros actuales en la sesión
+        session[session_key] = {
+            'name': request.args.get('name', ''),
+            'email': request.args.get('email', ''),
+            'document': request.args.get('document', ''),
+            'sort_by': request.args.get('sort_by', 'name'),
+            'sort_order': request.args.get('sort_order', 'asc'),
+            'page': request.args.get('page', 1, type=int),
+            'per_page': request.args.get('per_page', 10, type=int)
+        }
     
-    if username:
-        query = query.filter(User.username.ilike(f'%{username}%'))
+    # Si no hay parámetros pero sí hay sesión guardada, recuperarla para mantener el estado
+    elif session_key in session:
+        return redirect(url_for('agents.list_agents', **session[session_key]))
+    
+    # Obtener los parámetros ya sea de la solicitud o de la sesión
+    params = session.get(session_key, {})
+    name = params.get('name', request.args.get('name', ''))
+    email = params.get('email', request.args.get('email', ''))
+    document = params.get('document', request.args.get('document', ''))
+    
+    # Parámetros de ordenamiento
+    sort_by = params.get('sort_by', request.args.get('sort_by', 'name'))
+    sort_order = params.get('sort_order', request.args.get('sort_order', 'asc'))
+    
+    # Mapeo de nombres de parámetros a atributos de modelo para ordenamiento
+    sort_columns = {
+        'name': User.name,
+        'email': User.email,
+        'document_number': User.document_number
+    }
+    
+    query = User.query.filter_by(role=UserRole.AGENTE)
+    if name:
+        query = query.filter(User.name.ilike(f'%{name}%'))
     if email:
         query = query.filter(User.email.ilike(f'%{email}%'))
+    if document:
+        query = query.filter(User.document_number.ilike(f'%{document}%'))
     
-    # Obtener la paginación
+    # Aplicar ordenamiento
+    if sort_by in sort_columns:
+        if sort_order == 'desc':
+            query = query.order_by(sort_columns[sort_by].desc())
+        else:
+            query = query.order_by(sort_columns[sort_by].asc())
+    else:
+        # Ordenamiento por defecto
+        query = query.order_by(User.name)
+    
+    page = params.get('page', request.args.get('page', 1, type=int))
+    per_page = params.get('per_page', request.args.get('per_page', 10, type=int))
+    
+    allowed_per_page = [10, 25, 50, 100]
+    if per_page not in allowed_per_page:
+        per_page = 10
+    
     pagination = query.paginate(
-        page=page,
+        page=page, 
         per_page=per_page,
         error_out=False
     )
     
-    total = query.count()
-    agents = pagination.items
-    
-    return render_template('agents/list.html',
-                         agents=agents,
+    return render_template('agents/list.html', 
+                         agents=pagination.items, 
+                         document_types=DocumentType, 
                          pagination=pagination,
-                         total=total,
-                         page=page,
-                         per_page=per_page)
+                         title="Lista de Agentes",
+                         sort_by=sort_by,
+                         sort_order=sort_order)
 
 @bp.route('/create', methods=['GET', 'POST'])
 @login_required

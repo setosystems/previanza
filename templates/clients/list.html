@@ -73,6 +73,38 @@
                         </div>
                     </div>
                 </div>
+                
+                <!-- Filtros adicionales -->
+                <div class="flex flex-col md:flex-row gap-4 mt-2">
+                    <div class="flex-1">
+                        <div class="flex items-center space-x-2">
+                            <div class="relative flex-1">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <span class="material-symbols-outlined text-gray-400 dark:text-gray-500">calendar_today</span>
+                                </span>
+                                <input type="date" 
+                                       id="birthdate_from" 
+                                       name="birthdate_from" 
+                                       class="form-input h-10 pl-10 w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150" 
+                                       value="{{ birthdate_from }}"
+                                       placeholder="Fecha desde">
+                            </div>
+                            <span class="text-gray-600 dark:text-gray-300">-</span>
+                            <div class="relative flex-1">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <span class="material-symbols-outlined text-gray-400 dark:text-gray-500">calendar_today</span>
+                                </span>
+                                <input type="date" 
+                                       id="birthdate_to" 
+                                       name="birthdate_to" 
+                                       class="form-input h-10 pl-10 w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150" 
+                                       value="{{ birthdate_to }}"
+                                       placeholder="Fecha hasta">
+                            </div>
+                            <label for="birthdate_from" class="text-sm text-gray-600 dark:text-gray-300 whitespace-nowrap">Rango Fecha Nacimiento</label>
+                        </div>
+                    </div>
+                </div>
             </form>
         </div>
     </div>
@@ -83,10 +115,82 @@
             <thead class="bg-gray-50 dark:bg-gray-700">
                 <tr>
                     <th class="table-header text-gray-600 dark:text-gray-300 first:rounded-tl-xl last:rounded-tr-xl">
-                        Nombre
+                        <a href="{{ url_for('clients.list_clients', 
+                                sort_by='name', 
+                                sort_order='asc' if sort_by != 'name' or sort_order == 'desc' else 'desc', 
+                                name=request.args.get('name', ''), 
+                                email=request.args.get('email', ''), 
+                                document=request.args.get('document', ''), 
+                                document_type=request.args.get('document_type', ''), 
+                                page=request.args.get('page', 1), 
+                                per_page=request.args.get('per_page', 10)) }}" class="flex items-center justify-between hover:text-primary-600 dark:hover:text-primary-400">
+                            Nombre
+                            {% if sort_by == 'name' %}
+                                <span class="material-symbols-outlined text-xs ml-1">{{ 'arrow_upward' if sort_order == 'asc' else 'arrow_downward' }}</span>
+                            {% else %}
+                                <span class="material-symbols-outlined text-xs ml-1">sort</span>
+                            {% endif %}
+                        </a>
                     </th>
-                    <th class="table-header text-gray-600 dark:text-gray-300">Email</th>
-                    <th class="table-header text-gray-600 dark:text-gray-300">Documento</th>
+                    <th class="table-header text-gray-600 dark:text-gray-300">
+                        <a href="{{ url_for('clients.list_clients', 
+                                sort_by='email', 
+                                sort_order='asc' if sort_by != 'email' or sort_order == 'desc' else 'desc', 
+                                name=request.args.get('name', ''), 
+                                email=request.args.get('email', ''), 
+                                document=request.args.get('document', ''), 
+                                document_type=request.args.get('document_type', ''), 
+                                page=request.args.get('page', 1), 
+                                per_page=request.args.get('per_page', 10)) }}" class="flex items-center justify-between hover:text-primary-600 dark:hover:text-primary-400">
+                            Email
+                            {% if sort_by == 'email' %}
+                                <span class="material-symbols-outlined text-xs ml-1">{{ 'arrow_upward' if sort_order == 'asc' else 'arrow_downward' }}</span>
+                            {% else %}
+                                <span class="material-symbols-outlined text-xs ml-1">sort</span>
+                            {% endif %}
+                        </a>
+                    </th>
+                    <th class="table-header text-gray-600 dark:text-gray-300">Teléfono</th>
+                    <th class="table-header text-gray-600 dark:text-gray-300">
+                        <a href="{{ url_for('clients.list_clients', 
+                                sort_by='document_number', 
+                                sort_order='asc' if sort_by != 'document_number' or sort_order == 'desc' else 'desc', 
+                                name=request.args.get('name', ''), 
+                                email=request.args.get('email', ''), 
+                                document=request.args.get('document', ''),
+                                birthdate_from=request.args.get('birthdate_from', ''),
+                                birthdate_to=request.args.get('birthdate_to', ''),
+                                document_type=request.args.get('document_type', ''), 
+                                page=request.args.get('page', 1), 
+                                per_page=request.args.get('per_page', 10)) }}" class="flex items-center justify-between hover:text-primary-600 dark:hover:text-primary-400">
+                            Documento
+                            {% if sort_by == 'document_number' %}
+                                <span class="material-symbols-outlined text-xs ml-1">{{ 'arrow_upward' if sort_order == 'asc' else 'arrow_downward' }}</span>
+                            {% else %}
+                                <span class="material-symbols-outlined text-xs ml-1">sort</span>
+                            {% endif %}
+                        </a>
+                    </th>
+                    <th class="table-header text-gray-600 dark:text-gray-300">
+                        <a href="{{ url_for('clients.list_clients', 
+                                sort_by='birthdate', 
+                                sort_order='asc' if sort_by != 'birthdate' or sort_order == 'desc' else 'desc', 
+                                name=request.args.get('name', ''), 
+                                email=request.args.get('email', ''), 
+                                document=request.args.get('document', ''),
+                                birthdate_from=request.args.get('birthdate_from', ''),
+                                birthdate_to=request.args.get('birthdate_to', ''),
+                                document_type=request.args.get('document_type', ''), 
+                                page=request.args.get('page', 1), 
+                                per_page=request.args.get('per_page', 10)) }}" class="flex items-center justify-between hover:text-primary-600 dark:hover:text-primary-400">
+                            Fecha Nacimiento
+                            {% if sort_by == 'birthdate' %}
+                                <span class="material-symbols-outlined text-xs ml-1">{{ 'arrow_upward' if sort_order == 'asc' else 'arrow_downward' }}</span>
+                            {% else %}
+                                <span class="material-symbols-outlined text-xs ml-1">sort</span>
+                            {% endif %}
+                        </a>
+                    </th>
                     <th class="table-header text-gray-600 dark:text-gray-300">Estado</th>
                     <th class="table-header text-gray-600 dark:text-gray-300">Acciones</th>
                 </tr>
@@ -96,7 +200,9 @@
                 <tr class="table-row hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
                     <td class="table-cell text-gray-900 dark:text-gray-100">{{ client.name }}</td>
                     <td class="table-cell text-gray-700 dark:text-gray-300">{{ client.email }}</td>
+                    <td class="table-cell text-gray-700 dark:text-gray-300">{{ client.phone or '-' }}</td>
                     <td class="table-cell text-gray-700 dark:text-gray-300">{{ client.document_type.value }} {{ client.document_number }}</td>
+                    <td class="table-cell text-gray-700 dark:text-gray-300">{{ client.birthdate.strftime('%d/%m/%Y') if client.birthdate else '-' }}</td>
                     <td class="table-cell">
                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
                             {% if client.is_active %}
@@ -228,7 +334,16 @@
                             onchange="window.location.href=this.value"
                             class="form-select w-20 rounded-md text-sm border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 bg-white dark:bg-gray-700 focus:border-primary-500 focus:ring-primary-500 transition-colors">
                         {% for count in [10, 25, 50, 100] %}
-                        <option value="{{ url_for('clients.list_clients', per_page=count) }}"
+                        <option value="{{ url_for('clients.list_clients', 
+                                per_page=count, 
+                                name=request.args.get('name', ''), 
+                                email=request.args.get('email', ''), 
+                                document=request.args.get('document', ''),
+                                birthdate_from=request.args.get('birthdate_from', ''),
+                                birthdate_to=request.args.get('birthdate_to', ''),
+                                document_type=request.args.get('document_type', ''), 
+                                sort_by=sort_by, 
+                                sort_order=sort_order) }}"
                                 {% if request.args.get('per_page', '10')|int == count %}selected{% endif %}>
                             {{ count }}
                         </option>
@@ -253,7 +368,17 @@
             <!-- Paginación -->
             <nav class="flex items-center justify-center sm:justify-end gap-1">
                 {% if pagination.has_prev %}
-                <a href="{{ url_for('clients.list_clients', page=pagination.prev_num, per_page=request.args.get('per_page', 10)) }}"
+                <a href="{{ url_for('clients.list_clients', 
+                        page=pagination.prev_num, 
+                        per_page=pagination.per_page, 
+                        name=request.args.get('name', ''), 
+                        email=request.args.get('email', ''), 
+                        document=request.args.get('document', ''),
+                        birthdate_from=request.args.get('birthdate_from', ''),
+                        birthdate_to=request.args.get('birthdate_to', ''),
+                        document_type=request.args.get('document_type', ''), 
+                        sort_by=sort_by, 
+                        sort_order=sort_order) }}"
                    class="relative inline-flex items-center rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-primary-600 transition-colors">
                     <span class="sr-only">Anterior</span>
                     <span class="material-symbols-outlined text-sm">chevron_left</span>
@@ -262,7 +387,17 @@
 
                 {% for page in pagination.iter_pages() %}
                     {% if page %}
-                        <a href="{{ url_for('clients.list_clients', page=page, per_page=request.args.get('per_page', 10)) }}"
+                        <a href="{{ url_for('clients.list_clients', 
+                                page=page, 
+                                per_page=pagination.per_page, 
+                                name=request.args.get('name', ''), 
+                                email=request.args.get('email', ''), 
+                                document=request.args.get('document', ''),
+                                birthdate_from=request.args.get('birthdate_from', ''),
+                                birthdate_to=request.args.get('birthdate_to', ''),
+                                document_type=request.args.get('document_type', ''), 
+                                sort_by=sort_by, 
+                                sort_order=sort_order) }}"
                            class="relative inline-flex items-center justify-center min-w-[2.5rem] h-10 text-sm font-medium rounded-md transition-colors
                                   {% if page == pagination.page %}
                                       text-white bg-primary-600 hover:bg-primary-700 shadow-sm
@@ -275,7 +410,17 @@
                 {% endfor %}
 
                 {% if pagination.has_next %}
-                <a href="{{ url_for('clients.list_clients', page=pagination.next_num, per_page=request.args.get('per_page', 10)) }}"
+                <a href="{{ url_for('clients.list_clients', 
+                        page=pagination.next_num, 
+                        per_page=pagination.per_page, 
+                        name=request.args.get('name', ''), 
+                        email=request.args.get('email', ''), 
+                        document=request.args.get('document', ''),
+                        birthdate_from=request.args.get('birthdate_from', ''),
+                        birthdate_to=request.args.get('birthdate_to', ''),
+                        document_type=request.args.get('document_type', ''), 
+                        sort_by=sort_by, 
+                        sort_order=sort_order) }}"
                    class="relative inline-flex items-center rounded-md p-2 text-gray-400 hover:bg-gray-50 hover:text-primary-600 transition-colors">
                     <span class="sr-only">Siguiente</span>
                     <span class="material-symbols-outlined text-sm">chevron_right</span>

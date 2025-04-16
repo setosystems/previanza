@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, send_file
+from flask import Blueprint, render_template, redirect, url_for, flash, request, send_file, session
 from flask_login import login_required
 from models import Client, Policy, User, db, DocumentType, UserRole
 from forms import ClientForm
@@ -19,10 +19,58 @@ bp = Blueprint('clients', __name__, url_prefix='/clients')
 @login_required
 @admin_or_digitador_required
 def list_clients():
-    name = request.args.get('name', '')
-    email = request.args.get('email', '')
-    document_type = request.args.get('document_type', '')
-    document_number = request.args.get('document', '')
+    # Hacer la sesión permanente al entrar a esta vista
+    session.permanent = True
+    
+    # Guardar/recuperar parámetros de paginación, filtros y ordenamiento en la sesión
+    session_key = 'clients_list_params'
+    
+    # Si hay parámetros en la solicitud, actualizar la sesión
+    if request.args:
+        # Limpiar la sesión si se hace una nueva búsqueda (cuando hay parámetros pero no hay page)
+        if 'name' in request.args and 'page' not in request.args:
+            if session_key in session:
+                session.pop(session_key)
+                
+        # Guardar los parámetros actuales en la sesión
+        session[session_key] = {
+            'name': request.args.get('name', ''),
+            'email': request.args.get('email', ''),
+            'document_type': request.args.get('document_type', ''),
+            'document': request.args.get('document', ''),
+            'birthdate_from': request.args.get('birthdate_from', ''),
+            'birthdate_to': request.args.get('birthdate_to', ''),
+            'sort_by': request.args.get('sort_by', 'name'),
+            'sort_order': request.args.get('sort_order', 'asc'),
+            'page': request.args.get('page', 1, type=int),
+            'per_page': request.args.get('per_page', 10, type=int)
+        }
+    
+    # Si no hay parámetros pero sí hay sesión guardada, recuperarla para mantener el estado
+    elif session_key in session:
+        return redirect(url_for('clients.list_clients', **session[session_key]))
+    
+    # Obtener los parámetros ya sea de la solicitud o de la sesión
+    params = session.get(session_key, {})
+    name = params.get('name', request.args.get('name', ''))
+    email = params.get('email', request.args.get('email', ''))
+    document_type = params.get('document_type', request.args.get('document_type', ''))
+    document_number = params.get('document', request.args.get('document', ''))
+    birthdate_from = params.get('birthdate_from', request.args.get('birthdate_from', ''))
+    birthdate_to = params.get('birthdate_to', request.args.get('birthdate_to', ''))
+    
+    # Parámetros de ordenamiento
+    sort_by = params.get('sort_by', request.args.get('sort_by', 'name'))
+    sort_order = params.get('sort_order', request.args.get('sort_order', 'asc'))
+    
+    # Mapeo de nombres de parámetros a atributos de modelo para ordenamiento
+    sort_columns = {
+        'name': Client.name,
+        'email': Client.email,
+        'document_number': Client.document_number,
+        'city': Client.city,
+        'birthdate': Client.birthdate
+    }
     
     query = Client.query
     if name:
@@ -34,10 +82,33 @@ def list_clients():
     if document_number:
         query = query.filter(Client.document_number.ilike(f'%{document_number}%'))
     
-    query = query.order_by(Client.name)
+    # Filtro por rango de fechas de nacimiento
+    if birthdate_from:
+        try:
+            from_date = datetime.strptime(birthdate_from, '%Y-%m-%d').date()
+            query = query.filter(Client.birthdate >= from_date)
+        except ValueError:
+            flash('Formato de fecha inicial inválido. Use YYYY-MM-DD', 'warning')
     
-    page = request.args.get('page', 1, type=int)
-    per_page = request.args.get('per_page', 10, type=int)
+    if birthdate_to:
+        try:
+            to_date = datetime.strptime(birthdate_to, '%Y-%m-%d').date()
+            query = query.filter(Client.birthdate <= to_date)
+        except ValueError:
+            flash('Formato de fecha final inválido. Use YYYY-MM-DD', 'warning')
+    
+    # Aplicar ordenamiento
+    if sort_by in sort_columns:
+        if sort_order == 'desc':
+            query = query.order_by(sort_columns[sort_by].desc())
+        else:
+            query = query.order_by(sort_columns[sort_by].asc())
+    else:
+        # Ordenamiento por defecto
+        query = query.order_by(Client.name)
+    
+    page = params.get('page', request.args.get('page', 1, type=int))
+    per_page = params.get('per_page', request.args.get('per_page', 10, type=int))
     
     allowed_per_page = [10, 25, 50, 100]
     if per_page not in allowed_per_page:
@@ -54,6 +125,10 @@ def list_clients():
                          document_types=DocumentType, 
                          pagination=pagination,
                          title="Lista de Clientes",
+                         sort_by=sort_by,
+                         sort_order=sort_order,
+                         birthdate_from=birthdate_from,
+                         birthdate_to=birthdate_to,
                          show_client_actions=True)
 
 @bp.route('/create', methods=['GET', 'POST'])
@@ -63,8 +138,25 @@ def create_client():
     form = ClientForm()
     if form.validate_on_submit():
         try:
-            client = Client()
-            form.populate_obj(client)
+            # Crear el cliente sin usar populate_obj
+            client = Client(
+                name=form.name.data,
+                email=form.email.data,
+                phone=form.phone.data,
+                address=form.address.data,
+                city=form.city.data,
+                document_number=form.document_number.data,
+                birthdate=form.birthdate.data
+            )
+            
+            # Convertir explícitamente el tipo de documento de texto a enum
+            if form.document_type.data:
+                try:
+                    client.document_type = DocumentType[form.document_type.data]
+                except KeyError:
+                    flash(f'Tipo de documento inválido: {form.document_type.data}', 'error')
+                    return render_template('clients/create.html', form=form)
+            
             db.session.add(client)
             db.session.commit()
             flash('Cliente creado exitosamente', 'success')
@@ -75,6 +167,7 @@ def create_client():
         except Exception as e:
             db.session.rollback()
             flash(f'Error al crear el cliente: {str(e)}', 'error')
+            logging.error(f"Error al crear cliente: {str(e)}")
     
     return render_template('clients/create.html', form=form)
 
@@ -89,13 +182,30 @@ def edit_client(id):
     
     if form.validate_on_submit():
         try:
-            form.populate_obj(client)
+            # Actualizar los campos manualmente en lugar de usar populate_obj
+            client.name = form.name.data
+            client.email = form.email.data
+            client.phone = form.phone.data
+            client.address = form.address.data
+            client.city = form.city.data
+            client.document_number = form.document_number.data
+            client.birthdate = form.birthdate.data
+            
+            # Convertir explícitamente el tipo de documento de texto a enum
+            if form.document_type.data:
+                try:
+                    client.document_type = DocumentType[form.document_type.data]
+                except KeyError:
+                    flash(f'Tipo de documento inválido: {form.document_type.data}', 'error')
+                    return render_template('clients/edit.html', form=form, client=client)
+            
             db.session.commit()
             flash('Cliente actualizado exitosamente', 'success')
             return redirect(get_return_url(url_for('clients.list_clients')))
         except Exception as e:
             db.session.rollback()
             flash(f'Error al actualizar el cliente: {str(e)}', 'error')
+            logging.error(f"Error al actualizar cliente: {str(e)}")
     
     return render_template('clients/edit.html', form=form, client=client)
 
