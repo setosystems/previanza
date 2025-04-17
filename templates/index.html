@@ -180,30 +180,65 @@
     <!-- Products Performance -->
     <div class="card-container">
         <div class="p-4 border-b border-gray-200 dark:border-gray-700">
-            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Rendimiento de Productos</h3>
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Rendimiento de Productos</h3>
+                <div class="flex space-x-2">
+                    <select id="productsPeriodSelector" class="text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 py-1 px-2">
+                        <option value="month1" selected>Último mes</option>
+                        <option value="month3">3 meses</option>
+                        <option value="month6">6 meses</option>
+                        <option value="year1">1 año</option>
+                        <option value="all">Todo</option>
+                    </select>
+                </div>
+            </div>
         </div>
         <div class="p-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {% for product in products_performance %}
-                <div class="flex items-start space-x-4">
-                    {% if product.image_url %}
-                    <img src="{{ url_for('products.serve_image', filename=product.image_url.split('/')[-1], size='thumbnail') }}" 
-                         alt="{{ product.name }}" 
-                         class="w-16 h-16 object-cover rounded-lg">
-                    {% else %}
-                    <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
-                        <span class="material-symbols-outlined text-gray-400 dark:text-gray-500">inventory_2</span>
-                    </div>
-                    {% endif %}
-                    <div>
-                        <h4 class="font-medium text-gray-900 dark:text-gray-100">{{ product.name }}</h4>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ product.policy_count }} pólizas</p>
-                        <p class="text-sm font-medium text-primary-600 dark:text-primary-400">
-                            ${{ "{:,.2f}".format(product.total_premium or 0) }}
-                        </p>
+            <!-- Estructura en dos columnas: gráfico a la izquierda, lista a la derecha -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Gráfico de pastel -->
+                <div class="flex items-center justify-center">
+                    <div class="w-full h-64">
+                        <canvas id="productsChart" class="w-full h-full"></canvas>
                     </div>
                 </div>
-                {% endfor %}
+
+                <!-- Lista de productos -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="productsList">
+                    {% set total_premium = products_performance|sum(attribute='total_premium') %}
+                    {% set sorted_products = products_performance|sort(attribute='total_premium', reverse=true) %}
+                    {% for product in sorted_products %}
+                    <div class="flex items-start space-x-4">
+                        {% if product.image_url %}
+                        <img src="{{ url_for('products.serve_image', filename=product.image_url.split('/')[-1], size='thumbnail') }}" 
+                             alt="{{ product.name }}" 
+                             class="w-16 h-16 object-cover rounded-lg">
+                        {% else %}
+                        <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                            <span class="material-symbols-outlined text-gray-400 dark:text-gray-500">inventory_2</span>
+                        </div>
+                        {% endif %}
+                        <div>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-4 h-4 rounded product-color-indicator" data-product-index="{{ loop.index0 }}"></div>
+                                <h4 class="font-medium text-gray-900 dark:text-gray-100">{{ product.name }}</h4>
+                            </div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ product.policy_count }} pólizas</p>
+                            <div class="flex items-center justify-between">
+                                <p class="text-sm font-medium text-primary-600 dark:text-primary-400">
+                                    ${{ "{:,.2f}".format(product.total_premium or 0) }}
+                                </p>
+                                {% if total_premium > 0 %}
+                                    {% set percentage = (product.total_premium / total_premium * 100)|round|int %}
+                                    <p class="text-sm font-medium text-gray-600 dark:text-gray-400 ml-2">
+                                        ({{ percentage }}%)
+                                    </p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
         </div>
     </div>
@@ -272,9 +307,108 @@
 
     const salesData = {{ daily_sales|tojson }};
     const activityData = {{ weekly_activity|tojson }};
+    const productsData = {{ products_performance|tojson }};
 
+    // Verificar que los datos de productos existan
+    console.log("Datos de productos:", productsData);
+    
     let salesChart;
     let activityChart;
+    let productsChart;
+    
+    // Función para generar un color aleatorio con transparencia
+    function getRandomColor(alpha = 1) {
+        const r = Math.floor(Math.random() * 255);
+        const g = Math.floor(Math.random() * 255);
+        const b = Math.floor(Math.random() * 255);
+        return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+    
+    // Generar una paleta de colores para los productos
+    function generateColorPalette(count) {
+        // Colores predefinidos para los primeros productos
+        const baseColors = [
+            'rgba(54, 162, 235, 0.8)',
+            'rgba(255, 99, 132, 0.8)',
+            'rgba(255, 206, 86, 0.8)',
+            'rgba(75, 192, 192, 0.8)',
+            'rgba(153, 102, 255, 0.8)',
+            'rgba(255, 159, 64, 0.8)'
+        ];
+        
+        // Si necesitamos más colores, los generamos aleatoriamente
+        const colors = [...baseColors];
+        if (count > baseColors.length) {
+            for (let i = baseColors.length; i < count; i++) {
+                colors.push(getRandomColor(0.8));
+            }
+        }
+        
+        return colors;
+    }
+    
+    // Crear el gráfico de productos
+    function createProductsChart() {
+        const ctx = document.getElementById('productsChart').getContext('2d');
+        
+        // Verificar si hay datos disponibles
+        if (!productsData || productsData.length === 0) {
+            console.warn('No hay datos de productos disponibles para mostrar en el gráfico');
+            return;
+        }
+        
+        // Extraer datos para el gráfico
+        const labels = productsData.map(product => product.name);
+        const data = productsData.map(product => product.total_premium);
+        const backgroundColor = generateColorPalette(productsData.length);
+        
+        // Crear el gráfico
+        productsChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: backgroundColor,
+                    borderColor: isDarkMode ? 'rgba(17, 24, 39, 0.8)' : 'rgba(255, 255, 255, 0.8)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false // Ocultar la leyenda
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw;
+                                const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                const percentage = Math.round((value / total) * 100);
+                                return `${label}: $${value.toLocaleString('es-EC')} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Actualizar los indicadores de color en la lista de productos
+        updateProductColorIndicators(backgroundColor);
+    }
+    
+    // Nueva función para actualizar los indicadores de color
+    function updateProductColorIndicators(colors) {
+        const indicators = document.querySelectorAll('.product-color-indicator');
+        indicators.forEach((indicator, index) => {
+            if (index < colors.length) {
+                indicator.style.backgroundColor = colors[index];
+            }
+        });
+    }
 
     // Variables para almacenar datos de actividad por categoría
     let activityDataByCategory = {
@@ -1173,11 +1307,14 @@
         updateWeekLabel(chartType);
     }
 
-    // Al cargar la página, inicializar los controles
+    // Al cargar la página, inicializar los controles y gráficos
     document.addEventListener('DOMContentLoaded', function() {
         // Inicializar con los controles apropiados mostrados/ocultos
         toggleDateControls('sales', 'daily');  // Para ventas, mostrar controles de rango de fechas inicialmente
         toggleDateControls('activity', 'daily');  // Para actividad, ahora también en modo diario
+        
+        // Inicializar el gráfico de productos
+        createProductsChart();
         
         // Inicializar el gráfico de actividad con rango de fechas predeterminado (últimos 30 días)
         const today = new Date();
@@ -1208,6 +1345,154 @@
             });
         });
     });
+
+    // Inicializar el escuchador de eventos para el selector de períodos de productos
+    document.getElementById('productsPeriodSelector').addEventListener('change', function(e) {
+        const period = e.target.value;
+        updateProductsPerformance(period);
+    });
+    
+    // Función para actualizar el rendimiento de productos
+    async function updateProductsPerformance(period) {
+        try {
+            // Mostrar indicador de carga
+            const chartCanvas = document.getElementById('productsChart');
+            chartCanvas.style.opacity = '0.5';
+            
+            // También añadir opacidad a la lista de productos
+            const productsList = document.getElementById('productsList');
+            productsList.style.opacity = '0.5';
+            
+            // Construir URL con parámetro de período
+            let url = `{{ url_for('reports.products_performance_api') }}?period=${period}`;
+            
+            // Realizar la petición a la API
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                throw new Error('Error al obtener datos de productos');
+            }
+            
+            // Procesar respuesta
+            const data = await response.json();
+            
+            // Recrear el gráfico con los nuevos datos
+            if (productsChart) {
+                productsChart.destroy();
+            }
+            
+            // Verificar que hay datos disponibles
+            if (!data || data.length === 0) {
+                console.warn('No hay datos de productos disponibles para el período seleccionado');
+                // Restaurar opacidad
+                chartCanvas.style.opacity = '1';
+                productsList.style.opacity = '1';
+                return;
+            }
+            
+            // Ordenar los datos por total_premium (de mayor a menor)
+            data.sort((a, b) => b.total_premium - a.total_premium);
+            
+            // Extraer datos para el gráfico
+            const labels = data.map(product => product.name);
+            const chartData = data.map(product => product.total_premium);
+            const backgroundColor = generateColorPalette(data.length);
+            
+            // Calcular el total para obtener porcentajes
+            const totalPremium = chartData.reduce((sum, current) => sum + current, 0);
+            
+            // Crear el gráfico actualizado
+            productsChart = new Chart(chartCanvas.getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: chartData,
+                        backgroundColor: backgroundColor,
+                        borderColor: isDarkMode ? 'rgba(17, 24, 39, 0.8)' : 'rgba(255, 255, 255, 0.8)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false // Ocultar la leyenda
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw;
+                                    const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.round((value / total) * 100);
+                                    return `${label}: $${value.toLocaleString('es-EC')} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Actualizar la lista de productos
+            productsList.innerHTML = '';
+            
+            data.forEach((product, index) => {
+                const productElement = document.createElement('div');
+                productElement.className = 'flex items-start space-x-4';
+                
+                // Calcular el porcentaje para este producto
+                const percentage = totalPremium > 0 ? Math.round((product.total_premium / totalPremium) * 100) : 0;
+                
+                let imageHtml = '';
+                if (product.image_url) {
+                    // Esta URL necesita ajustarse según tu estructura
+                    const imagePath = product.image_url.split('/').pop();
+                    imageHtml = `<img src="/products/image/${imagePath}?size=thumbnail" 
+                                    alt="${product.name}" 
+                                    class="w-16 h-16 object-cover rounded-lg">`;
+                } else {
+                    imageHtml = `<div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-gray-400 dark:text-gray-500">inventory_2</span>
+                                </div>`;
+                }
+                
+                productElement.innerHTML = `
+                    ${imageHtml}
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-4 h-4 rounded product-color-indicator" style="background-color: ${backgroundColor[index]}"></div>
+                            <h4 class="font-medium text-gray-900 dark:text-gray-100">${product.name}</h4>
+                        </div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">${product.policy_count} pólizas</p>
+                        <div class="flex items-center justify-between">
+                            <p class="text-sm font-medium text-primary-600 dark:text-primary-400">
+                                $${parseFloat(product.total_premium).toLocaleString('es-EC', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                            </p>
+                            <p class="text-sm font-medium text-gray-600 dark:text-gray-400 ml-2">
+                                (${percentage}%)
+                            </p>
+                        </div>
+                    </div>
+                `;
+                
+                productsList.appendChild(productElement);
+            });
+            
+            // Restaurar opacidad
+            chartCanvas.style.opacity = '1';
+            productsList.style.opacity = '1';
+            
+        } catch (error) {
+            console.error('Error al actualizar el rendimiento de productos:', error);
+            alert('No se pudieron cargar los datos de productos. Por favor, intente nuevamente.');
+            
+            // Restaurar opacidad en caso de error
+            document.getElementById('productsChart').style.opacity = '1';
+            document.getElementById('productsList').style.opacity = '1';
+        }
+    }
 </script>
 {% endblock %}
 {% endblock %}

@@ -5,6 +5,7 @@ from flask_login import LoginManager, current_user
 from flask_migrate import Migrate
 from config import Config, basedir
 from models import DocumentType, db, User, UserRole, Policy, Commission, Client, Product, SMTPConfig
+from utils.security import decrypt_value
 from sqlalchemy.exc import OperationalError
 import time
 from extensions import mail
@@ -85,10 +86,26 @@ def create_app():
             start_date = end_date - timedelta(days=30)
             previous_start = start_date - timedelta(days=30)
 
+            # Definir variables con valores predeterminados antes de cualquier consulta
+            total_policies = 0
+            total_premium = 0
+            total_commissions = 0
+            active_clients = 0
+            new_clients = 0
+            policy_growth = 0
+            weekly_activity = {'dates': [], 'counts': []}
+            sales_data = {'dates': [], 'totals': []}
+            products_performance_list = []
+            top_clients_list = []
+            top_agents_list = []
+
             # Estadísticas generales
-            total_policies = Policy.query.count()
-            total_premium = db.session.query(func.sum(Policy.premium)).scalar() or 0
-            total_commissions = db.session.query(func.sum(Commission.amount)).scalar() or 0
+            total_policies = Policy.query.count() or 0
+            total_premium_raw = db.session.query(func.sum(Policy.premium)).scalar() or 0
+            total_premium = float(total_premium_raw)
+            
+            total_commissions_raw = db.session.query(func.sum(Commission.amount)).scalar() or 0
+            total_commissions = float(total_commissions_raw)
             
             # Cálculo de crecimiento de pólizas
             current_period_policies = Policy.query.filter(
@@ -97,10 +114,16 @@ def create_app():
             previous_period_policies = Policy.query.filter(
                 Policy.solicitation_date.between(previous_start, start_date)
             ).count()
-            policy_growth = (
-                ((current_period_policies - previous_period_policies) / previous_period_policies * 100)
-                if previous_period_policies > 0 else 0
-            )
+            
+            # Asegurar que policy_growth siempre tenga un valor, incluso si previous_period_policies es 0
+            try:
+                policy_growth = (
+                    ((current_period_policies - previous_period_policies) / previous_period_policies * 100)
+                    if previous_period_policies > 0 else 0
+                )
+            except Exception as e:
+                logging.error(f"Error calculando policy_growth: {str(e)}")
+                policy_growth = 0
 
             # Clientes activos y nuevos
             active_clients = Client.query.count()
@@ -138,12 +161,12 @@ def create_app():
                     day_abbr = 'M' if weekday == 1 else 'J'  # 1 es martes, 3 es jueves
                 
                 if day_abbr in weekly_activity_temp:
-                    weekly_activity_temp[day_abbr] = day_data.count
+                    weekly_activity_temp[day_abbr] = int(day_data.count)
             
             # Formato compatible con el gráfico - asegurar el orden correcto
             weekly_activity = {
                 'dates': days_of_week,
-                'counts': [weekly_activity_temp[day] for day in days_of_week]
+                'counts': [int(weekly_activity_temp[day]) for day in days_of_week]
             }
 
             # Ventas diarias
@@ -160,7 +183,8 @@ def create_app():
             }
 
             # Rendimiento de productos
-            products_performance = db.session.query(
+            products_query = db.session.query(
+                Product.id,
                 Product.name,
                 Product.description,
                 Product.image_url,
@@ -175,6 +199,28 @@ def create_app():
             ).group_by(Product.id, Product.name, Product.description, Product.image_url)\
             .order_by(func.sum(Policy.premium).desc())\
             .all()
+            
+            # Convertir objetos Row a diccionarios para evitar problemas de serialización JSON
+            products_performance_list = []
+            for p in products_query:
+                # Verificar si total_premium es None y convertir a 0 si es necesario
+                premium = 0
+                if p.total_premium is not None:
+                    premium = float(p.total_premium)
+                
+                # Verificar si policy_count es None y convertir a 0 si es necesario
+                count = 0
+                if p.policy_count is not None:
+                    count = int(p.policy_count)
+                
+                products_performance_list.append({
+                    'id': p.id,
+                    'name': p.name,
+                    'description': p.description,
+                    'image_url': p.image_url,
+                    'policy_count': count,
+                    'total_premium': premium
+                })
 
             # Top clientes
             top_clients = db.session.query(
@@ -184,6 +230,15 @@ def create_app():
             ).join(Policy).group_by(Client.id, Client.name)\
             .order_by(func.sum(Policy.premium).desc())\
             .limit(5).all()
+            
+            # Convertir a diccionarios
+            top_clients_list = []
+            for c in top_clients:
+                top_clients_list.append({
+                    'name': c.name,
+                    'policy_count': c.policy_count or 0,
+                    'total_premium': float(c.total_premium) if c.total_premium else 0
+                })
 
             # Top agentes
             top_agents = db.session.query(
@@ -195,6 +250,15 @@ def create_app():
             .group_by(User.id, User.name)\
             .order_by(func.sum(Policy.premium).desc())\
             .limit(5).all()
+            
+            # Convertir a diccionarios
+            top_agents_list = []
+            for a in top_agents:
+                top_agents_list.append({
+                    'name': a.name,
+                    'policy_count': a.policy_count or 0,
+                    'total_premium': float(a.total_premium) if a.total_premium else 0
+                })
 
             return render_template('index.html',
                 total_policies=total_policies,
@@ -205,15 +269,30 @@ def create_app():
                 policy_growth=policy_growth,
                 weekly_activity=weekly_activity,
                 daily_sales=sales_data,
-                products_performance=products_performance,
-                top_clients=top_clients,
-                top_agents=top_agents
+                products_performance=products_performance_list,
+                top_clients=top_clients_list,
+                top_agents=top_agents_list
             )
 
         except Exception as e:
             logging.error(f"Error en dashboard: {str(e)}")
             flash('Error al cargar el dashboard', 'error')
-            return render_template('index.html', error=True)
+            
+            # Proporcionar valores predeterminados para todas las variables requeridas por la plantilla
+            return render_template('index.html',
+                error=True,
+                total_policies=0,
+                total_premium=0,
+                total_commissions=0,
+                active_clients=0,
+                new_clients=0,
+                policy_growth=0,
+                weekly_activity={'dates': [], 'counts': []},
+                daily_sales={'dates': [], 'totals': []},
+                products_performance=[],
+                top_clients=[],
+                top_agents=[]
+            )
 
     @app.errorhandler(401)
     def unauthorized(error):

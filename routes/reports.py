@@ -1357,3 +1357,83 @@ def get_yearly_activity_by_category(start_year, end_year, category='all'):
         'dates': [str(activity['year']) for activity in yearly_activity],
         'counts': [activity['count'] for activity in yearly_activity]
     }
+
+@bp.route('/api/products_performance')
+@login_required
+def products_performance_api():
+    """
+    API para obtener datos de rendimiento de productos filtrados por período.
+    Parámetros:
+    - period: Puede ser 'month1', 'month3', 'month6', 'year1' o 'all'
+    """
+    period = request.args.get('period', 'month1')
+    
+    # Determinar el rango de fechas según el período
+    end_date = datetime.now()
+    
+    if period == 'month1':
+        start_date = end_date - timedelta(days=30)
+    elif period == 'month3':
+        start_date = end_date - timedelta(days=90)
+    elif period == 'month6':
+        start_date = end_date - timedelta(days=180)
+    elif period == 'year1':
+        start_date = end_date - timedelta(days=365)
+    else:  # 'all'
+        start_date = None
+    
+    try:
+        # Consulta base para productos
+        query = db.session.query(
+            Product.id,
+            Product.name,
+            Product.description,
+            Product.image_url,
+            func.count(Policy.id).label('policy_count'),
+            func.sum(Policy.premium).label('total_premium')
+        )
+        
+        # Aplicar filtro de fecha solo si no es 'all'
+        if start_date:
+            query = query.outerjoin(
+                Policy,
+                db.and_(
+                    Policy.product_id == Product.id,
+                    Policy.solicitation_date.between(start_date, end_date)
+                )
+            )
+        else:
+            # Sin filtro de fecha para 'all'
+            query = query.outerjoin(
+                Policy,
+                Policy.product_id == Product.id
+            )
+        
+        # Agrupar y ordenar
+        products = query.group_by(
+            Product.id, Product.name, Product.description, Product.image_url
+        ).order_by(
+            func.sum(Policy.premium).desc()
+        ).all()
+        
+        # Convertir a formato JSON
+        result = []
+        for p in products:
+            # Manejar valores nulos
+            premium = 0 if p.total_premium is None else float(p.total_premium)
+            count = 0 if p.policy_count is None else int(p.policy_count)
+            
+            result.append({
+                'id': p.id,
+                'name': p.name,
+                'description': p.description,
+                'image_url': p.image_url,
+                'policy_count': count,
+                'total_premium': premium
+            })
+        
+        return jsonify(result)
+        
+    except Exception as e:
+        logging.error(f"Error en API de rendimiento de productos: {str(e)}")
+        return jsonify({'error': str(e)}), 500
