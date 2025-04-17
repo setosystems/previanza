@@ -100,7 +100,7 @@
         <div class="card-container">
             <div class="p-4 border-b border-gray-200 dark:border-gray-700">
                 <div class="flex items-center justify-between">
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Ventas Diarias (Pólizas Emitidas)</h3>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Ventas</h3>
                     <div class="flex space-x-2">
                         <select id="salesPeriodSelector" class="text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 py-1 px-2">
                             <option value="daily" selected>Diario</option>
@@ -128,7 +128,7 @@
         <div class="card-container">
             <div class="p-4 border-b border-gray-200 dark:border-gray-700">
                 <div class="flex items-center justify-between">
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Actividad Diaria (Todas las Pólizas)</h3>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Actividad</h3>
                     <div class="flex space-x-2">
                         <select id="activityPeriodSelector" class="text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 py-1 px-2">
                             <option value="daily" selected>Diario</option>
@@ -392,30 +392,10 @@
             // Procesar respuesta
             const data = await response.json();
             
-            // Actualizar título según el período
-            let chartTitle = 'Ventas ';
-            switch(period) {
-                case 'daily':
-                    chartTitle += 'Diarias';
-                    break;
-                case 'weekly':
-                    chartTitle += 'Semanales';
-                    break;
-                case 'monthly':
-                    // Destacar el año en la vista mensual
-                    const displayYear = year || new Date().getFullYear();
-                    chartTitle += `Mensuales ${displayYear}`;
-                    break;
-                case 'yearly':
-                    chartTitle += 'Anuales';
-                    break;
-            }
-            chartTitle += ' (Pólizas Emitidas)';
-            
-            // Actualizar título en el DOM
+            // Actualizar título del gráfico
             const chartTitleElem = document.querySelector('.card-container h3');
             if (chartTitleElem) {
-                chartTitleElem.textContent = chartTitle;
+                chartTitleElem.textContent = 'Ventas';
             }
             
             // Recrear el gráfico con los nuevos datos
@@ -765,29 +745,11 @@
             // Usar las fechas de la categoría "all" como referencia
             let chartData = activityDataByCategory;
             
-            // Actualizar título según el período
-            let chartTitle = 'Actividad ';
-            switch(period) {
-                case 'daily':
-                    chartTitle += 'Diaria';
-                    break;
-                case 'weekly':
-                    chartTitle += 'Semanal';
-                    break;
-                case 'monthly':
-                    const displayYear = year || new Date().getFullYear();
-                    chartTitle += `Mensual ${displayYear}`;
-                    break;
-                case 'yearly':
-                    chartTitle += 'Anual';
-                    break;
-            }
-            
-            // Actualizar título en el DOM
+            // Actualizar título simplificado
             const chartContainer = document.getElementById('activityChart').closest('.card-container');
             const chartTitleElem = chartContainer.querySelector('h3');
             if (chartTitleElem) {
-                chartTitleElem.textContent = chartTitle;
+                chartTitleElem.textContent = 'Actividad';
             }
             
             // Recrear el gráfico con los nuevos datos
@@ -841,22 +803,11 @@
                 activityDataByCategory[result.category] = result.data;
             });
             
-            // Formatear fechas para mostrar en el título
-            const formatDisplayDate = (dateStr) => {
-                const [year, month, day] = dateStr.split('-');
-                return `${day}/${month}/${year}`;
-            };
-            
-            // Actualizar título con el rango de fechas
-            const formattedStartDate = formatDisplayDate(startDate);
-            const formattedEndDate = formatDisplayDate(endDate);
-            const chartTitle = `Actividad Diaria ${formattedStartDate} - ${formattedEndDate}`;
-            
-            // Actualizar título en el DOM
+            // Actualizar título simplificado, sin fechas
             const chartContainer = document.getElementById('activityChart').closest('.card-container');
             const chartTitleElem = chartContainer.querySelector('h3');
             if (chartTitleElem) {
-                chartTitleElem.textContent = chartTitle;
+                chartTitleElem.textContent = 'Actividad';
             }
             
             // Recrear el gráfico con los nuevos datos
@@ -1093,21 +1044,10 @@
             // Procesar respuesta
             const data = await response.json();
             
-            // Formatear fechas para mostrar en el título
-            const formatDisplayDate = (dateStr) => {
-                const [year, month, day] = dateStr.split('-');
-                return `${day}/${month}/${year}`;
-            };
-            
-            // Actualizar título con el rango de fechas
-            const formattedStartDate = formatDisplayDate(startDate);
-            const formattedEndDate = formatDisplayDate(endDate);
-            const chartTitle = `Ventas Diarias ${formattedStartDate} - ${formattedEndDate} (Pólizas Emitidas)`;
-            
-            // Actualizar título en el DOM
+            // Actualizar título sin fechas
             const chartTitleElem = document.querySelector('.card-container h3');
             if (chartTitleElem) {
-                chartTitleElem.textContent = chartTitle;
+                chartTitleElem.textContent = 'Ventas';
             }
             
             // Recrear el gráfico con los nuevos datos
