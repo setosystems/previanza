@@ -92,10 +92,10 @@ def create_app():
             
             # Cálculo de crecimiento de pólizas
             current_period_policies = Policy.query.filter(
-                Policy.start_date.between(start_date, end_date)
+                Policy.solicitation_date.between(start_date, end_date)
             ).count()
             previous_period_policies = Policy.query.filter(
-                Policy.start_date.between(previous_start, start_date)
+                Policy.solicitation_date.between(previous_start, start_date)
             ).count()
             policy_growth = (
                 ((current_period_policies - previous_period_policies) / previous_period_policies * 100)
@@ -107,7 +107,7 @@ def create_app():
             new_clients = Client.query.filter(
                 Client.id.in_(
                     db.session.query(Policy.client_id).filter(
-                        Policy.start_date.between(start_date, end_date)
+                        Policy.solicitation_date.between(start_date, end_date)
                     )
                 )
             ).count()
@@ -116,24 +116,42 @@ def create_app():
             today = datetime.now()
             week_start = today - timedelta(days=today.weekday())
             daily_counts = db.session.query(
-                func.date_trunc('day', Policy.start_date).label('day'),
+                func.date_trunc('day', Policy.solicitation_date).label('day'),
                 func.count(Policy.id).label('count')
             ).filter(
-                Policy.start_date >= week_start
+                Policy.solicitation_date >= week_start
+                # Sin filtrar por estado para mostrar todas las pólizas
             ).group_by('day').all()
 
-            weekly_activity = {
-                'L': 0, 'M': 0, 'X': 0, 'J': 0, 'V': 0, 'S': 0, 'D': 0
-            }
+            # Crear diccionario con los días de la semana en orden correcto
+            days_of_week = ['L', 'M', 'X', 'J', 'V', 'S', 'D']
+            weekly_activity_temp = {day: 0 for day in days_of_week}
+            
+            # Llenar con datos reales
             for day_data in daily_counts:
-                weekly_activity[day_data.day.strftime('%a')[0]] = day_data.count
+                day_abbr = day_data.day.strftime('%a')[0]
+                # Corrección para algunos sistemas que pueden devolver abreviaturas en inglés
+                if day_abbr == 'W':  # Wednesday en inglés
+                    day_abbr = 'X'
+                elif day_abbr == 'T':  # Tuesday o Thursday en inglés
+                    weekday = day_data.day.weekday()
+                    day_abbr = 'M' if weekday == 1 else 'J'  # 1 es martes, 3 es jueves
+                
+                if day_abbr in weekly_activity_temp:
+                    weekly_activity_temp[day_abbr] = day_data.count
+            
+            # Formato compatible con el gráfico - asegurar el orden correcto
+            weekly_activity = {
+                'dates': days_of_week,
+                'counts': [weekly_activity_temp[day] for day in days_of_week]
+            }
 
             # Ventas diarias
             daily_sales = db.session.query(
-                func.date_trunc('day', Policy.start_date).label('date'),
+                func.date_trunc('day', Policy.solicitation_date).label('date'),
                 func.sum(Policy.premium).label('total')
             ).filter(
-                Policy.start_date.between(start_date, end_date)
+                Policy.solicitation_date.between(start_date, end_date)
             ).group_by('date').order_by('date').all()
 
             sales_data = {
@@ -152,7 +170,7 @@ def create_app():
                 Policy, 
                 db.and_(
                     Policy.product_id == Product.id,
-                    Policy.start_date.between(start_date, end_date)
+                    Policy.solicitation_date.between(start_date, end_date)
                 )
             ).group_by(Product.id, Product.name, Product.description, Product.image_url)\
             .order_by(func.sum(Policy.premium).desc())\

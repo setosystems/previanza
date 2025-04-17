@@ -8,7 +8,8 @@ from models import (
     Product, 
     db, 
     UserRole, 
-    PaymentStatus
+    PaymentStatus,
+    EmisionStatus
 )
 from sqlalchemy import func, case
 from datetime import datetime, timedelta
@@ -143,40 +144,83 @@ def get_weekly_activity():
     week_start = today - timedelta(days=today.weekday())
     
     daily_counts = db.session.query(
-        func.date_trunc('day', Policy.start_date).label('day'),
+        func.date_trunc('day', Policy.solicitation_date).label('day'),
         func.count(Policy.id).label('count')
     ).filter(
-        Policy.start_date >= week_start
+        Policy.solicitation_date >= week_start
+        # Sin filtro de estado para incluir todas las pólizas
     ).group_by('day').all()
     
-    # Crear diccionario con los días de la semana
-    week_data = {day: 0 for day in ['L', 'M', 'M', 'J', 'V', 'S', 'D']}
+    # Crear diccionario con los días de la semana en orden correcto
+    days_of_week = ['L', 'M', 'X', 'J', 'V', 'S', 'D']
+    week_data = {day: 0 for day in days_of_week}
     
     # Llenar con datos reales
     for day_data in daily_counts:
-        week_data[day_data.day.strftime('%a')[0]] = day_data.count
+        day_abbr = day_data.day.strftime('%a')[0]
+        # Corrección para algunos sistemas que pueden devolver abreviaturas en inglés
+        if day_abbr == 'W':  # Wednesday en inglés
+            day_abbr = 'X'
+        elif day_abbr == 'T':  # Tuesday o Thursday en inglés
+            weekday = day_data.day.weekday()
+            day_abbr = 'M' if weekday == 1 else 'J'  # 1 es martes, 3 es jueves
+        
+        if day_abbr in week_data:
+            week_data[day_abbr] = day_data.count
     
-    return week_data
+    # Asegurar que solo se devuelvan los 7 días de la semana
+    result = {
+        'dates': days_of_week,
+        'counts': [week_data[day] for day in days_of_week]
+    }
+    
+    return result
 
 def get_daily_sales(start_date, end_date):
+    """Obtener ventas diarias (solo pólizas emitidas) para un rango de fechas específico"""
+    # Consulta para obtener los datos reales
     daily_sales = db.session.query(
-        func.date_trunc('day', Policy.start_date).label('date'),
+        func.date_trunc('day', Policy.solicitation_date).label('date'),
         func.sum(Policy.premium).label('total')
     ).filter(
-        Policy.start_date.between(start_date, end_date)
+        Policy.solicitation_date.between(start_date, end_date),
+        Policy.emision_status == 'EMITIDA'  # Filtrar solo pólizas emitidas
     ).group_by('date').order_by('date').all()
     
+    # Crear un diccionario con todos los días del rango
+    date_dict = {}
+    current_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+    while current_date <= end_date:
+        date_str = current_date.strftime('%d/%m')
+        date_dict[date_str] = 0
+        current_date += timedelta(days=1)
+    
+    # Llenar con datos reales
+    for sale in daily_sales:
+        date_str = sale.date.strftime('%d/%m')
+        if date_str in date_dict:
+            date_dict[date_str] = float(sale.total) if sale.total else 0
+    
+    # Convertir a listas para el formato de respuesta
+    dates = list(date_dict.keys())
+    totals = list(date_dict.values())
+    
+    # Ordenar las fechas cronológicamente
+    sorted_items = sorted(zip(dates, totals), key=lambda x: datetime.strptime(x[0], '%d/%m'))
+    dates = [item[0] for item in sorted_items]
+    totals = [item[1] for item in sorted_items]
+    
     return {
-        'dates': [d.date.strftime('%d/%m') for d in daily_sales],
-        'totals': [float(d.total) for d in daily_sales]
+        'dates': dates,
+        'totals': totals
     }
 
 def get_completed_policies(start_date, end_date):
     completed = db.session.query(
-        func.date_trunc('day', Policy.start_date).label('date'),
+        func.date_trunc('day', Policy.solicitation_date).label('date'),
         func.count(Policy.id).label('count')
     ).filter(
-        Policy.start_date.between(start_date, end_date),
+        Policy.solicitation_date.between(start_date, end_date),
         Policy.emision_status == 'EMITIDA'
     ).group_by('date').order_by('date').all()
     
@@ -223,13 +267,13 @@ def sales_report():
 
         # Construir la consulta base
         query = db.session.query(
-            func.date_trunc('day', Policy.start_date).label('date'),
+            func.date_trunc('day', Policy.solicitation_date).label('date'),
             func.sum(Policy.premium).label('total_sales'),
             func.count(Policy.id).label('policy_count')
         )
 
         # Aplicar filtros
-        query = query.filter(Policy.start_date.between(start_date, end_date))
+        query = query.filter(Policy.solicitation_date.between(start_date, end_date))
 
         # Si es agente, filtrar solo sus pólizas
         if current_user.role == UserRole.AGENTE:
@@ -237,7 +281,7 @@ def sales_report():
 
         # Agrupar y ordenar
         sales = query.group_by(
-            func.date_trunc('day', Policy.start_date)
+            func.date_trunc('day', Policy.solicitation_date)
         ).order_by('date').all()
 
         # Calcular totales
@@ -913,3 +957,403 @@ def update_multiple_commission_status():
         logging.error(f"Error actualizando estados de comisiones: {str(e)}")
     
     return redirect(url_for('reports.agent_commission_details', agent_id=agent_id))
+
+@bp.route('/api/sales_data')
+@login_required
+def sales_data_api():
+    """
+    API para obtener datos de ventas filtrados por período.
+    Parámetros: 
+    - period: 'daily', 'weekly', 'monthly', 'yearly'
+    - year: año específico para vista mensual (opcional)
+    - start_date: fecha de inicio para vista personalizada (opcional)
+    - end_date: fecha de fin para vista personalizada (opcional)
+    """
+    period = request.args.get('period', 'daily')
+    year = request.args.get('year', datetime.now().year)
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    
+    logging.info(f"sales_data_api - Parámetros: period={period}, year={year}, start_date={start_date}, end_date={end_date}")
+    
+    try:
+        # Si se proporcionan fechas de inicio y fin, usarlas para filtrar datos diarios
+        if start_date and end_date and period == 'daily':
+            try:
+                logging.info(f"Procesando rango personalizado: {start_date} a {end_date}")
+                start_date_obj = datetime.strptime(start_date, '%Y-%m-%d')
+                end_date_obj = datetime.strptime(end_date, '%Y-%m-%d')
+                # Ajustar end_date para incluir todo el día
+                end_date_obj = end_date_obj.replace(hour=23, minute=59, second=59)
+                
+                result = get_daily_sales(start_date_obj, end_date_obj)
+                logging.info(f"Resultado rango personalizado: {len(result['dates'])} días")
+                return jsonify(result)
+            except ValueError as e:
+                logging.error(f"Error de formato de fecha: {str(e)}")
+                return jsonify({'error': 'Formato de fecha incorrecto'}), 400
+                
+        # Si no hay fechas personalizadas, seguir con la lógica existente
+        year = int(year)
+        if period == 'daily':
+            # Datos diarios de los últimos 30 días
+            end_date = datetime.now()
+            start_date = end_date - timedelta(days=30)
+            return jsonify(get_daily_sales(start_date, end_date))
+            
+        elif period == 'weekly':
+            # Datos semanales de los últimos 3 meses
+            end_date = datetime.now()
+            start_date = end_date - timedelta(days=90)
+            return jsonify(get_weekly_sales(start_date, end_date))
+            
+        elif period == 'monthly':
+            # Datos mensuales del año seleccionado
+            return jsonify(get_monthly_sales(year))
+            
+        elif period == 'yearly':
+            # Datos anuales de los últimos 5 años
+            end_year = datetime.now().year
+            start_year = end_year - 5
+            return jsonify(get_yearly_sales(start_year, end_year))
+            
+        else:
+            # Período no válido
+            return jsonify({'error': 'Período no válido'}), 400
+    
+    except Exception as e:
+        # Error al procesar la solicitud
+        logging.error(f"Error en sales_data_api: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+def get_weekly_sales(start_date, end_date):
+    """Obtener ventas agrupadas por semana"""
+    # Consulta SQL para agrupar por semana
+    weekly_sales = db.session.query(
+        func.date_trunc('week', Policy.solicitation_date).label('week_start'),
+        func.sum(Policy.premium).label('total')
+    ).filter(
+        Policy.solicitation_date.between(start_date, end_date),
+        Policy.emision_status == 'EMITIDA'  # Filtrar solo pólizas emitidas
+    ).group_by('week_start').order_by('week_start').all()
+    
+    # Formatear datos para la respuesta
+    return {
+        'dates': [d.week_start.strftime('%d/%m/%Y') for d in weekly_sales],
+        'totals': [float(d.total) if d.total else 0 for d in weekly_sales]
+    }
+
+def get_monthly_sales(year):
+    """Obtener ventas mensuales para un año específico"""
+    try:
+        year = int(year)
+    except (TypeError, ValueError):
+        year = datetime.now().year
+        
+    # Fechas de inicio y fin del año
+    start_date = datetime(year, 1, 1)
+    end_date = datetime(year, 12, 31, 23, 59, 59)
+    
+    # Consulta SQL para agrupar por mes
+    monthly_sales = db.session.query(
+        func.date_trunc('month', Policy.solicitation_date).label('month_start'),
+        func.sum(Policy.premium).label('total')
+    ).filter(
+        Policy.solicitation_date.between(start_date, end_date),
+        Policy.emision_status == 'EMITIDA'  # Filtrar solo pólizas emitidas
+    ).group_by('month_start').order_by('month_start').all()
+    
+    # Nombres de meses en español
+    month_names = [
+        'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    ]
+    
+    # Inicializar array con todos los meses (incluso los que no tienen datos)
+    results = {
+        'dates': month_names,
+        'totals': [0] * 12
+    }
+    
+    # Llenar con datos reales
+    for sale in monthly_sales:
+        if sale.month_start and sale.total:
+            month_idx = sale.month_start.month - 1  # Índice 0-based
+            if 0 <= month_idx < 12:  # Asegurarse de que el índice es válido
+                results['totals'][month_idx] = float(sale.total)
+    
+    return results
+
+def get_yearly_sales(start_year, end_year):
+    """Obtener ventas anuales para un rango de años"""
+    yearly_sales = []
+    
+    for year in range(start_year, end_year + 1):
+        # Fechas de inicio y fin del año
+        start_date = datetime(year, 1, 1)
+        end_date = datetime(year, 12, 31, 23, 59, 59)
+        
+        # Consulta SQL para el año
+        total = db.session.query(
+            func.sum(Policy.premium)
+        ).filter(
+            Policy.solicitation_date.between(start_date, end_date),
+            Policy.emision_status == 'EMITIDA'  # Filtrar solo pólizas emitidas
+        ).scalar() or 0
+        
+        yearly_sales.append({
+            'year': year,
+            'total': float(total)
+        })
+    
+    # Formatear datos para la respuesta
+    return {
+        'dates': [str(sale['year']) for sale in yearly_sales],
+        'totals': [sale['total'] for sale in yearly_sales]
+    }
+
+@bp.route('/api/activity_data')
+@login_required
+def activity_data_api():
+    """
+    API para obtener datos de actividad filtrados por período.
+    Parámetros: 
+    - period: 'daily', 'weekly', 'monthly', 'yearly'
+    - year: año específico para vista mensual (opcional)
+    - start_date: fecha de inicio para vista personalizada (opcional)
+    - end_date: fecha de fin para vista personalizada (opcional)
+    - category: categoría de pólizas ('all', 'emitidas', 'anuladas', 'pendientes', 'caducadas')
+    """
+    period = request.args.get('period', 'daily')
+    year = request.args.get('year', datetime.now().year)
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    category = request.args.get('category', 'all')
+    
+    logging.info(f"activity_data_api - Parámetros: period={period}, year={year}, start_date={start_date}, end_date={end_date}, category={category}")
+    
+    try:
+        # Si se proporcionan fechas de inicio y fin, usarlas para filtrar datos diarios
+        if start_date and end_date and period == 'daily':
+            try:
+                logging.info(f"Procesando rango personalizado: {start_date} a {end_date}")
+                start_date_obj = datetime.strptime(start_date, '%Y-%m-%d')
+                end_date_obj = datetime.strptime(end_date, '%Y-%m-%d')
+                # Ajustar end_date para incluir todo el día
+                end_date_obj = end_date_obj.replace(hour=23, minute=59, second=59)
+                
+                result = get_daily_activity_by_category(start_date_obj, end_date_obj, category)
+                logging.info(f"Resultado rango personalizado ({category}): {len(result['dates'])} días")
+                return jsonify(result)
+            except ValueError as e:
+                logging.error(f"Error de formato de fecha: {str(e)}")
+                return jsonify({'error': 'Formato de fecha incorrecto'}), 400
+        
+        year = int(year)
+        if period == 'daily':
+            # Datos diarios de los últimos 30 días
+            end_date = datetime.now()
+            start_date = end_date - timedelta(days=30)
+            return jsonify(get_daily_activity_by_category(start_date, end_date, category))
+            
+        elif period == 'weekly':
+            # Datos semanales de los últimos 3 meses
+            end_date = datetime.now()
+            start_date = end_date - timedelta(days=90)
+            return jsonify(get_weekly_activity_by_category(start_date, end_date, category))
+            
+        elif period == 'monthly':
+            # Datos mensuales del año seleccionado
+            return jsonify(get_monthly_activity_by_category(year, category))
+            
+        elif period == 'yearly':
+            # Datos anuales de los últimos 5 años
+            end_year = datetime.now().year
+            start_year = end_year - 5
+            return jsonify(get_yearly_activity_by_category(start_year, end_year, category))
+            
+        else:
+            # Período no válido
+            return jsonify({'error': 'Período no válido'}), 400
+    
+    except Exception as e:
+        # Error al procesar la solicitud
+        logging.error(f"Error en activity_data_api: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+def get_daily_activity_by_category(start_date, end_date, category='all'):
+    """Obtener actividad diaria filtrada por categoría para un rango de fechas específico"""
+    
+    # Consulta base
+    query = db.session.query(
+        func.date_trunc('day', Policy.solicitation_date).label('date'),
+        func.count(Policy.id).label('count')
+    ).filter(
+        Policy.solicitation_date.between(start_date, end_date)
+    )
+    
+    # Aplicar filtros según categoría
+    if category == 'emitidas':
+        query = query.filter(Policy.emision_status == EmisionStatus.EMITIDA)
+    elif category == 'anuladas':
+        query = query.filter(Policy.emision_status == EmisionStatus.ANULADA)
+    elif category == 'pendientes':
+        query = query.filter(Policy.emision_status == EmisionStatus.PENDIENTE)
+    elif category == 'caducadas':
+        query = query.filter(Policy.emision_status == EmisionStatus.CADUCADA)
+    # Para 'all' no se aplica filtro adicional
+    
+    # Agrupar y ordenar
+    daily_activity = query.group_by('date').order_by('date').all()
+    
+    # Crear un diccionario con todos los días del rango
+    date_dict = {}
+    current_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+    while current_date <= end_date:
+        date_str = current_date.strftime('%d/%m')
+        date_dict[date_str] = 0
+        current_date += timedelta(days=1)
+    
+    # Llenar con datos reales
+    for activity in daily_activity:
+        date_str = activity.date.strftime('%d/%m')
+        if date_str in date_dict:
+            date_dict[date_str] = activity.count
+    
+    # Convertir a listas para el formato de respuesta
+    dates = list(date_dict.keys())
+    counts = list(date_dict.values())
+    
+    # Ordenar las fechas cronológicamente
+    sorted_items = sorted(zip(dates, counts), key=lambda x: datetime.strptime(x[0], '%d/%m'))
+    dates = [item[0] for item in sorted_items]
+    counts = [item[1] for item in sorted_items]
+    
+    return {
+        'dates': dates,
+        'counts': counts
+    }
+
+def get_weekly_activity_by_category(start_date, end_date, category='all'):
+    """Obtener actividad agrupada por semana filtrada por categoría"""
+    
+    # Consulta base
+    query = db.session.query(
+        func.date_trunc('week', Policy.solicitation_date).label('week_start'),
+        func.count(Policy.id).label('count')
+    ).filter(
+        Policy.solicitation_date.between(start_date, end_date)
+    )
+    
+    # Aplicar filtros según categoría
+    if category == 'emitidas':
+        query = query.filter(Policy.emision_status == EmisionStatus.EMITIDA)
+    elif category == 'anuladas':
+        query = query.filter(Policy.emision_status == EmisionStatus.ANULADA)
+    elif category == 'pendientes':
+        query = query.filter(Policy.emision_status == EmisionStatus.PENDIENTE)
+    elif category == 'caducadas':
+        query = query.filter(Policy.emision_status == EmisionStatus.CADUCADA)
+    # Para 'all' no se aplica filtro adicional
+    
+    # Agrupar y ordenar
+    weekly_activity = query.group_by('week_start').order_by('week_start').all()
+    
+    return {
+        'dates': [d.week_start.strftime('%d/%m/%Y') for d in weekly_activity],
+        'counts': [d.count for d in weekly_activity]
+    }
+
+def get_monthly_activity_by_category(year, category='all'):
+    """Obtener actividad mensual para un año específico filtrada por categoría"""
+    try:
+        year = int(year)
+    except (TypeError, ValueError):
+        year = datetime.now().year
+        
+    # Fechas de inicio y fin del año
+    start_date = datetime(year, 1, 1)
+    end_date = datetime(year, 12, 31, 23, 59, 59)
+    
+    # Consulta base
+    query = db.session.query(
+        func.date_trunc('month', Policy.solicitation_date).label('month_start'),
+        func.count(Policy.id).label('count')
+    ).filter(
+        Policy.solicitation_date.between(start_date, end_date)
+    )
+    
+    # Aplicar filtros según categoría
+    if category == 'emitidas':
+        query = query.filter(Policy.emision_status == EmisionStatus.EMITIDA)
+    elif category == 'anuladas':
+        query = query.filter(Policy.emision_status == EmisionStatus.ANULADA)
+    elif category == 'pendientes':
+        query = query.filter(Policy.emision_status == EmisionStatus.PENDIENTE)
+    elif category == 'caducadas':
+        query = query.filter(Policy.emision_status == EmisionStatus.CADUCADA)
+    # Para 'all' no se aplica filtro adicional
+    
+    # Agrupar y ordenar
+    monthly_activity = query.group_by('month_start').order_by('month_start').all()
+    
+    # Nombres de meses en español
+    month_names = [
+        'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    ]
+    
+    # Inicializar array con todos los meses (incluso los que no tienen datos)
+    results = {
+        'dates': month_names,
+        'counts': [0] * 12
+    }
+    
+    # Llenar con datos reales
+    for activity in monthly_activity:
+        if activity.month_start and activity.count:
+            month_idx = activity.month_start.month - 1  # Índice 0-based
+            if 0 <= month_idx < 12:  # Asegurarse de que el índice es válido
+                results['counts'][month_idx] = activity.count
+    
+    return results
+
+def get_yearly_activity_by_category(start_year, end_year, category='all'):
+    """Obtener actividad anual para un rango de años filtrada por categoría"""
+    yearly_activity = []
+    
+    for year in range(start_year, end_year + 1):
+        # Fechas de inicio y fin del año
+        start_date = datetime(year, 1, 1)
+        end_date = datetime(year, 12, 31, 23, 59, 59)
+        
+        # Consulta base
+        query = db.session.query(
+            func.count(Policy.id)
+        ).filter(
+            Policy.solicitation_date.between(start_date, end_date)
+        )
+        
+        # Aplicar filtros según categoría
+        if category == 'emitidas':
+            query = query.filter(Policy.emision_status == EmisionStatus.EMITIDA)
+        elif category == 'anuladas':
+            query = query.filter(Policy.emision_status == EmisionStatus.ANULADA)
+        elif category == 'pendientes':
+            query = query.filter(Policy.emision_status == EmisionStatus.PENDIENTE)
+        elif category == 'caducadas':
+            query = query.filter(Policy.emision_status == EmisionStatus.CADUCADA)
+        # Para 'all' no se aplica filtro adicional
+        
+        count = query.scalar() or 0
+        
+        yearly_activity.append({
+            'year': year,
+            'count': count
+        })
+    
+    # Formatear datos para la respuesta
+    return {
+        'dates': [str(activity['year']) for activity in yearly_activity],
+        'counts': [activity['count'] for activity in yearly_activity]
+    }

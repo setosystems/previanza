@@ -322,13 +322,15 @@ class EmisionStatus(enum.Enum):
     PENDIENTE = "Pendiente"
     EMITIDA = "Emitida"
     CADUCADA = "Caducada"
-    ANULADA = "Anulada"
+    ANULADA = "Negada"
+    REENVIADA = "Reenviada"
+    REQUERIMIENTO = "Req"
     OTROS = "Otros"
 
 class PaymentStatus(enum.Enum):
     PENDIENTE = "Pendiente"
     PAGADO = "Pagado"
-    ABONADO = "Abonado"
+    FACTURADO = "Facturado"
     REEMBOLSADO = "Reembolsado"
     OTROS = "Otros"
 

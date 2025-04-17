@@ -76,6 +76,143 @@
                         {% endif %}
                     </div>
                 </div>
+                
+                <!-- Filtros de fechas -->
+                <div class="flex flex-col md:flex-row gap-4 mt-4">
+                    <!-- Fecha Inicio -->
+                    <div class="flex-1">
+                        <label for="start_date_from" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha Inicio</label>
+                        <div class="flex gap-2">
+                            <div class="relative flex-1">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <span class="material-symbols-outlined text-gray-400 dark:text-gray-500">event</span>
+                                </span>
+                                <input type="date" 
+                                       id="start_date_from" 
+                                       name="start_date_from" 
+                                       class="form-input h-10 pl-10 w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150" 
+                                       value="{{ request.args.get('start_date_from', '') }}"
+                                       placeholder="Desde">
+                            </div>
+                            <div class="relative flex-1">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <span class="material-symbols-outlined text-gray-400 dark:text-gray-500">event</span>
+                                </span>
+                                <input type="date" 
+                                       id="start_date_to" 
+                                       name="start_date_to" 
+                                       class="form-input h-10 pl-10 w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150" 
+                                       value="{{ request.args.get('start_date_to', '') }}"
+                                       placeholder="Hasta">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Fecha Fin -->
+                    <div class="flex-1">
+                        <label for="end_date_from" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha Fin</label>
+                        <div class="flex gap-2">
+                            <div class="relative flex-1">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <span class="material-symbols-outlined text-gray-400 dark:text-gray-500">event</span>
+                                </span>
+                                <input type="date" 
+                                       id="end_date_from" 
+                                       name="end_date_from" 
+                                       class="form-input h-10 pl-10 w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150" 
+                                       value="{{ request.args.get('end_date_from', '') }}"
+                                       placeholder="Desde">
+                            </div>
+                            <div class="relative flex-1">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <span class="material-symbols-outlined text-gray-400 dark:text-gray-500">event</span>
+                                </span>
+                                <input type="date" 
+                                       id="end_date_to" 
+                                       name="end_date_to" 
+                                       class="form-input h-10 pl-10 w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150" 
+                                       value="{{ request.args.get('end_date_to', '') }}"
+                                       placeholder="Hasta">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Fecha Solicitud -->
+                    <div class="flex-1">
+                        <label for="solicitation_date_from" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fecha Solicitud</label>
+                        <div class="flex gap-2">
+                            <div class="relative flex-1">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <span class="material-symbols-outlined text-gray-400 dark:text-gray-500">event</span>
+                                </span>
+                                <input type="date" 
+                                       id="solicitation_date_from" 
+                                       name="solicitation_date_from" 
+                                       class="form-input h-10 pl-10 w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150" 
+                                       value="{{ request.args.get('solicitation_date_from', '') }}"
+                                       placeholder="Desde">
+                            </div>
+                            <div class="relative flex-1">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <span class="material-symbols-outlined text-gray-400 dark:text-gray-500">event</span>
+                                </span>
+                                <input type="date" 
+                                       id="solicitation_date_to" 
+                                       name="solicitation_date_to" 
+                                       class="form-input h-10 pl-10 w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150" 
+                                       value="{{ request.args.get('solicitation_date_to', '') }}"
+                                       placeholder="Hasta">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fila adicional para filtros de estado -->
+                <div class="flex flex-col md:flex-row gap-4 mt-4">
+                    <!-- Estado de Emisión -->
+                    <div class="flex-1">
+                        <label for="emision_status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Estado de Emisión</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="material-symbols-outlined text-gray-400 dark:text-gray-500">pending</span>
+                            </span>
+                            <select id="emision_status" 
+                                    name="emision_status" 
+                                    class="form-select h-10 pl-10 w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150">
+                                <option value="">Todos</option>
+                                {% for status in EmisionStatus %}
+                                <option value="{{ status.name }}" {% if request.args.get('emision_status') == status.name %}selected{% endif %}>
+                                    {{ status.value }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Estado de Pago -->
+                    <div class="flex-1">
+                        <label for="payment_status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Estado de Pago</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="material-symbols-outlined text-gray-400 dark:text-gray-500">payments</span>
+                            </span>
+                            <select id="payment_status" 
+                                    name="payment_status" 
+                                    class="form-select h-10 pl-10 w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150">
+                                <option value="">Todos</option>
+                                {% for status in PaymentStatus %}
+                                <option value="{{ status.name }}" {% if request.args.get('payment_status') == status.name %}selected{% endif %}>
+                                    {{ status.value }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="flex-1">
+                        <!-- Espacio en blanco para mantener la alineación -->
+                    </div>
+                </div>
             </form>
         </div>
     </div>
@@ -88,16 +225,230 @@
                 <thead class="bg-gray-50 dark:bg-gray-700">
                     <tr>
                         <th class="table-header text-gray-600 dark:text-gray-300 first:rounded-tl-xl last:rounded-tr-xl">
-                            Número de Póliza
+                            <a href="{{ url_for('policies.list_policies', 
+                                sort_by='policy_number', 
+                                sort_order='asc' if sort_by != 'policy_number' or sort_order == 'desc' else 'desc', 
+                                policy_number=request.args.get('policy_number', ''), 
+                                client_name=request.args.get('client_name', ''), 
+                                product_name=request.args.get('product_name', ''), 
+                                start_date_from=request.args.get('start_date_from', ''),
+                                start_date_to=request.args.get('start_date_to', ''),
+                                end_date_from=request.args.get('end_date_from', ''),
+                                end_date_to=request.args.get('end_date_to', ''),
+                                solicitation_date_from=request.args.get('solicitation_date_from', ''),
+                                solicitation_date_to=request.args.get('solicitation_date_to', ''),
+                                emision_status=request.args.get('emision_status', ''),
+                                payment_status=request.args.get('payment_status', ''),
+                                page=request.args.get('page', 1), 
+                                per_page=request.args.get('per_page', 10)) }}" class="flex items-center justify-between hover:text-primary-600 dark:hover:text-primary-400">
+                                Número de Póliza
+                                {% if sort_by == 'policy_number' %}
+                                    <span class="material-symbols-outlined text-xs ml-1">{{ 'arrow_upward' if sort_order == 'asc' else 'arrow_downward' }}</span>
+                                {% else %}
+                                    <span class="material-symbols-outlined text-xs ml-1">sort</span>
+                                {% endif %}
+                            </a>
                         </th>
-                        <th class="table-header text-gray-600 dark:text-gray-300">Cliente</th>
-                        <th class="table-header text-gray-600 dark:text-gray-300">Producto</th>
-                        <th class="table-header text-gray-600 dark:text-gray-300 text-right">Prima</th>
-                        <th class="table-header text-gray-600 dark:text-gray-300 text-center">Estado Emisión</th>
-                        <th class="table-header text-gray-600 dark:text-gray-300 text-center">Estado Pago</th>
-                        <th class="table-header text-gray-600 dark:text-gray-300 text-center">Fecha Inicio</th>
-                        <th class="table-header text-gray-600 dark:text-gray-300 text-center">Fecha Fin</th>
-                        <th class="table-header text-gray-600 dark:text-gray-300 text-center">Fecha Solicitud</th>
+                        <th class="table-header text-gray-600 dark:text-gray-300">
+                            <a href="{{ url_for('policies.list_policies', 
+                                sort_by='client', 
+                                sort_order='asc' if sort_by != 'client' or sort_order == 'desc' else 'desc', 
+                                policy_number=request.args.get('policy_number', ''), 
+                                client_name=request.args.get('client_name', ''), 
+                                product_name=request.args.get('product_name', ''), 
+                                start_date_from=request.args.get('start_date_from', ''),
+                                start_date_to=request.args.get('start_date_to', ''),
+                                end_date_from=request.args.get('end_date_from', ''),
+                                end_date_to=request.args.get('end_date_to', ''),
+                                solicitation_date_from=request.args.get('solicitation_date_from', ''),
+                                solicitation_date_to=request.args.get('solicitation_date_to', ''),
+                                emision_status=request.args.get('emision_status', ''),
+                                payment_status=request.args.get('payment_status', ''),
+                                page=request.args.get('page', 1), 
+                                per_page=request.args.get('per_page', 10)) }}" class="flex items-center justify-between hover:text-primary-600 dark:hover:text-primary-400">
+                                Cliente
+                                {% if sort_by == 'client' %}
+                                    <span class="material-symbols-outlined text-xs ml-1">{{ 'arrow_upward' if sort_order == 'asc' else 'arrow_downward' }}</span>
+                                {% else %}
+                                    <span class="material-symbols-outlined text-xs ml-1">sort</span>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th class="table-header text-gray-600 dark:text-gray-300">
+                            <a href="{{ url_for('policies.list_policies', 
+                                sort_by='product', 
+                                sort_order='asc' if sort_by != 'product' or sort_order == 'desc' else 'desc', 
+                                policy_number=request.args.get('policy_number', ''), 
+                                client_name=request.args.get('client_name', ''), 
+                                product_name=request.args.get('product_name', ''), 
+                                start_date_from=request.args.get('start_date_from', ''),
+                                start_date_to=request.args.get('start_date_to', ''),
+                                end_date_from=request.args.get('end_date_from', ''),
+                                end_date_to=request.args.get('end_date_to', ''),
+                                solicitation_date_from=request.args.get('solicitation_date_from', ''),
+                                solicitation_date_to=request.args.get('solicitation_date_to', ''),
+                                emision_status=request.args.get('emision_status', ''),
+                                payment_status=request.args.get('payment_status', ''),
+                                page=request.args.get('page', 1), 
+                                per_page=request.args.get('per_page', 10)) }}" class="flex items-center justify-between hover:text-primary-600 dark:hover:text-primary-400">
+                                Producto
+                                {% if sort_by == 'product' %}
+                                    <span class="material-symbols-outlined text-xs ml-1">{{ 'arrow_upward' if sort_order == 'asc' else 'arrow_downward' }}</span>
+                                {% else %}
+                                    <span class="material-symbols-outlined text-xs ml-1">sort</span>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th class="table-header text-gray-600 dark:text-gray-300 text-right">
+                            <a href="{{ url_for('policies.list_policies', 
+                                sort_by='premium', 
+                                sort_order='asc' if sort_by != 'premium' or sort_order == 'desc' else 'desc', 
+                                policy_number=request.args.get('policy_number', ''), 
+                                client_name=request.args.get('client_name', ''), 
+                                product_name=request.args.get('product_name', ''), 
+                                start_date_from=request.args.get('start_date_from', ''),
+                                start_date_to=request.args.get('start_date_to', ''),
+                                end_date_from=request.args.get('end_date_from', ''),
+                                end_date_to=request.args.get('end_date_to', ''),
+                                solicitation_date_from=request.args.get('solicitation_date_from', ''),
+                                solicitation_date_to=request.args.get('solicitation_date_to', ''),
+                                emision_status=request.args.get('emision_status', ''),
+                                payment_status=request.args.get('payment_status', ''),
+                                page=request.args.get('page', 1), 
+                                per_page=request.args.get('per_page', 10)) }}" class="flex items-center justify-end hover:text-primary-600 dark:hover:text-primary-400">
+                                Prima
+                                {% if sort_by == 'premium' %}
+                                    <span class="material-symbols-outlined text-xs ml-1">{{ 'arrow_upward' if sort_order == 'asc' else 'arrow_downward' }}</span>
+                                {% else %}
+                                    <span class="material-symbols-outlined text-xs ml-1">sort</span>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th class="table-header text-gray-600 dark:text-gray-300 text-center">
+                            <a href="{{ url_for('policies.list_policies', 
+                                sort_by='emision_status', 
+                                sort_order='asc' if sort_by != 'emision_status' or sort_order == 'desc' else 'desc', 
+                                policy_number=request.args.get('policy_number', ''), 
+                                client_name=request.args.get('client_name', ''), 
+                                product_name=request.args.get('product_name', ''), 
+                                start_date_from=request.args.get('start_date_from', ''),
+                                start_date_to=request.args.get('start_date_to', ''),
+                                end_date_from=request.args.get('end_date_from', ''),
+                                end_date_to=request.args.get('end_date_to', ''),
+                                solicitation_date_from=request.args.get('solicitation_date_from', ''),
+                                solicitation_date_to=request.args.get('solicitation_date_to', ''),
+                                emision_status=request.args.get('emision_status', ''),
+                                payment_status=request.args.get('payment_status', ''),
+                                page=request.args.get('page', 1), 
+                                per_page=request.args.get('per_page', 10)) }}" class="flex items-center justify-center hover:text-primary-600 dark:hover:text-primary-400">
+                                Estado Emisión
+                                {% if sort_by == 'emision_status' %}
+                                    <span class="material-symbols-outlined text-xs ml-1">{{ 'arrow_upward' if sort_order == 'asc' else 'arrow_downward' }}</span>
+                                {% else %}
+                                    <span class="material-symbols-outlined text-xs ml-1">sort</span>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th class="table-header text-gray-600 dark:text-gray-300 text-center">
+                            <a href="{{ url_for('policies.list_policies', 
+                                sort_by='payment_status', 
+                                sort_order='asc' if sort_by != 'payment_status' or sort_order == 'desc' else 'desc', 
+                                policy_number=request.args.get('policy_number', ''), 
+                                client_name=request.args.get('client_name', ''), 
+                                product_name=request.args.get('product_name', ''), 
+                                start_date_from=request.args.get('start_date_from', ''),
+                                start_date_to=request.args.get('start_date_to', ''),
+                                end_date_from=request.args.get('end_date_from', ''),
+                                end_date_to=request.args.get('end_date_to', ''),
+                                solicitation_date_from=request.args.get('solicitation_date_from', ''),
+                                solicitation_date_to=request.args.get('solicitation_date_to', ''),
+                                emision_status=request.args.get('emision_status', ''),
+                                payment_status=request.args.get('payment_status', ''),
+                                page=request.args.get('page', 1), 
+                                per_page=request.args.get('per_page', 10)) }}" class="flex items-center justify-center hover:text-primary-600 dark:hover:text-primary-400">
+                                Estado Pago
+                                {% if sort_by == 'payment_status' %}
+                                    <span class="material-symbols-outlined text-xs ml-1">{{ 'arrow_upward' if sort_order == 'asc' else 'arrow_downward' }}</span>
+                                {% else %}
+                                    <span class="material-symbols-outlined text-xs ml-1">sort</span>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th class="table-header text-gray-600 dark:text-gray-300 text-center">
+                            <a href="{{ url_for('policies.list_policies', 
+                                sort_by='start_date', 
+                                sort_order='asc' if sort_by != 'start_date' or sort_order == 'desc' else 'desc', 
+                                policy_number=request.args.get('policy_number', ''), 
+                                client_name=request.args.get('client_name', ''), 
+                                product_name=request.args.get('product_name', ''), 
+                                start_date_from=request.args.get('start_date_from', ''),
+                                start_date_to=request.args.get('start_date_to', ''),
+                                end_date_from=request.args.get('end_date_from', ''),
+                                end_date_to=request.args.get('end_date_to', ''),
+                                solicitation_date_from=request.args.get('solicitation_date_from', ''),
+                                solicitation_date_to=request.args.get('solicitation_date_to', ''),
+                                emision_status=request.args.get('emision_status', ''),
+                                payment_status=request.args.get('payment_status', ''),
+                                page=request.args.get('page', 1), 
+                                per_page=request.args.get('per_page', 10)) }}" class="flex items-center justify-center hover:text-primary-600 dark:hover:text-primary-400">
+                                Fecha Inicio
+                                {% if sort_by == 'start_date' %}
+                                    <span class="material-symbols-outlined text-xs ml-1">{{ 'arrow_upward' if sort_order == 'asc' else 'arrow_downward' }}</span>
+                                {% else %}
+                                    <span class="material-symbols-outlined text-xs ml-1">sort</span>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th class="table-header text-gray-600 dark:text-gray-300 text-center">
+                            <a href="{{ url_for('policies.list_policies', 
+                                sort_by='end_date', 
+                                sort_order='asc' if sort_by != 'end_date' or sort_order == 'desc' else 'desc', 
+                                policy_number=request.args.get('policy_number', ''), 
+                                client_name=request.args.get('client_name', ''), 
+                                product_name=request.args.get('product_name', ''), 
+                                start_date_from=request.args.get('start_date_from', ''),
+                                start_date_to=request.args.get('start_date_to', ''),
+                                end_date_from=request.args.get('end_date_from', ''),
+                                end_date_to=request.args.get('end_date_to', ''),
+                                solicitation_date_from=request.args.get('solicitation_date_from', ''),
+                                solicitation_date_to=request.args.get('solicitation_date_to', ''),
+                                emision_status=request.args.get('emision_status', ''),
+                                payment_status=request.args.get('payment_status', ''),
+                                page=request.args.get('page', 1), 
+                                per_page=request.args.get('per_page', 10)) }}" class="flex items-center justify-center hover:text-primary-600 dark:hover:text-primary-400">
+                                Fecha Fin
+                                {% if sort_by == 'end_date' %}
+                                    <span class="material-symbols-outlined text-xs ml-1">{{ 'arrow_upward' if sort_order == 'asc' else 'arrow_downward' }}</span>
+                                {% else %}
+                                    <span class="material-symbols-outlined text-xs ml-1">sort</span>
+                                {% endif %}
+                            </a>
+                        </th>
+                        <th class="table-header text-gray-600 dark:text-gray-300 text-center">
+                            <a href="{{ url_for('policies.list_policies', 
+                                sort_by='solicitation_date', 
+                                sort_order='asc' if sort_by != 'solicitation_date' or sort_order == 'desc' else 'desc', 
+                                policy_number=request.args.get('policy_number', ''), 
+                                client_name=request.args.get('client_name', ''), 
+                                product_name=request.args.get('product_name', ''), 
+                                start_date_from=request.args.get('start_date_from', ''),
+                                start_date_to=request.args.get('start_date_to', ''),
+                                end_date_from=request.args.get('end_date_from', ''),
+                                end_date_to=request.args.get('end_date_to', ''),
+                                solicitation_date_from=request.args.get('solicitation_date_from', ''),
+                                solicitation_date_to=request.args.get('solicitation_date_to', ''),
+                                emision_status=request.args.get('emision_status', ''),
+                                payment_status=request.args.get('payment_status', ''),
+                                page=request.args.get('page', 1), 
+                                per_page=request.args.get('per_page', 10)) }}" class="flex items-center justify-center hover:text-primary-600 dark:hover:text-primary-400">
+                                Fecha Solicitud
+                                {% if sort_by == 'solicitation_date' %}
+                                    <span class="material-symbols-outlined text-xs ml-1">{{ 'arrow_upward' if sort_order == 'asc' else 'arrow_downward' }}</span>
+                                {% else %}
+                                    <span class="material-symbols-outlined text-xs ml-1">sort</span>
+                                {% endif %}
+                            </a>
+                        </th>
                         <th class="table-header text-gray-600 dark:text-gray-300 text-center">Acciones</th>
                     </tr>
                 </thead>
@@ -261,7 +612,7 @@
                                 onchange="window.location.href=this.value"
                                 class="form-select w-20 rounded-md text-sm border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 bg-white dark:bg-gray-700 focus:border-primary-500 focus:ring-primary-500 transition-colors">
                             {% for count in [10, 25, 50, 100] %}
-                            <option value="{{ url_for('policies.list_policies', per_page=count) }}"
+                            <option value="{{ url_for('policies.list_policies', per_page=count, sort_by=sort_by, sort_order=sort_order, policy_number=request.args.get('policy_number', ''), client_name=request.args.get('client_name', ''), product_name=request.args.get('product_name', ''), start_date_from=request.args.get('start_date_from', ''), start_date_to=request.args.get('start_date_to', ''), end_date_from=request.args.get('end_date_from', ''), end_date_to=request.args.get('end_date_to', ''), solicitation_date_from=request.args.get('solicitation_date_from', ''), solicitation_date_to=request.args.get('solicitation_date_to', ''), emision_status=request.args.get('emision_status', ''), payment_status=request.args.get('payment_status', '')) }}"
                                     {% if request.args.get('per_page', '10')|int == count %}selected{% endif %}>
                                 {{ count }}
                             </option>
@@ -286,16 +637,16 @@
                 <!-- Paginación -->
                 <nav class="flex items-center justify-center sm:justify-end gap-1">
                     {% if pagination.has_prev %}
-                    <a href="{{ url_for('policies.list_policies', page=pagination.prev_num, per_page=request.args.get('per_page', 10)) }}"
+                    <a href="{{ url_for('policies.list_policies', page=pagination.prev_num, per_page=pagination.per_page, sort_by=sort_by, sort_order=sort_order, policy_number=request.args.get('policy_number', ''), client_name=request.args.get('client_name', ''), product_name=request.args.get('product_name', ''), start_date_from=request.args.get('start_date_from', ''), start_date_to=request.args.get('start_date_to', ''), end_date_from=request.args.get('end_date_from', ''), end_date_to=request.args.get('end_date_to', ''), solicitation_date_from=request.args.get('solicitation_date_from', ''), solicitation_date_to=request.args.get('solicitation_date_to', ''), emision_status=request.args.get('emision_status', ''), payment_status=request.args.get('payment_status', '')) }}"
                        class="relative inline-flex items-center rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-primary-600 transition-colors">
                         <span class="sr-only">Anterior</span>
                         <span class="material-symbols-outlined text-sm">chevron_left</span>
                     </a>
                     {% endif %}
-
+                    
                     {% for page in pagination.iter_pages() %}
                         {% if page %}
-                            <a href="{{ url_for('policies.list_policies', page=page, per_page=request.args.get('per_page', 10)) }}"
+                            <a href="{{ url_for('policies.list_policies', page=page, per_page=pagination.per_page, sort_by=sort_by, sort_order=sort_order, policy_number=request.args.get('policy_number', ''), client_name=request.args.get('client_name', ''), product_name=request.args.get('product_name', ''), start_date_from=request.args.get('start_date_from', ''), start_date_to=request.args.get('start_date_to', ''), end_date_from=request.args.get('end_date_from', ''), end_date_to=request.args.get('end_date_to', ''), solicitation_date_from=request.args.get('solicitation_date_from', ''), solicitation_date_to=request.args.get('solicitation_date_to', ''), emision_status=request.args.get('emision_status', ''), payment_status=request.args.get('payment_status', '')) }}"
                                class="relative inline-flex items-center justify-center min-w-[2.5rem] h-10 text-sm font-medium rounded-md transition-colors
                                       {% if page == pagination.page %}
                                           text-white bg-primary-600 hover:bg-primary-700 shadow-sm
@@ -306,9 +657,9 @@
                             </a>
                         {% endif %}
                     {% endfor %}
-
+                    
                     {% if pagination.has_next %}
-                    <a href="{{ url_for('policies.list_policies', page=pagination.next_num, per_page=request.args.get('per_page', 10)) }}"
+                    <a href="{{ url_for('policies.list_policies', page=pagination.next_num, per_page=pagination.per_page, sort_by=sort_by, sort_order=sort_order, policy_number=request.args.get('policy_number', ''), client_name=request.args.get('client_name', ''), product_name=request.args.get('product_name', ''), start_date_from=request.args.get('start_date_from', ''), start_date_to=request.args.get('start_date_to', ''), end_date_from=request.args.get('end_date_from', ''), end_date_to=request.args.get('end_date_to', ''), solicitation_date_from=request.args.get('solicitation_date_from', ''), solicitation_date_to=request.args.get('solicitation_date_to', ''), emision_status=request.args.get('emision_status', ''), payment_status=request.args.get('payment_status', '')) }}"
                        class="relative inline-flex items-center rounded-md p-2 text-gray-400 hover:bg-gray-50 hover:text-primary-600 transition-colors">
                         <span class="sr-only">Siguiente</span>
                         <span class="material-symbols-outlined text-sm">chevron_right</span>
@@ -335,10 +686,37 @@ function confirmDelete(policyId, policyNumber) {
     if (confirm(`¿Está seguro que desea eliminar la póliza "${policyNumber}"?\nEsta acción no se puede deshacer.`)) {
         // Construir la URL base y los parámetros por separado
         const baseUrl = `/policies/delete/${policyId}`;
-        const params = new URLSearchParams({
-            page: '{{ pagination.page }}',
-            per_page: '{{ pagination.per_page }}'
-        });
+        const params = new URLSearchParams();
+        
+        // Añadir parámetros de paginación
+        params.append('page', '{{ pagination.page }}');
+        params.append('per_page', '{{ pagination.per_page }}');
+        
+        // Añadir parámetros de ordenamiento si existen
+        const sortBy = '{{ sort_by|default("") }}';
+        const sortOrder = '{{ sort_order|default("") }}';
+        if (sortBy) {
+            params.append('sort_by', sortBy);
+        }
+        if (sortOrder) {
+            params.append('sort_order', sortOrder);
+        }
+        
+        // Añadir parámetros de búsqueda si existen
+        const policyNumberSearch = '{{ request.args.get("policy_number", "")|default("") }}';
+        const clientNameSearch = '{{ request.args.get("client_name", "")|default("") }}';
+        const productNameSearch = '{{ request.args.get("product_name", "")|default("") }}';
+        
+        if (policyNumberSearch) {
+            params.append('policy_number', policyNumberSearch);
+        }
+        if (clientNameSearch) {
+            params.append('client_name', clientNameSearch);
+        }
+        if (productNameSearch) {
+            params.append('product_name', productNameSearch);
+        }
+        
         window.location.href = `${baseUrl}?${params.toString()}`;
     }
 }
