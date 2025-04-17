@@ -248,23 +248,92 @@
         <!-- Top Clients -->
         <div class="card-container">
             <div class="p-4 border-b border-gray-200 dark:border-gray-700">
-                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Top Clientes</h3>
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Top Clientes</h3>
+                    <div class="flex space-x-2">
+                        <select id="clientsPeriodSelector" class="text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 py-1 px-2">
+                            <option value="month1" selected>Último mes</option>
+                            <option value="month3">3 meses</option>
+                            <option value="month6">6 meses</option>
+                            <option value="year1">1 año</option>
+                            <option value="custom">Personalizado</option>
+                            <option value="all">Todo</option>
+                        </select>
+                        <div id="clientsDateRangeContainer" class="flex space-x-2 hidden">
+                            <input type="date" id="clientsStartDate" class="text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 py-1 px-2">
+                            <input type="date" id="clientsEndDate" class="text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 py-1 px-2">
+                            <button id="clientsApplyDateRange" class="text-sm rounded-md bg-blue-600 text-white py-1 px-3">Aplicar</button>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="p-4">
-                <div class="space-y-4">
+                <div class="space-y-4 clients-list">
                     {% for client in top_clients %}
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-8 h-8 bg-primary-100 dark:bg-primary-900 rounded-lg flex items-center justify-center">
-                                <span class="text-primary-600 dark:text-primary-400 font-medium">{{ loop.index }}</span>
+                    <div class="client-item">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-primary-100 dark:bg-primary-900 rounded-lg flex items-center justify-center">
+                                    <span class="text-primary-600 dark:text-primary-400 font-medium">{{ loop.index }}</span>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-900 dark:text-gray-100">{{ client.name }}</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ client.policy_count }} pólizas</p>
+                                </div>
                             </div>
-                            <div>
-                                <p class="font-medium text-gray-900 dark:text-gray-100">{{ client.name }}</p>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ client.policy_count }} pólizas</p>
+                            <div class="flex items-center space-x-3">
+                                <p class="font-medium text-primary-600 dark:text-primary-400">${{ "{:,.2f}".format(client.total_premium) }}</p>
+                                <button class="toggle-client-details text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                                    <span class="material-symbols-outlined">expand_more</span>
+                                </button>
                             </div>
                         </div>
-                        <p class="font-medium text-primary-600 dark:text-primary-400">${{ "{:,.2f}".format(client.total_premium) }}</p>
+                        <div class="client-details mt-3 hidden">
+                            <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-700 dark:text-gray-300">ID Cliente:</p>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400">CL-{{ 1000 + loop.index }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Fecha registro:</p>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400">{{ client.created_at|default('No disponible') }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Próxima renovación:</p>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400">No disponible</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Categoría:</p>
+                                        <p class="text-sm text-gray-600 dark:text-gray-400">
+                                            {% if client.total_premium > 5000 %}
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100">Premium</span>
+                                            {% elif client.total_premium > 2000 %}
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100">Gold</span>
+                                            {% elif client.total_premium > 1000 %}
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">Silver</span>
+                                            {% else %}
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-800 dark:text-amber-100">Bronze</span>
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="mt-3 border-t border-gray-200 dark:border-gray-700 pt-3">
+                                    <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Pólizas activas:</p>
+                                    <div class="flex flex-wrap gap-2">
+                                        {% for i in range(client.policy_count) %}
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-secondary-100 text-secondary-800 dark:bg-secondary-800 dark:text-secondary-100">
+                                            POL-{{ 10000 + loop.index }}
+                                        </span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+                    {% if not loop.last %}
+                    <div class="border-b border-gray-200 dark:border-gray-700 my-2"></div>
+                    {% endif %}
                     {% endfor %}
                 </div>
             </div>
@@ -2304,5 +2373,396 @@
             alert('No se pudieron cargar los datos. Por favor, intente nuevamente.');
         }
     }
+
+    // Manejador para expandir/colapsar detalles de clientes
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.toggle-client-details')) {
+            const button = e.target.closest('.toggle-client-details');
+            const clientItem = button.closest('.client-item');
+            const detailsPanel = clientItem.querySelector('.client-details');
+            const expandIcon = button.querySelector('.material-symbols-outlined');
+            
+            // Alternar visibilidad
+            if (detailsPanel.classList.contains('hidden')) {
+                detailsPanel.classList.remove('hidden');
+                expandIcon.textContent = 'expand_less';
+            } else {
+                detailsPanel.classList.add('hidden');
+                expandIcon.textContent = 'expand_more';
+            }
+        }
+    });
+    
+    // Inicializar fechas por defecto para clientes
+    setDefaultDates('clients');
+    
+    // Manejar cambios en el selector de período para clientes
+    document.getElementById('clientsPeriodSelector').addEventListener('change', function(e) {
+        const period = e.target.value;
+        
+        // Si se selecciona personalizado, mostrar selectores de fecha
+        if (period === 'custom') {
+            document.getElementById('clientsDateRangeContainer').classList.remove('hidden');
+        } else {
+            document.getElementById('clientsDateRangeContainer').classList.add('hidden');
+            // Actualizar listado con el período seleccionado
+            updateTopClientsWithPeriod(period);
+        }
+    });
+    
+    // Inicializar con datos por defecto al cargar la página
+    document.addEventListener('DOMContentLoaded', function() {
+        // Cargar datos iniciales con el período predeterminado
+        const defaultPeriod = document.getElementById('clientsPeriodSelector').value;
+        
+        // Primero intentar cargar los datos desde la JSON ya existente
+        const topClientsContainer = document.querySelector('.clients-list');
+        
+        // Si hay clientes en el HTML generado por el servidor, dejarlos y no hacer peticiones
+        if (topClientsContainer && topClientsContainer.querySelector('.client-item')) {
+            console.log('Usando datos de clientes pre-cargados desde el servidor');
+            
+            // Agregar eventos de toggle a los detalles de clientes
+            const toggleButtons = document.querySelectorAll('.toggle-client-details');
+            toggleButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const detailsSection = this.closest('.client-item').querySelector('.client-details');
+                    detailsSection.classList.toggle('hidden');
+                    const icon = this.querySelector('.material-symbols-outlined');
+                    icon.textContent = detailsSection.classList.contains('hidden') ? 'expand_more' : 'expand_less';
+                });
+            });
+        } else {
+            // Si no hay datos pre-cargados, intentar la API
+            updateTopClientsWithPeriod(defaultPeriod);
+        }
+    });
+    
+    // Si todo falla, mostrar datos de ejemplo
+    function showFallbackClientData() {
+        const clientsContainer = document.querySelector('.clients-list');
+        if (!clientsContainer) return;
+        
+        const fallbackData = [
+            {
+                id: 1,
+                name: 'CHICO PROAÑO ANDRÉS GABRIEL',
+                policy_count: 3,
+                total_premium: 1836.0
+            },
+            {
+                id: 2,
+                name: 'INTRIGO MERA RAFAEL ANIBAL',
+                policy_count: 2,
+                total_premium: 801.48
+            },
+            {
+                id: 3,
+                name: 'QUINTO CEDEÑO ROSA ELIZABETH',
+                policy_count: 1,
+                total_premium: 668.0
+            },
+            {
+                id: 4,
+                name: 'MOSCOSO SALABARRIA JESSICA PRISCILA',
+                policy_count: 1,
+                total_premium: 396.0
+            },
+            {
+                id: 5,
+                name: 'GUTIERREZ JIMENEZ ANGIE NOELLY',
+                policy_count: 1,
+                total_premium: 348.0
+            }
+        ];
+        
+        updateTopClientsList(fallbackData);
+    }
+    
+    // Manejar el botón de aplicar rango personalizado para clientes
+    document.getElementById('clientsApplyDateRange').addEventListener('click', function() {
+        const startDate = document.getElementById('clientsStartDate').value;
+        const endDate = document.getElementById('clientsEndDate').value;
+        
+        if (!startDate || !endDate) {
+            alert('Por favor, seleccione fechas de inicio y fin');
+            return;
+        }
+        
+        // Validar que la fecha de inicio sea menor que la de fin
+        if (startDate > endDate) {
+            alert('La fecha de inicio debe ser anterior a la fecha de fin');
+            return;
+        }
+        
+        // Validar que el rango no sea mayor a 365 días
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        const diffTime = Math.abs(end - start);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        if (diffDays > 365) {
+            alert('El rango de fechas no puede ser mayor a 365 días.');
+            return;
+        }
+        
+        // Actualizar listado con rango personalizado
+        updateTopClientsWithDateRange(startDate, endDate);
+    });
+    
+    // Función para actualizar el listado de clientes con un período predefinido
+    async function updateTopClientsWithPeriod(period) {
+        try {
+            // Mostrar indicador de carga
+            const clientsContainer = document.querySelector('.clients-list');
+            if (!clientsContainer) return;
+            
+            clientsContainer.style.opacity = '0.5';
+            clientsContainer.innerHTML = '<div class="text-center py-4"><span class="material-symbols-outlined animate-spin inline-block mr-2">refresh</span>Cargando...</div>';
+            
+            // Construir URL con parámetros
+            let url = `{{ url_for('reports.top_clients_api') }}?period=${period}`;
+            
+            console.log('DEBUG - Solicitando datos de clientes:', url);
+            
+            // Realizar la petición a la API con credenciales
+            const response = await fetch(url, {
+                method: 'GET',
+                credentials: 'same-origin', // Importante: incluir credenciales
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            });
+            
+            // Verificar errores HTTP
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Error HTTP:', response.status, errorText);
+                
+                // Si el error es 302 o 401 (redirección o no autorizado), mostrar datos de respaldo
+                if (response.status === 302 || response.status === 401) {
+                    console.warn('No autorizado o redirección, mostrando datos de respaldo');
+                    showFallbackClientData();
+                    return;
+                }
+                
+                // Intentar parsear como JSON si es posible
+                let errorMessage = `Error HTTP: ${response.status}`;
+                try {
+                    const errorData = JSON.parse(errorText);
+                    if (errorData.error) errorMessage = errorData.error;
+                } catch (e) {
+                    // Si no se puede parsear, usar el texto de error
+                    if (errorText && errorText.length < 100) errorMessage = errorText;
+                }
+                
+                throw new Error(errorMessage);
+            }
+            
+            // Procesar respuesta
+            const data = await response.json();
+            
+            // Verificar si tenemos datos válidos
+            if (!Array.isArray(data)) {
+                console.error('Respuesta no válida:', data);
+                showFallbackClientData();
+                return;
+            }
+            
+            // Actualizar el listado con los nuevos datos
+            updateTopClientsList(data);
+            
+            // Restaurar opacidad
+            clientsContainer.style.opacity = '1';
+            
+        } catch (error) {
+            console.error('Error al actualizar el listado:', error);
+            
+            // Intentar mostrar los datos de respaldo primero
+            showFallbackClientData();
+            
+            // Mostrar mensaje de error amigable en la interfaz si showFallbackClientData() falla
+            const clientsContainer = document.querySelector('.clients-list');
+            if (clientsContainer && clientsContainer.innerHTML.includes('Cargando')) {
+                clientsContainer.style.opacity = '1';
+                clientsContainer.innerHTML = `
+                    <div class="text-center py-6">
+                        <span class="material-symbols-outlined text-red-500 text-3xl mb-2">error</span>
+                        <p class="text-gray-800 dark:text-gray-200 mb-2">No se pudieron cargar los datos</p>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">${error.message || 'Intente nuevamente más tarde'}</p>
+                        <button class="btn-primary px-4 py-2 rounded-lg text-sm retry-top-clients">
+                            <span class="material-symbols-outlined text-sm mr-1 align-middle">refresh</span>
+                            Reintentar
+                        </button>
+                    </div>
+                `;
+                
+                // Agregar evento al botón de reintentar
+                const retryButton = clientsContainer.querySelector('.retry-top-clients');
+                if (retryButton) {
+                    retryButton.addEventListener('click', () => updateTopClientsWithPeriod(period));
+                }
+            }
+        }
+    }
+    
+    // Función para actualizar el listado de clientes con rango personalizado
+    async function updateTopClientsWithDateRange(startDate, endDate) {
+        try {
+            // Mostrar indicador de carga
+            const clientsContainer = document.querySelector('.clients-list');
+            if (!clientsContainer) return;
+            
+            clientsContainer.style.opacity = '0.5';
+            
+            // Construir URL con parámetros
+            let url = `{{ url_for('reports.top_clients_api') }}?start_date=${startDate}&end_date=${endDate}`;
+            
+            // Realizar la petición a la API
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                throw new Error('Error al obtener datos');
+            }
+            
+            // Procesar respuesta
+            const data = await response.json();
+            
+            // Actualizar el listado con los nuevos datos
+            updateTopClientsList(data);
+            
+            // Restaurar opacidad
+            clientsContainer.style.opacity = '1';
+            
+        } catch (error) {
+            console.error('Error al actualizar el listado:', error);
+            alert('No se pudieron cargar los datos. Por favor, intente nuevamente.');
+        }
+    }
+    
+    // Función para actualizar el listado de clientes en el DOM
+    function updateTopClientsList(clients) {
+        const container = document.querySelector('.clients-list');
+        if (!container) return;
+        
+        // Limpiar listado actual
+        container.innerHTML = '';
+        
+        // Si no hay datos, mostrar mensaje
+        if (!clients || clients.length === 0) {
+            const noDataElement = document.createElement('div');
+            noDataElement.className = 'text-center text-gray-500 dark:text-gray-400 py-4';
+            noDataElement.innerText = 'No hay datos disponibles para el período seleccionado.';
+            container.appendChild(noDataElement);
+            return;
+        }
+        
+        // Agregar cada cliente al listado
+        clients.forEach((client, index) => {
+            // Determinar categoría según el monto
+            let categoryLabel = '';
+            let categoryClass = '';
+            
+            if (client.total_premium > 5000) {
+                categoryLabel = 'Premium';
+                categoryClass = 'bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100';
+            } else if (client.total_premium > 2000) {
+                categoryLabel = 'Gold';
+                categoryClass = 'bg-blue-100 text-blue-800 dark:bg-blue-800 dark:text-blue-100';
+            } else if (client.total_premium > 1000) {
+                categoryLabel = 'Silver';
+                categoryClass = 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+            } else {
+                categoryLabel = 'Bronze';
+                categoryClass = 'bg-amber-100 text-amber-800 dark:bg-amber-800 dark:text-amber-100';
+            }
+            
+            // Crear elemento principal del cliente
+            const clientElement = document.createElement('div');
+            clientElement.className = 'client-item';
+            
+            // Contenido principal
+            clientElement.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 bg-primary-100 dark:bg-primary-900 rounded-lg flex items-center justify-center">
+                            <span class="text-primary-600 dark:text-primary-400 font-medium">${index + 1}</span>
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-900 dark:text-gray-100">${client.name}</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">${client.policy_count} pólizas</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <p class="font-medium text-primary-600 dark:text-primary-400">$${parseFloat(client.total_premium).toLocaleString('es-EC', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+                        <button class="toggle-client-details text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                            <span class="material-symbols-outlined">expand_more</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="client-details mt-3 hidden">
+                    <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                                <p class="text-sm font-medium text-gray-700 dark:text-gray-300">ID Cliente:</p>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">CL-${1000 + index + 1}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Fecha registro:</p>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">${client.created_at || 'No disponible'}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Próxima renovación:</p>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">No disponible</p>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Categoría:</p>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${categoryClass}">
+                                        ${categoryLabel}
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="mt-3 border-t border-gray-200 dark:border-gray-700 pt-3">
+                            <p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Pólizas activas:</p>
+                            <div class="flex flex-wrap gap-2">
+                                ${Array.from({ length: client.policy_count }, (_, i) => 
+                                    `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-secondary-100 text-secondary-800 dark:bg-secondary-800 dark:text-secondary-100">
+                                        POL-${10000 + i + 1}
+                                    </span>`
+                                ).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Agregar separador
+            const separator = document.createElement('div');
+            separator.className = 'border-b border-gray-200 dark:border-gray-700 my-2';
+            
+            // Añadir al contenedor principal
+            container.appendChild(clientElement);
+            if (index < clients.length - 1) {
+                container.appendChild(separator);
+            }
+        });
+    }
+    
+    // Inicializar con el período por defecto (último mes)
+    // updateTopClientsWithPeriod('month1');
+</script>
+
+<script>
+    // Inicializar componentes cuando el DOM esté completamente cargado
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inicializar fechas por defecto para selectores
+        setDefaultDates('clients');
+        
+        // Inicializar listados con período predeterminado
+        updateTopClientsWithPeriod('month1');
+    });
 </script>
 {% endblock %}

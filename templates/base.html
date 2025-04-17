@@ -2,7 +2,8 @@
 <html lang="es" class="h-full" 
       x-data="{ 
           darkMode: localStorage.theme === 'dark',
-          mobileMenuOpen: false
+          mobileMenuOpen: false,
+          sidebarCollapsed: localStorage.getItem('sidebarCollapsed') === 'true'
       }" 
       :class="{ 
           'dark': darkMode,
