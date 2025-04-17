@@ -99,7 +99,25 @@
         <!-- Sales Chart -->
         <div class="card-container">
             <div class="p-4 border-b border-gray-200 dark:border-gray-700">
-                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Ventas Diarias</h3>
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Ventas Diarias (Pólizas Emitidas)</h3>
+                    <div class="flex space-x-2">
+                        <select id="salesPeriodSelector" class="text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 py-1 px-2">
+                            <option value="daily" selected>Diario</option>
+                            <option value="weekly">Semanal</option>
+                            <option value="monthly">Mensual</option>
+                            <option value="yearly">Anual</option>
+                        </select>
+                        <select id="salesYearSelector" class="text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 py-1 px-2 hidden">
+                            <!-- Opciones de año se generarán dinámicamente -->
+                        </select>
+                        <div id="salesDateRangeContainer" class="flex space-x-2">
+                            <input type="date" id="salesStartDate" class="text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 py-1 px-2">
+                            <input type="date" id="salesEndDate" class="text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 py-1 px-2">
+                            <button id="salesApplyDateRange" class="text-sm rounded-md bg-blue-600 text-white py-1 px-3">Aplicar</button>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="p-4">
                 <canvas id="salesChart" class="w-full h-64"></canvas>
@@ -109,7 +127,49 @@
         <!-- Activity Chart -->
         <div class="card-container">
             <div class="p-4 border-b border-gray-200 dark:border-gray-700">
-                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Actividad Semanal</h3>
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Actividad Diaria (Todas las Pólizas)</h3>
+                    <div class="flex space-x-2">
+                        <select id="activityPeriodSelector" class="text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 py-1 px-2">
+                            <option value="daily" selected>Diario</option>
+                            <option value="weekly">Semanal</option>
+                            <option value="monthly">Mensual</option>
+                            <option value="yearly">Anual</option>
+                        </select>
+                        <select id="activityYearSelector" class="text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 py-1 px-2 hidden">
+                            <!-- Opciones de año se generarán dinámicamente -->
+                        </select>
+                        <div id="activityDateRangeContainer" class="flex space-x-2">
+                            <input type="date" id="activityStartDate" class="text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 py-1 px-2">
+                            <input type="date" id="activityEndDate" class="text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 py-1 px-2">
+                            <button id="activityApplyDateRange" class="text-sm rounded-md bg-blue-600 text-white py-1 px-3">Aplicar</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Filtros de categorías de pólizas -->
+                <div class="flex flex-wrap items-center mt-3 gap-3">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="activity-filter-all" class="activity-filter mr-1 h-3 w-3 text-blue-600 rounded border-gray-300 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700" checked>
+                        <label for="activity-filter-all" class="text-sm text-gray-700 dark:text-gray-300">Todas</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="activity-filter-emitidas" class="activity-filter mr-1 h-3 w-3 text-green-600 rounded border-gray-300 focus:ring-green-500 dark:border-gray-600 dark:bg-gray-700">
+                        <label for="activity-filter-emitidas" class="text-sm text-gray-700 dark:text-gray-300">Emitidas</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="activity-filter-anuladas" class="activity-filter mr-1 h-3 w-3 text-red-600 rounded border-gray-300 focus:ring-red-500 dark:border-gray-600 dark:bg-gray-700">
+                        <label for="activity-filter-anuladas" class="text-sm text-gray-700 dark:text-gray-300">Anuladas</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="activity-filter-pendientes" class="activity-filter mr-1 h-3 w-3 text-yellow-600 rounded border-gray-300 focus:ring-yellow-500 dark:border-gray-600 dark:bg-gray-700">
+                        <label for="activity-filter-pendientes" class="text-sm text-gray-700 dark:text-gray-300">Pendientes</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="activity-filter-caducadas" class="activity-filter mr-1 h-3 w-3 text-gray-600 rounded border-gray-300 focus:ring-gray-500 dark:border-gray-600 dark:bg-gray-700">
+                        <label for="activity-filter-caducadas" class="text-sm text-gray-700 dark:text-gray-300">Caducadas</label>
+                    </div>
+                </div>
             </div>
             <div class="p-4">
                 <canvas id="activityChart" class="w-full h-64"></canvas>
@@ -213,37 +273,248 @@
     const salesData = {{ daily_sales|tojson }};
     const activityData = {{ weekly_activity|tojson }};
 
-    // Gráfico de Ventas
-    new Chart(document.getElementById('salesChart'), {
-        type: 'line',
+    let salesChart;
+    let activityChart;
+
+    // Variables para almacenar datos de actividad por categoría
+    let activityDataByCategory = {
+        all: null,
+        emitidas: null,
+        anuladas: null,
+        pendientes: null,
+        caducadas: null
+    };
+    
+    // Configuración de colores por categoría
+    const categoryColors = {
+        all: {
+            border: '#0284c7',
+            background: isDarkMode ? '#0284c720' : '#0284c710'
+        },
+        emitidas: {
+            border: '#16a34a',
+            background: isDarkMode ? '#16a34a20' : '#16a34a10'
+        },
+        anuladas: {
+            border: '#dc2626',
+            background: isDarkMode ? '#dc262620' : '#dc262610'
+        },
+        pendientes: {
+            border: '#eab308',
+            background: isDarkMode ? '#eab30820' : '#eab30810'
+        },
+        caducadas: {
+            border: '#6b7280',
+            background: isDarkMode ? '#6b728020' : '#6b728010'
+        }
+    };
+
+    // Poblar selector de años al cargar la página
+    function populateYearSelector(selectorId) {
+        const yearSelector = document.getElementById(selectorId);
+        const currentYear = new Date().getFullYear();
+        
+        // Limpiar opciones existentes
+        yearSelector.innerHTML = '';
+        
+        // Agregar opciones desde 5 años atrás hasta el año actual
+        for (let year = currentYear; year >= currentYear - 5; year--) {
+            const option = document.createElement('option');
+            option.value = year;
+            option.textContent = year;
+            
+            // Seleccionar año actual por defecto
+            if (year === currentYear) {
+                option.selected = true;
+            }
+            
+            yearSelector.appendChild(option);
+        }
+    }
+    
+    // Inicializar selectores de años
+    populateYearSelector('salesYearSelector');
+    populateYearSelector('activityYearSelector');
+    
+    // Función para formatear moneda
+    function formatCurrency(value) {
+        return new Intl.NumberFormat('es-EC', {
+            style: 'currency',
+            currency: 'USD'
+        }).format(value);
+    }
+    
+    // Inicializar el gráfico de ventas
+    createSalesChart('daily', salesData);
+    
+    // Manejar cambios en el selector de período
+    document.getElementById('salesPeriodSelector').addEventListener('change', function(e) {
+        const period = e.target.value;
+        toggleDateControls('sales', period);
+        
+        if (period === 'weekly') {
+            // Si cambia a vista semanal, inicializar con la semana actual
+            updateWeeklyChart('sales');
+        } else if (period !== 'daily') {
+            // Para otros períodos que no sean diario ni semanal
+            const year = period === 'monthly' ? document.getElementById('salesYearSelector').value : null;
+            updateSalesChart(period, year);
+        }
+    });
+    
+    // Manejar cambios en el selector de año
+    document.getElementById('salesYearSelector').addEventListener('change', function(e) {
+        const year = e.target.value;
+        // Actualizar gráfico con el período mensual y el año seleccionado
+        updateSalesChart('monthly', year);
+    });
+    
+    // Función para actualizar el gráfico de ventas mediante la API
+    async function updateSalesChart(period, year) {
+        try {
+            // Construir URL con parámetros
+            let url = `{{ url_for('reports.sales_data_api') }}?period=${period}`;
+            if (year) {
+                url += `&year=${year}`;
+            }
+            
+            // Mostrar indicador de carga
+            const chartCanvas = document.getElementById('salesChart');
+            chartCanvas.style.opacity = '0.5';
+            
+            // Realizar la petición a la API
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                throw new Error('Error al obtener datos');
+            }
+            
+            // Procesar respuesta
+            const data = await response.json();
+            
+            // Actualizar título según el período
+            let chartTitle = 'Ventas ';
+            switch(period) {
+                case 'daily':
+                    chartTitle += 'Diarias';
+                    break;
+                case 'weekly':
+                    chartTitle += 'Semanales';
+                    break;
+                case 'monthly':
+                    // Destacar el año en la vista mensual
+                    const displayYear = year || new Date().getFullYear();
+                    chartTitle += `Mensuales ${displayYear}`;
+                    break;
+                case 'yearly':
+                    chartTitle += 'Anuales';
+                    break;
+            }
+            chartTitle += ' (Pólizas Emitidas)';
+            
+            // Actualizar título en el DOM
+            const chartTitleElem = document.querySelector('.card-container h3');
+            if (chartTitleElem) {
+                chartTitleElem.textContent = chartTitle;
+            }
+            
+            // Recrear el gráfico con los nuevos datos
+            createSalesChart(period, data, year);
+            
+            // Restaurar opacidad
+            chartCanvas.style.opacity = '1';
+            
+        } catch (error) {
+            console.error('Error al actualizar el gráfico:', error);
+            alert('No se pudieron cargar los datos. Por favor, intente nuevamente.');
+        }
+    }
+    
+    // Función para crear el gráfico de ventas
+    function createSalesChart(period = 'daily', chartData = salesData, year = null) {
+        // Destruir el gráfico anterior si existe
+        if (salesChart) {
+            salesChart.destroy();
+        }
+        
+        // Obtener los datos
+        let labels = chartData.dates;
+        const data = chartData.totals;
+        
+        // En vista mensual, no añadir el año a cada etiqueta ya que se muestra en el título
+        // El año ya se incluye en el título del gráfico
+        
+        // Limitar cantidad de datos mostrados para no sobrecargar el gráfico
+        let displayLabels = labels;
+        let displayData = data;
+        
+        if (labels.length > 30 && period !== 'monthly') {
+            // Si hay más de 30 elementos, mostrar una muestra
+            displayLabels = labels.slice(0, 30);
+            displayData = data.slice(0, 30);
+        }
+        
+        // Configurar tooltip personalizado
+        const tooltipCallback = {
+            label: function(context) {
+                return formatCurrency(context.raw);
+            },
+            title: function(context) {
+                return displayLabels[context[0].dataIndex];
+            }
+        };
+        
+        // Crear el nuevo gráfico
+        salesChart = new Chart(document.getElementById('salesChart'), {
+            type: 'line',  // Cambiar a gráfico de línea tradicional
         data: {
-            labels: salesData.dates,
+                labels: displayLabels,
             datasets: [{
-                label: 'Ventas Diarias',
-                data: salesData.totals,
+                    label: getPeriodLabel(period),
+                    data: displayData,
                 borderColor: '#0284c7',
                 backgroundColor: isDarkMode ? '#0284c720' : '#0284c710',
                 fill: true,
-                tension: 0.4
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
             }]
         },
         options: {
+                indexAxis: 'x',  // Eje X para las etiquetas (orientación normal)
             responsive: true,
             maintainAspectRatio: false,
             scales: {
-                x: {
+                    y: {
                     grid: {
                         color: gridColor
                     },
                     ticks: {
+                            color: textColor,
+                            callback: function(value) {
+                                return formatCurrency(value);
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Prima ($)',
                         color: textColor
                     }
                 },
-                y: {
+                    x: {
                     grid: {
                         color: gridColor
                     },
                     ticks: {
+                            color: textColor,
+                            autoSkip: period !== 'daily', // No saltar automáticamente en vista diaria
+                            maxRotation: period === 'daily' ? 45 : 0,  // Rotar etiquetas en vista diaria
+                            // Asegurar que en vista mensual se muestren todos los meses
+                            maxTicksLimit: period === 'monthly' ? 12 : undefined
+                        },
+                        title: {
+                            display: true,
+                            text: getPeriodAxisLabel(period),
                         color: textColor
                     }
                 }
@@ -252,52 +523,750 @@
                 legend: {
                     labels: {
                         color: textColor
+                        }
+                    },
+                    tooltip: {
+                        callbacks: tooltipCallback
                     }
                 }
             }
+        });
+    }
+    
+    // Función para obtener etiqueta según el período
+    function getPeriodLabel(period) {
+        switch(period) {
+            case 'daily': return 'Ventas Diarias (Pólizas Emitidas)';
+            case 'weekly': return 'Ventas Semanales (Pólizas Emitidas)';
+            case 'monthly': return 'Ventas Mensuales (Pólizas Emitidas)';
+            case 'yearly': return 'Ventas Anuales (Pólizas Emitidas)';
+            default: return 'Ventas (Pólizas Emitidas)';
+        }
+    }
+    
+    // Función para obtener etiqueta de eje según el período
+    function getPeriodAxisLabel(period) {
+        switch(period) {
+            case 'daily': return 'Día';
+            case 'weekly': return 'Semana';
+            case 'monthly': return 'Mes';
+            case 'yearly': return 'Año';
+            default: return 'Período';
+        }
+    }
+
+    // Función para crear el gráfico de actividad con múltiples categorías
+    function createActivityChart(period = 'daily', chartData = { all: { dates: [], counts: [] } }, year = null) {
+        // Destruir el gráfico anterior si existe
+        if (activityChart) {
+            activityChart.destroy();
+        }
+        
+        // Obtener las etiquetas (fechas) del conjunto de datos "all" si existe
+        let labels = [];
+        if (chartData.all && chartData.all.dates) {
+            labels = chartData.all.dates;
+        }
+        
+        // Verificar qué categorías están activadas
+        const categories = [];
+        document.querySelectorAll('.activity-filter').forEach(checkbox => {
+            if (checkbox.checked) {
+                const category = checkbox.id.replace('activity-filter-', '');
+                categories.push(category);
+            }
+        });
+        
+        // Si no hay categorías seleccionadas, usar "all" por defecto
+        if (categories.length === 0) {
+            document.getElementById('activity-filter-all').checked = true;
+            categories.push('all');
+        }
+        
+        // Preparar datasets para el gráfico
+        const datasets = [];
+        
+        // Construir los datasets para cada categoría seleccionada
+        categories.forEach(category => {
+            // Si la categoría tiene datos, crear el dataset
+            if (chartData[category] && chartData[category].counts) {
+                datasets.push({
+                    label: getCategoryLabel(category),
+                    data: chartData[category].counts,
+                    borderColor: categoryColors[category].border,
+                    backgroundColor: categoryColors[category].background,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                });
+            }
+        });
+        
+        // Verificar si hay datos para mostrar
+        if (datasets.length === 0 || labels.length === 0) {
+            console.warn('No hay datos para mostrar en el gráfico de actividad');
+            return;
+        }
+        
+        // Limitar cantidad de datos mostrados para no sobrecargar el gráfico
+        if (labels.length > 30 && period !== 'monthly') {
+            // Si hay más de 30 elementos, mostrar una muestra
+            labels = labels.slice(0, 30);
+            datasets.forEach(dataset => {
+                dataset.data = dataset.data.slice(0, 30);
+            });
+        }
+        
+        // Configurar tooltip personalizado
+        const tooltipCallback = {
+            label: function(context) {
+                return `${context.dataset.label}: ${context.raw} pólizas`;
+            }
+        };
+        
+        // Crear el nuevo gráfico
+        activityChart = new Chart(document.getElementById('activityChart'), {
+            type: 'line',
+        data: {
+                labels: labels,
+                datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                    y: {
+                        beginAtZero: true,
+                    grid: {
+                        color: gridColor
+                    },
+                    ticks: {
+                            color: textColor,
+                            precision: 0
+                        },
+                        title: {
+                            display: true,
+                            text: 'Número de Pólizas',
+                        color: textColor
+                    }
+                },
+                    x: {
+                    grid: {
+                        color: gridColor
+                    },
+                    ticks: {
+                            color: textColor,
+                            autoSkip: period !== 'daily', 
+                            maxRotation: period === 'daily' ? 45 : 0,
+                            maxTicksLimit: period === 'monthly' ? 12 : undefined
+                        },
+                        title: {
+                            display: true,
+                            text: getActivityPeriodAxisLabel(period),
+                        color: textColor
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                        display: true,
+                        position: 'top',
+                    labels: {
+                            color: textColor,
+                            usePointStyle: true,
+                            pointStyle: 'circle'
+                        }
+                    },
+                    tooltip: {
+                        callbacks: tooltipCallback
+                    }
+                }
+            }
+        });
+    }
+    
+    // Función para obtener la etiqueta de categoría
+    function getCategoryLabel(category) {
+        switch(category) {
+            case 'all': return 'Todas';
+            case 'emitidas': return 'Emitidas';
+            case 'anuladas': return 'Anuladas';
+            case 'pendientes': return 'Pendientes';
+            case 'caducadas': return 'Caducadas';
+            default: return 'Pólizas';
+        }
+    }
+    
+    // Actualizar el gráfico cuando se cambia un filtro de categoría
+    document.querySelectorAll('.activity-filter').forEach(checkbox => {
+        checkbox.addEventListener('change', function(e) {
+            // Verificar si hay alguna categoría seleccionada
+            const anyChecked = Array.from(document.querySelectorAll('.activity-filter')).some(cb => cb.checked);
+            
+            // Si no hay ninguna categoría seleccionada, activar "Todas"
+            if (!anyChecked) {
+                document.getElementById('activity-filter-all').checked = true;
+            }
+            
+            // Actualizar el gráfico con las categorías seleccionadas
+            updateActivityChartWithFilters();
+        });
+    });
+    
+    // Función para actualizar el gráfico con los filtros seleccionados
+    function updateActivityChartWithFilters() {
+        const period = document.getElementById('activityPeriodSelector').value;
+        const year = period === 'monthly' ? document.getElementById('activityYearSelector').value : null;
+        
+        // Recrear el gráfico con los datos existentes y filtros actuales
+        createActivityChart(period, activityDataByCategory, year);
+    }
+    
+    // Modificar la función updateActivityChart para cargar todas las categorías
+    async function updateActivityChart(period = 'daily', year = null) {
+        try {
+            // Mostrar indicador de carga
+            const chartCanvas = document.getElementById('activityChart');
+            if (!chartCanvas) {
+                console.error('No se encontró el elemento del gráfico de actividad');
+                return;
+            }
+            chartCanvas.style.opacity = '0.5';
+            
+            // Construir URL base con parámetros comunes
+            let baseUrl = `{{ url_for('reports.activity_data_api') }}?period=${period}`;
+            if (year) {
+                baseUrl += `&year=${year}`;
+            }
+            
+            // Cargar datos para cada categoría
+            const categories = ['all', 'emitidas', 'anuladas', 'pendientes', 'caducadas'];
+            const requests = categories.map(category => {
+                const url = `${baseUrl}&category=${category}`;
+                return fetch(url)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`Error al obtener datos para ${category}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => ({ category, data }));
+            });
+            
+            // Esperar a que todas las solicitudes se completen
+            const results = await Promise.all(requests);
+            
+            // Almacenar los resultados por categoría
+            results.forEach(result => {
+                activityDataByCategory[result.category] = result.data;
+            });
+            
+            // Usar las fechas de la categoría "all" como referencia
+            let chartData = activityDataByCategory;
+            
+            // Actualizar título según el período
+            let chartTitle = 'Actividad ';
+            switch(period) {
+                case 'daily':
+                    chartTitle += 'Diaria';
+                    break;
+                case 'weekly':
+                    chartTitle += 'Semanal';
+                    break;
+                case 'monthly':
+                    const displayYear = year || new Date().getFullYear();
+                    chartTitle += `Mensual ${displayYear}`;
+                    break;
+                case 'yearly':
+                    chartTitle += 'Anual';
+                    break;
+            }
+            
+            // Actualizar título en el DOM
+            const chartContainer = document.getElementById('activityChart').closest('.card-container');
+            const chartTitleElem = chartContainer.querySelector('h3');
+            if (chartTitleElem) {
+                chartTitleElem.textContent = chartTitle;
+            }
+            
+            // Recrear el gráfico con los nuevos datos
+            createActivityChart(period, chartData, year);
+            
+            // Restaurar opacidad
+            chartCanvas.style.opacity = '1';
+            
+        } catch (error) {
+            console.error('Error al actualizar el gráfico de actividad:', error);
+            console.error(error.stack);
+            try {
+                document.getElementById('activityChart').style.opacity = '1';
+            } catch (e) {}
+            
+            if (period !== 'daily') {
+                alert('No se pudieron cargar los datos de actividad. Por favor, intente nuevamente.');
+            }
+        }
+    }
+    
+    // Modificar la función para actualizar el gráfico con rango de fechas
+    async function updateActivityChartWithDateRange(startDate, endDate) {
+        try {
+            // Mostrar indicador de carga
+            const chartCanvas = document.getElementById('activityChart');
+            chartCanvas.style.opacity = '0.5';
+            
+            // Construir URL base con parámetros comunes
+            let baseUrl = `{{ url_for('reports.activity_data_api') }}?period=daily&start_date=${startDate}&end_date=${endDate}`;
+            
+            // Cargar datos para cada categoría
+            const categories = ['all', 'emitidas', 'anuladas', 'pendientes', 'caducadas'];
+            const requests = categories.map(category => {
+                const url = `${baseUrl}&category=${category}`;
+                return fetch(url)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`Error al obtener datos para ${category}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => ({ category, data }));
+            });
+            
+            // Esperar a que todas las solicitudes se completen
+            const results = await Promise.all(requests);
+            
+            // Almacenar los resultados por categoría
+            results.forEach(result => {
+                activityDataByCategory[result.category] = result.data;
+            });
+            
+            // Formatear fechas para mostrar en el título
+            const formatDisplayDate = (dateStr) => {
+                const [year, month, day] = dateStr.split('-');
+                return `${day}/${month}/${year}`;
+            };
+            
+            // Actualizar título con el rango de fechas
+            const formattedStartDate = formatDisplayDate(startDate);
+            const formattedEndDate = formatDisplayDate(endDate);
+            const chartTitle = `Actividad Diaria ${formattedStartDate} - ${formattedEndDate}`;
+            
+            // Actualizar título en el DOM
+            const chartContainer = document.getElementById('activityChart').closest('.card-container');
+            const chartTitleElem = chartContainer.querySelector('h3');
+            if (chartTitleElem) {
+                chartTitleElem.textContent = chartTitle;
+            }
+            
+            // Recrear el gráfico con los nuevos datos
+            createActivityChart('daily', activityDataByCategory);
+            
+            // Restaurar opacidad
+            chartCanvas.style.opacity = '1';
+            
+        } catch (error) {
+            console.error('Error al actualizar el gráfico:', error);
+            alert('No se pudieron cargar los datos. Por favor, intente nuevamente.');
+        }
+    }
+    
+    // Modificar la función updateWeeklyChart para el filtrado por categorías
+    function updateWeeklyChart(chartType) {
+        // Formatear fechas para la API (YYYY-MM-DD)
+        const formatDate = (date) => {
+            return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+        };
+        
+        const startDate = formatDate(currentWeek.startDate);
+        const endDate = formatDate(currentWeek.endDate);
+        
+        // Actualizar gráfico correspondiente
+        if (chartType === 'sales') {
+            updateSalesChartWithDateRange(startDate, endDate);
+        } else if (chartType === 'activity') {
+            updateActivityChartWithDateRange(startDate, endDate);
+        }
+    }
+
+    // Variables para seguimiento de la semana actual
+    let currentWeek = {
+        startDate: getWeekStartDate(new Date()),
+        endDate: getWeekEndDate(new Date())
+    };
+
+    // Actualizar etiqueta de semana
+    function updateWeekLabel(chartType) {
+        const weekLabel = document.getElementById(`${chartType}CurrentWeek`);
+        if (weekLabel) {
+            const startDay = currentWeek.startDate.getDate().toString().padStart(2, '0');
+            const startMonth = (currentWeek.startDate.getMonth() + 1).toString().padStart(2, '0');
+            const endDay = currentWeek.endDate.getDate().toString().padStart(2, '0');
+            const endMonth = (currentWeek.endDate.getMonth() + 1).toString().padStart(2, '0');
+            const year = currentWeek.endDate.getFullYear();
+            
+            weekLabel.textContent = `${startDay}/${startMonth} - ${endDay}/${endMonth}/${year}`;
+        }
+    }
+
+    // Navegar entre semanas
+    function navigateWeek(chartType, direction) {
+        // Calcular nuevas fechas
+        const newStartDate = new Date(currentWeek.startDate);
+        newStartDate.setDate(newStartDate.getDate() + (direction * 7));
+        
+        const newEndDate = new Date(newStartDate);
+        newEndDate.setDate(newEndDate.getDate() + 6);
+        
+        // Actualizar fechas actuales
+        currentWeek.startDate = newStartDate;
+        currentWeek.endDate = newEndDate;
+        
+        // Actualizar etiqueta
+        updateWeekLabel(chartType);
+        
+        // Actualizar gráfico
+        if (chartType === 'sales') {
+            updateWeeklyChart('sales');
+        } else if (chartType === 'activity') {
+            updateWeeklyChart('activity');
+        }
+    }
+
+    // Actualizar gráfico con las fechas de semana actuales
+    function updateWeeklyChart(chartType) {
+        // Formatear fechas para la API (YYYY-MM-DD)
+        const formatDate = (date) => {
+            return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+        };
+        
+        const startDate = formatDate(currentWeek.startDate);
+        const endDate = formatDate(currentWeek.endDate);
+        
+        // Actualizar gráfico correspondiente
+        if (chartType === 'sales') {
+            updateSalesChartWithDateRange(startDate, endDate);
+        } else if (chartType === 'activity') {
+            updateActivityChartWithDateRange(startDate, endDate);
+        }
+    }
+
+    // Obtener fecha de inicio de la semana actual o una fecha específica
+    function getWeekStartDate(date) {
+        const d = new Date(date);
+        const day = d.getDay(); // 0 = domingo, 1 = lunes, ...
+        const diff = d.getDate() - day + (day === 0 ? -6 : 1); // ajuste para iniciar en lunes
+        const startDate = new Date(d.setDate(diff));
+        startDate.setHours(0, 0, 0, 0);
+        return startDate;
+    }
+
+    // Obtener fecha de fin de la semana actual o una fecha específica
+    function getWeekEndDate(date) {
+        const startDate = getWeekStartDate(date);
+        const endDate = new Date(startDate);
+        endDate.setDate(startDate.getDate() + 6); // 6 días después del inicio
+        endDate.setHours(23, 59, 59, 999);
+        return endDate;
+    }
+
+    // Manejar cambios en el selector de período de ventas
+    document.getElementById('salesPeriodSelector').addEventListener('change', function(e) {
+        const period = e.target.value;
+        toggleDateControls('sales', period);
+        
+        if (period === 'weekly') {
+            // Si cambia a vista semanal, actualizar el gráfico con la semana actual
+            updateWeeklyChart('sales');
+        } else if (period !== 'daily') {
+            // Para otros períodos que no sean diario
+            const year = period === 'monthly' ? document.getElementById('salesYearSelector').value : null;
+            updateSalesChart(period, year);
         }
     });
 
-    // Gráfico de Actividad
-    new Chart(document.getElementById('activityChart'), {
-        type: 'bar',
-        data: {
-            labels: Object.keys(activityData),
-            datasets: [{
-                label: 'Pólizas Emitidas',
-                data: Object.values(activityData),
-                backgroundColor: isDarkMode ? '#0284c7aa' : '#0284c7'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                x: {
-                    grid: {
-                        color: gridColor
-                    },
-                    ticks: {
-                        color: textColor
-                    }
-                },
-                y: {
-                    grid: {
-                        color: gridColor
-                    },
-                    ticks: {
-                        color: textColor
-                    }
-                }
-            },
-            plugins: {
-                legend: {
-                    labels: {
-                        color: textColor
-                    }
-                }
-            }
+    // Manejar cambios en el selector de período de actividad
+    document.getElementById('activityPeriodSelector').addEventListener('change', function(e) {
+        const period = e.target.value;
+        toggleDateControls('activity', period);
+        
+        if (period === 'weekly') {
+            // Si cambia a vista semanal, actualizar el gráfico con la semana actual
+            updateWeeklyChart('activity');
+        } else if (period !== 'daily') {
+            // Para otros períodos que no sean diario
+            const year = period === 'monthly' ? document.getElementById('activityYearSelector').value : null;
+            updateActivityChart(period, year);
         }
+    });
+
+    // Manejar cambios en el selector de año de actividad
+    document.getElementById('activityYearSelector').addEventListener('change', function(e) {
+        const year = e.target.value;
+        // Actualizar gráfico con el período mensual y el año seleccionado
+        updateActivityChart('monthly', year);
+    });
+
+    // Manejar botón de aplicar rango de fechas para ventas
+    document.getElementById('salesApplyDateRange').addEventListener('click', function() {
+        const startDate = document.getElementById('salesStartDate').value;
+        const endDate = document.getElementById('salesEndDate').value;
+        
+        if (!startDate || !endDate) {
+            alert('Por favor, seleccione fechas de inicio y fin.');
+            return;
+        }
+        
+        // Validar que la fecha de inicio no sea posterior a la fecha de fin
+        const startDateObj = new Date(startDate);
+        const endDateObj = new Date(endDate);
+        
+        if (startDateObj > endDateObj) {
+            alert('La fecha de inicio no puede ser posterior a la fecha de fin.');
+            return;
+        }
+        
+        // Calcular la diferencia en días
+        const diffTime = Math.abs(endDateObj - startDateObj);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        // Validar que el rango no sea mayor a 30 días
+        if (diffDays > 30) {
+            alert('El rango de fechas no puede ser mayor a 30 días.');
+            return;
+        }
+        
+        // Llamar a la función que actualizará el gráfico con el rango de fechas
+        updateSalesChartWithDateRange(startDate, endDate);
+    });
+    
+    // Manejar botón de aplicar rango de fechas para actividad
+    document.getElementById('activityApplyDateRange').addEventListener('click', function() {
+        const startDate = document.getElementById('activityStartDate').value;
+        const endDate = document.getElementById('activityEndDate').value;
+        
+        if (!startDate || !endDate) {
+            alert('Por favor, seleccione fechas de inicio y fin.');
+            return;
+        }
+        
+        // Validar que la fecha de inicio no sea posterior a la fecha de fin
+        const startDateObj = new Date(startDate);
+        const endDateObj = new Date(endDate);
+        
+        if (startDateObj > endDateObj) {
+            alert('La fecha de inicio no puede ser posterior a la fecha de fin.');
+            return;
+        }
+        
+        // Calcular la diferencia en días
+        const diffTime = Math.abs(endDateObj - startDateObj);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        // Validar que el rango no sea mayor a 30 días
+        if (diffDays > 30) {
+            alert('El rango de fechas no puede ser mayor a 30 días.');
+            return;
+        }
+        
+        // Llamar a la función que actualizará el gráfico con el rango de fechas
+        updateActivityChartWithDateRange(startDate, endDate);
+    });
+    
+    // Función para actualizar el gráfico de ventas con rango de fechas personalizado
+    async function updateSalesChartWithDateRange(startDate, endDate) {
+        try {
+            // Construir URL con parámetros
+            let url = `{{ url_for('reports.sales_data_api') }}?period=daily&start_date=${startDate}&end_date=${endDate}`;
+            
+            // Mostrar indicador de carga
+            const chartCanvas = document.getElementById('salesChart');
+            chartCanvas.style.opacity = '0.5';
+            
+            // Realizar la petición a la API
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                throw new Error('Error al obtener datos');
+            }
+            
+            // Procesar respuesta
+            const data = await response.json();
+            
+            // Formatear fechas para mostrar en el título
+            const formatDisplayDate = (dateStr) => {
+                const [year, month, day] = dateStr.split('-');
+                return `${day}/${month}/${year}`;
+            };
+            
+            // Actualizar título con el rango de fechas
+            const formattedStartDate = formatDisplayDate(startDate);
+            const formattedEndDate = formatDisplayDate(endDate);
+            const chartTitle = `Ventas Diarias ${formattedStartDate} - ${formattedEndDate} (Pólizas Emitidas)`;
+            
+            // Actualizar título en el DOM
+            const chartTitleElem = document.querySelector('.card-container h3');
+            if (chartTitleElem) {
+                chartTitleElem.textContent = chartTitle;
+            }
+            
+            // Recrear el gráfico con los nuevos datos
+            createSalesChart('daily', data);
+            
+            // Restaurar opacidad
+            chartCanvas.style.opacity = '1';
+            
+        } catch (error) {
+            console.error('Error al actualizar el gráfico:', error);
+            alert('No se pudieron cargar los datos. Por favor, intente nuevamente.');
+        }
+    }
+    
+    // Función para obtener etiqueta de eje según el período de actividad
+    function getActivityPeriodAxisLabel(period) {
+        switch(period) {
+            case 'daily': return 'Día';
+            case 'weekly': return 'Semana';
+            case 'monthly': return 'Mes';
+            case 'yearly': return 'Año';
+            default: return 'Período';
+        }
+    }
+
+    // Configurar fechas por defecto para los selectores de rango
+    function setDefaultDateRange() {
+        const today = new Date();
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(today.getDate() - 30);
+        
+        // Formatear fechas para los inputs (YYYY-MM-DD)
+        const formatDate = (date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
+        
+        // Establecer fechas por defecto para el gráfico de ventas
+        document.getElementById('salesStartDate').value = formatDate(thirtyDaysAgo);
+        document.getElementById('salesEndDate').value = formatDate(today);
+        
+        // Establecer fechas por defecto para el gráfico de actividad
+        document.getElementById('activityStartDate').value = formatDate(thirtyDaysAgo);
+        document.getElementById('activityEndDate').value = formatDate(today);
+    }
+    
+    // Llamar a la función para establecer fechas por defecto
+    setDefaultDateRange();
+    
+    // Mostrar/ocultar los controles apropiados según el período seleccionado
+    function toggleDateControls(chartType, period) {
+        const yearSelector = document.getElementById(`${chartType}YearSelector`);
+        const dateRangeContainer = document.getElementById(`${chartType}DateRangeContainer`);
+        
+        // Ocultar todos los controles primero
+        yearSelector.classList.add('hidden');
+        dateRangeContainer.classList.add('hidden');
+        
+        // Eliminar navegación semanal si existe
+        const weekNav = document.getElementById(`${chartType}WeekNav`);
+        if (weekNav) {
+            weekNav.remove();
+        }
+        
+        // Mostrar los controles apropiados según el período
+        if (period === 'monthly') {
+            yearSelector.classList.remove('hidden');
+        } else if (period === 'daily') {
+            dateRangeContainer.classList.remove('hidden');
+        } else if (period === 'weekly') {
+            // Crear y mostrar controles de semana
+            createWeekNavigation(chartType);
+        }
+    }
+    
+    // Función para crear la navegación semanal
+    function createWeekNavigation(chartType) {
+        const periodSelector = document.getElementById(`${chartType}PeriodSelector`);
+        if (!periodSelector || !periodSelector.parentNode) return;
+        
+        // Crear div contenedor
+        const weekNav = document.createElement('div');
+        weekNav.id = `${chartType}WeekNav`;
+        weekNav.className = 'flex items-center space-x-2 ml-2';
+        
+        // Botón semana anterior
+        const prevWeekBtn = document.createElement('button');
+        prevWeekBtn.className = 'text-sm rounded-md bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 py-1 px-2';
+        prevWeekBtn.innerHTML = '<span class="material-symbols-outlined" style="font-size: 16px;">chevron_left</span>';
+        prevWeekBtn.title = 'Semana anterior';
+        
+        // Texto de semana actual
+        const weekLabel = document.createElement('span');
+        weekLabel.id = `${chartType}CurrentWeek`;
+        weekLabel.className = 'text-sm px-2 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100';
+        
+        // Botón semana siguiente
+        const nextWeekBtn = document.createElement('button');
+        nextWeekBtn.className = 'text-sm rounded-md bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 py-1 px-2';
+        nextWeekBtn.innerHTML = '<span class="material-symbols-outlined" style="font-size: 16px;">chevron_right</span>';
+        nextWeekBtn.title = 'Semana siguiente';
+        
+        // Añadir elementos al contenedor
+        weekNav.appendChild(prevWeekBtn);
+        weekNav.appendChild(weekLabel);
+        weekNav.appendChild(nextWeekBtn);
+        
+        // Insertar después del selector de periodo
+        periodSelector.parentNode.appendChild(weekNav);
+        
+        // Eventos para botones de navegación
+        prevWeekBtn.addEventListener('click', function() {
+            navigateWeek(chartType, -1);
+        });
+        
+        nextWeekBtn.addEventListener('click', function() {
+            navigateWeek(chartType, 1);
+        });
+        
+        // Inicializar con la semana actual
+        updateWeekLabel(chartType);
+    }
+
+    // Al cargar la página, inicializar los controles
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inicializar con los controles apropiados mostrados/ocultos
+        toggleDateControls('sales', 'daily');  // Para ventas, mostrar controles de rango de fechas inicialmente
+        toggleDateControls('activity', 'daily');  // Para actividad, ahora también en modo diario
+        
+        // Inicializar el gráfico de actividad con rango de fechas predeterminado (últimos 30 días)
+        const today = new Date();
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(today.getDate() - 30);
+        
+        // Formatear fechas para la API
+        const formatDate = (date) => {
+            return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+        };
+        
+        // Actualizar gráfico con rango de fechas por defecto
+        updateActivityChartWithDateRange(formatDate(thirtyDaysAgo), formatDate(today));
+        
+        // Añadir manejadores de eventos para los checkboxes de categorías
+        document.querySelectorAll('.activity-filter').forEach(checkbox => {
+            checkbox.addEventListener('change', function(e) {
+                // Verificar si hay alguna categoría seleccionada
+                const anyChecked = Array.from(document.querySelectorAll('.activity-filter')).some(cb => cb.checked);
+                
+                // Si no hay ninguna categoría seleccionada, activar "Todas"
+                if (!anyChecked) {
+                    document.getElementById('activity-filter-all').checked = true;
+                }
+                
+                // Actualizar el gráfico con las categorías seleccionadas
+                updateActivityChartWithFilters();
+            });
+        });
     });
 </script>
 {% endblock %}
