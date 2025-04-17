@@ -60,6 +60,16 @@
         .material-symbols-outlined {
             font-size: 1.25rem !important;
         }
+        
+        /* Animación para las barras de progreso */
+        @keyframes progressAnimation {
+            from { width: 0; }
+            to { width: var(--progress-width); }
+        }
+        
+        .animate-progress {
+            animation: progressAnimation 0.8s ease-out forwards;
+        }
     </style>
 
     {% block extra_css %}{% endblock %}

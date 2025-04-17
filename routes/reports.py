@@ -1437,3 +1437,81 @@ def products_performance_api():
     except Exception as e:
         logging.error(f"Error en API de rendimiento de productos: {str(e)}")
         return jsonify({'error': str(e)}), 500
+
+@bp.route('/api/top_agents')
+@login_required
+def top_agents_api():
+    """
+    API para obtener datos de top agentes filtrados por período o fechas.
+    Parámetros: 
+    - period: 'month1', 'month3', 'month6', 'year1', 'all'
+    - start_date: fecha de inicio para rango personalizado (opcional)
+    - end_date: fecha de fin para rango personalizado (opcional)
+    """
+    period = request.args.get('period', 'month1')
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    
+    logging.info(f"top_agents_api - Parámetros: period={period}, start_date={start_date}, end_date={end_date}")
+    
+    try:
+        # Si se proporcionan fechas de inicio y fin, usarlas para filtrar
+        if start_date and end_date:
+            try:
+                logging.info(f"Procesando rango personalizado: {start_date} a {end_date}")
+                start_date_obj = datetime.strptime(start_date, '%Y-%m-%d')
+                end_date_obj = datetime.strptime(end_date, '%Y-%m-%d')
+                # Ajustar end_date para incluir todo el día
+                end_date_obj = end_date_obj.replace(hour=23, minute=59, second=59)
+                
+                return jsonify(get_top_agents(start_date_obj, end_date_obj))
+            except ValueError as e:
+                logging.error(f"Error de formato de fecha: {str(e)}")
+                return jsonify({'error': 'Formato de fecha incorrecto'}), 400
+        
+        # Si no hay fechas personalizadas, usar período preestablecido
+        end_date = datetime.now()
+        
+        if period == 'month1':
+            start_date = end_date - timedelta(days=30)
+        elif period == 'month3':
+            start_date = end_date - timedelta(days=90)
+        elif period == 'month6':
+            start_date = end_date - timedelta(days=180)
+        elif period == 'year1':
+            start_date = end_date - timedelta(days=365)
+        else:  # all
+            start_date = datetime(2000, 1, 1)  # Fecha muy antigua para incluir todo
+        
+        return jsonify(get_top_agents(start_date, end_date))
+        
+    except Exception as e:
+        logging.error(f"Error en top_agents_api: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+def get_top_agents(start_date, end_date):
+    """Obtener top 5 agentes por prima generada en un rango de fechas"""
+    # Consulta para obtener top agentes
+    top_agents = db.session.query(
+        User.name,
+        func.count(Policy.id).label('policy_count'),
+        func.sum(Policy.premium).label('total_premium')
+    ).join(Policy, User.id == Policy.agent_id)\
+    .filter(
+        User.role == UserRole.AGENTE,
+        Policy.solicitation_date.between(start_date, end_date)
+    )\
+    .group_by(User.id, User.name)\
+    .order_by(func.sum(Policy.premium).desc())\
+    .limit(5).all()
+    
+    # Convertir a formato JSON
+    result = []
+    for agent in top_agents:
+        result.append({
+            'name': agent.name,
+            'policy_count': agent.policy_count or 0,
+            'total_premium': float(agent.total_premium) if agent.total_premium else 0
+        })
+    
+    return result

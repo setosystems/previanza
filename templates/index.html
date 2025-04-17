@@ -271,25 +271,80 @@
         </div>
 
         <!-- Top Agents -->
-        <div class="card-container">
+        <div class="card-container top-agents-container">
             <div class="p-4 border-b border-gray-200 dark:border-gray-700">
-                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Top Agentes</h3>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Top Agentes</h3>
+                        <button id="agentsGoalsConfig" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200" title="Configurar metas">
+                            <span class="material-symbols-outlined text-sm">settings</span>
+                        </button>
+                    </div>
+                    <div class="flex space-x-2">
+                        <select id="agentsPeriodSelector" class="text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 py-1 px-2">
+                            <option value="month1" selected>Último mes</option>
+                            <option value="month3">3 meses</option>
+                            <option value="month6">6 meses</option>
+                            <option value="year1">1 año</option>
+                            <option value="custom">Personalizado</option>
+                            <option value="all">Todo</option>
+                        </select>
+                        <div id="agentsDateRangeContainer" class="flex space-x-2 hidden">
+                            <input type="date" id="agentsStartDate" class="text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 py-1 px-2">
+                            <input type="date" id="agentsEndDate" class="text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 py-1 px-2">
+                            <button id="agentsApplyDateRange" class="text-sm rounded-md bg-blue-600 text-white py-1 px-3">Aplicar</button>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="p-4">
-                <div class="space-y-4">
+                <div class="space-y-4 agents-list">
+                    {% set total_premium = top_agents|sum(attribute='total_premium') %}
                     {% for agent in top_agents %}
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-3">
-                            <div class="w-8 h-8 bg-secondary-100 dark:bg-secondary-900 rounded-lg flex items-center justify-center">
-                                <span class="text-secondary-600 dark:text-secondary-400 font-medium">{{ loop.index }}</span>
+                    <div class="flex flex-col space-y-2">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 bg-secondary-100 dark:bg-secondary-900 rounded-lg flex items-center justify-center">
+                                    {% if loop.index == 1 %}
+                                    <span class="material-symbols-rounded text-amber-500 dark:text-amber-400">emoji_events</span>
+                                    {% elif loop.index == 2 %}
+                                    <span class="material-symbols-rounded text-gray-400 dark:text-gray-300">emoji_events</span>
+                                    {% elif loop.index == 3 %}
+                                    <span class="material-symbols-rounded text-amber-700 dark:text-amber-600">emoji_events</span>
+                                    {% else %}
+                                    <span class="text-secondary-600 dark:text-secondary-400 font-medium">{{ loop.index }}</span>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-900 dark:text-gray-100">{{ agent.name }}</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ agent.policy_count }} pólizas</p>
+                                </div>
                             </div>
-                            <div>
-                                <p class="font-medium text-gray-900 dark:text-gray-100">{{ agent.name }}</p>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">{{ agent.policy_count }} pólizas</p>
-                            </div>
+                            <p class="font-medium text-secondary-600 dark:text-secondary-400">${{ "{:,.2f}".format(agent.total_premium) }}</p>
                         </div>
-                        <p class="font-medium text-secondary-600 dark:text-secondary-400">${{ "{:,.2f}".format(agent.total_premium) }}</p>
+                        
+                        {% if total_premium > 0 %}
+                            {% set percentage = ((agent.total_premium / total_premium) * 100)|round|int %}
+                            <div class="relative h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden mt-1" 
+                                 role="progressbar" 
+                                 aria-valuenow="{{ percentage }}" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100">
+                                <div class="absolute top-0 left-0 h-full bg-gradient-to-r from-secondary-500 to-secondary-400 rounded-full transition-all duration-500 ease-out animate-progress" 
+                                     style="width: {{ percentage }}%; --progress-width: {{ percentage }}%;">
+                                     {% if percentage > 10 %}
+                                     <span class="absolute right-1 text-[10px] text-white font-medium">{{ percentage }}%</span>
+                                     {% endif %}
+                                 </div>
+                            </div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 text-right">
+                                {{ percentage }}% del total
+                            </div>
+                        {% endif %}
                     </div>
+                    {% if not loop.last %}
+                    <div class="border-b border-gray-200 dark:border-gray-700 my-2"></div>
+                    {% endif %}
                     {% endfor %}
                 </div>
             </div>
@@ -297,7 +352,47 @@
     </div>
 </div>
 
-{% block extra_js %}
+<!-- Modal para configuración de metas -->
+<div id="goalsConfigModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl p-6">
+        <div class="flex justify-between items-center border-b border-gray-200 dark:border-gray-700 pb-3 mb-4">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Configurar Metas de Agentes</h3>
+            <button id="closeGoalsModal" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        
+        <div class="overflow-y-auto max-h-[70vh]">
+            <div class="mb-4">
+                <div class="flex items-center justify-between mb-2">
+                    <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Establecer meta global para todos los agentes</p>
+                    <div class="flex items-center">
+                        <input type="number" id="globalGoalInput" class="w-32 text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 py-1 px-2 mr-2" placeholder="Meta en $">
+                        <button id="applyGlobalGoal" class="text-sm rounded-md bg-blue-600 text-white py-1 px-3">Aplicar</button>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">Esta configuración aplicará la misma meta a todos los agentes. Para metas individuales, configure cada agente por separado.</p>
+            </div>
+            
+            <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+                <h4 class="text-md font-medium text-gray-800 dark:text-gray-200 mb-3">Metas Individuales</h4>
+                <div id="agentsGoalsList" class="space-y-4">
+                    <!-- Las filas de agentes se generarán dinámicamente -->
+                    <div class="text-center text-gray-500 dark:text-gray-400 py-3">
+                        Cargando agentes...
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="flex justify-end mt-5 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <button id="saveAgentGoals" class="bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg">
+                Guardar Configuración
+            </button>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     // Configuración de gráficos con tema oscuro
@@ -1344,6 +1439,9 @@
                 updateActivityChartWithFilters();
             });
         });
+        
+        // Inicializar manejadores para el selector de Top Agentes
+        initTopAgentsControls();
     });
 
     // Inicializar el escuchador de eventos para el selector de períodos de productos
@@ -1493,6 +1591,718 @@
             document.getElementById('productsList').style.opacity = '1';
         }
     }
+
+    // Función para inicializar controles de Top Agentes
+    function initTopAgentsControls() {
+        // Establecer fechas por defecto para Top Agentes
+        setDefaultDates('agents');
+        
+        // Manejar cambios en el selector de período
+        document.getElementById('agentsPeriodSelector').addEventListener('change', function(e) {
+            const period = e.target.value;
+            
+            // Si se selecciona personalizado, mostrar selectores de fecha
+            if (period === 'custom') {
+                document.getElementById('agentsDateRangeContainer').classList.remove('hidden');
+            } else {
+                document.getElementById('agentsDateRangeContainer').classList.add('hidden');
+                // Actualizar listado con el período seleccionado
+                updateTopAgentsWithPeriod(period);
+            }
+        });
+        
+        // Manejar el botón de aplicar rango personalizado
+        document.getElementById('agentsApplyDateRange').addEventListener('click', function() {
+            const startDate = document.getElementById('agentsStartDate').value;
+            const endDate = document.getElementById('agentsEndDate').value;
+            
+            if (!startDate || !endDate) {
+                alert('Por favor, seleccione fechas de inicio y fin');
+                return;
+            }
+            
+            // Validar que la fecha de inicio sea menor que la de fin
+            if (startDate > endDate) {
+                alert('La fecha de inicio debe ser anterior a la fecha de fin');
+                return;
+            }
+            
+            // Validar que el rango no sea mayor a 365 días
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            const diffTime = Math.abs(end - start);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays > 365) {
+                alert('El rango de fechas no puede ser mayor a 365 días.');
+                return;
+            }
+            
+            // Actualizar listado con rango personalizado
+            updateTopAgentsWithDateRange(startDate, endDate);
+        });
+        
+        // Inicializar con el período por defecto (último mes)
+        updateTopAgentsWithPeriod('month1');
+        
+        // Inicializar controles para la gestión de metas
+        initAgentGoalsControls();
+    }
+    
+    // Mapa para almacenar las metas base mensuales de los agentes
+    let agentGoalsMap = new Map();
+    
+    // Definir multiplicadores para cada período
+    const PERIOD_MULTIPLIERS = {
+        'month1': 1,    // Último mes (base)
+        'month3': 3,    // 3 meses
+        'month6': 6,    // 6 meses
+        'year1': 12,    // 1 año
+        'all': 12,      // Todo (usamos 12 como valor predeterminado)
+        'custom': 1     // Personalizado (ajustable según el rango)
+    };
+    
+    // Función para obtener la meta ajustada según el período
+    function getAdjustedGoal(baseGoal, period, startDate, endDate) {
+        if (!baseGoal || baseGoal <= 0) return 0;
+        
+        // Para períodos predefinidos, usar multiplicador fijo
+        if (period !== 'custom') {
+            const multiplier = PERIOD_MULTIPLIERS[period] || 1;
+            return baseGoal * multiplier;
+        }
+        
+        // Para período personalizado, calcular basado en el rango de fechas
+        if (startDate && endDate) {
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            const diffTime = Math.abs(end - start);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            // Calcular cuántos meses aproximados abarca el rango
+            const monthMultiplier = Math.max(1, Math.round(diffDays / 30));
+            return baseGoal * monthMultiplier;
+        }
+        
+        return baseGoal; // Si todo lo demás falla, devolver la meta base
+    }
+    
+    // Función para inicializar los controles de gestión de metas
+    function initAgentGoalsControls() {
+        // Obtener referencias a elementos del DOM
+        const configButton = document.getElementById('agentsGoalsConfig');
+        const modal = document.getElementById('goalsConfigModal');
+        const closeButton = document.getElementById('closeGoalsModal');
+        const saveButton = document.getElementById('saveAgentGoals');
+        const applyGlobalButton = document.getElementById('applyGlobalGoal');
+        
+        // Modificar el evento de abrir modal para usar los agentes del período actual
+        configButton.addEventListener('click', function() {
+            // Cargar agentes del período actualmente seleccionado
+            const currentPeriod = document.getElementById('agentsPeriodSelector').value;
+            
+            if (currentPeriod === 'custom') {
+                // Si es período personalizado, usar las fechas actuales
+                const startDate = document.getElementById('agentsStartDate').value;
+                const endDate = document.getElementById('agentsEndDate').value;
+                if (startDate && endDate) {
+                    loadAgentsIntoGoalsModal(startDate, endDate);
+                } else {
+                    // Si no hay fechas seleccionadas, usar el período por defecto (month1)
+                    loadAgentsIntoGoalsModal('period', 'month1');
+                }
+            } else {
+                // Para períodos predefinidos
+                loadAgentsIntoGoalsModal('period', currentPeriod);
+            }
+            
+            // Mostrar el modal
+            modal.classList.remove('hidden');
+            
+            // Prevenir scroll en el body
+            document.body.style.overflow = 'hidden';
+        });
+        
+        // Cerrar el modal cuando se hace clic en el botón de cierre
+        closeButton.addEventListener('click', function() {
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        });
+        
+        // Cerrar el modal si se hace clic fuera del contenido
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                modal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        });
+        
+        // Aplicar meta global a todos los agentes
+        applyGlobalButton.addEventListener('click', function() {
+            const globalGoal = parseFloat(document.getElementById('globalGoalInput').value);
+            
+            // DEBUG: Ver el valor de meta global
+            console.log('DEBUG - Valor de meta global base mensual:', globalGoal);
+            
+            if (isNaN(globalGoal) || globalGoal <= 0) {
+                alert('Por favor, ingrese una meta válida mayor a 0');
+                return;
+            }
+            
+            // Aplicar la meta global a todos los inputs de agentes
+            const agentInputs = document.querySelectorAll('.agent-goal-input');
+            
+            // DEBUG: Ver cuántos inputs se encontraron
+            console.log('DEBUG - Número de inputs de agentes:', agentInputs.length);
+            
+            agentInputs.forEach(input => {
+                input.value = globalGoal;
+                const agentKey = input.getAttribute('data-agent-key');
+                
+                // DEBUG: Ver la clave del agente para cada input
+                console.log('DEBUG - Aplicando meta global a clave:', agentKey);
+                
+                if (agentKey) {
+                    agentGoalsMap.set(agentKey, globalGoal);
+                }
+            });
+            
+            // DEBUG: Ver el mapa después de aplicar meta global
+            console.log('DEBUG - Mapa después de aplicar meta global:', new Map(agentGoalsMap));
+            
+            // Guardar inmediatamente en localStorage
+            saveAgentGoalsToStorage();
+            
+            // Notificar al usuario
+            alert('Meta global aplicada a todos los agentes');
+        });
+        
+        // Guardar la configuración de metas
+        saveButton.addEventListener('click', function() {
+            // Recopilar todas las metas ingresadas
+            const agentInputs = document.querySelectorAll('.agent-goal-input');
+            
+            // Limpiar metas existentes que ya no correspondan a agentes actuales
+            // Esto evita acumular metas para agentes que ya no existen
+            agentGoalsMap.clear();
+            
+            // DEBUG: Ver cuántos inputs se van a procesar
+            console.log('DEBUG - Procesando inputs para guardar:', agentInputs.length);
+            
+            // Actualizar el mapa con los valores actuales
+            agentInputs.forEach(input => {
+                const agentKey = input.getAttribute('data-agent-key');
+                const goalValue = parseFloat(input.value);
+                
+                // DEBUG: Ver cada valor que se procesa
+                console.log(`DEBUG - Guardando meta base mensual: agente ${agentKey}, valor ${goalValue}`);
+                
+                if (!isNaN(goalValue) && goalValue > 0 && agentKey) {
+                    agentGoalsMap.set(agentKey, goalValue);
+                }
+            });
+            
+            // Guardar en localStorage para persistencia entre sesiones
+            saveAgentGoalsToStorage();
+            
+            // Actualizar visualización de los agentes con las nuevas metas
+            updateTopAgentsVisualization();
+            
+            // Cerrar el modal
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            
+            // Notificar al usuario
+            alert('Configuración de metas guardada correctamente');
+        });
+        
+        // Cargar metas guardadas previamente
+        loadAgentGoalsFromStorage();
+    }
+
+    // Función para cargar los agentes en el modal de configuración
+    async function loadAgentsIntoGoalsModal(paramType = 'period', paramValue = 'all') {
+        // Obtener el contenedor de la lista de agentes
+        const agentsListContainer = document.getElementById('agentsGoalsList');
+        
+        // Modificar el título del modal para indicar que son metas mensuales base
+        const modalTitle = document.querySelector('#goalsConfigModal h3');
+        if (modalTitle) {
+            modalTitle.textContent = 'Configurar Metas Mensuales Base de Agentes';
+        }
+        
+        // Añadir explicación sobre metas dinámicas
+        const globalGoalSection = document.querySelector('#goalsConfigModal .mb-4');
+        if (globalGoalSection) {
+            const explanationText = globalGoalSection.querySelector('p:last-child');
+            if (explanationText) {
+                explanationText.innerHTML = 'Esta configuración establece la <strong>meta mensual base</strong> para los agentes. La meta se ajustará automáticamente según el período seleccionado en el panel principal.';
+            }
+        }
+        
+        // Limpiar contenido actual
+        agentsListContainer.innerHTML = '<div class="text-center text-gray-500 dark:text-gray-400 py-3">Cargando agentes...</div>';
+        
+        try {
+            // Construir la URL adecuada según el tipo de parámetro
+            let url;
+            if (paramType === 'period') {
+                url = `{{ url_for('reports.top_agents_api') }}?period=${paramValue}`;
+            } else {
+                // Asumir que son fechas de inicio y fin
+                url = `{{ url_for('reports.top_agents_api') }}?start_date=${paramType}&end_date=${paramValue}`;
+            }
+            
+            console.log('DEBUG - Cargando agentes con URL:', url);
+            
+            // Realizar la petición a la API
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                throw new Error('Error al obtener datos de agentes');
+            }
+            
+            const agents = await response.json();
+            
+            // DEBUG: Ver la estructura de los datos de agentes
+            console.log('DEBUG - Datos de agentes recibidos para configuración:', agents);
+            
+            // Limpiar el contenedor
+            agentsListContainer.innerHTML = '';
+            
+            // Verificar si hay agentes
+            if (!agents || agents.length === 0) {
+                agentsListContainer.innerHTML = '<div class="text-center text-gray-500 dark:text-gray-400 py-3">No hay agentes disponibles para el período seleccionado</div>';
+                return;
+            }
+            
+            // DEBUG: Mostrar el mapa de metas actual
+            console.log('DEBUG - Mapa de metas antes de cargar agentes:', new Map(agentGoalsMap));
+            
+            // Crear una fila para cada agente
+            agents.forEach((agent, index) => {
+                // Crear un identificador único y consistente - usar el nombre como ID
+                // Para asegurar unicidad, añadimos un índice si es necesario 
+                const agentName = agent.name || `Agente ${index + 1}`;
+                // Normalizar el nombre como clave (sin espacios, minúsculas)
+                const agentKey = `agent_${agentName.toLowerCase().replace(/\s+/g, '_')}`;
+                
+                // Almacenar la relación entre el agentKey y el objeto agente original
+                if (!agent._agentKey) {
+                    agent._agentKey = agentKey;
+                }
+                
+                // DEBUG: Ver qué ID se está utilizando para cada agente
+                console.log(`DEBUG - Usando la clave: ${agentKey} para el agente: ${agentName}`);
+                
+                // Verificar si ya existe una meta para este agente
+                const currentGoal = agentGoalsMap.has(agentKey) ? agentGoalsMap.get(agentKey) : '';
+                
+                // DEBUG: Ver la meta actual para este agente
+                console.log(`DEBUG - Meta actual para ${agentName} (Clave: ${agentKey}):`, currentGoal);
+                
+                // Crear el elemento para el agente
+                const agentRow = document.createElement('div');
+                agentRow.className = 'flex items-center justify-between border-b border-gray-200 dark:border-gray-700 pb-3';
+                
+                // Añadir contenido HTML
+                agentRow.innerHTML = `
+                    <div>
+                        <p class="font-medium text-gray-900 dark:text-gray-100">${agentName}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Prima actual: $${parseFloat(agent.total_premium).toLocaleString('es-EC', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+                    </div>
+                    <div class="flex items-center">
+                        <label class="text-sm text-gray-700 dark:text-gray-300 mr-2">Meta mensual: $</label>
+                        <input 
+                            type="number" 
+                            class="agent-goal-input w-32 text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 py-1 px-2" 
+                            data-agent-key="${agentKey}"
+                            value="${currentGoal}"
+                            placeholder="Meta mensual en $">
+                    </div>
+                `;
+                
+                // Añadir el elemento al contenedor
+                agentsListContainer.appendChild(agentRow);
+                
+                // Añadir evento para actualizar el mapa cuando cambie el valor
+                const input = agentRow.querySelector('.agent-goal-input');
+                input.addEventListener('change', function() {
+                    const goalValue = parseFloat(this.value);
+                    const inputAgentKey = this.getAttribute('data-agent-key');
+                    
+                    // DEBUG: Ver el cambio de valor
+                    console.log(`DEBUG - Cambio de meta para ${agentName} (Clave: ${inputAgentKey}):`, goalValue);
+                    
+                    if (!isNaN(goalValue) && goalValue > 0 && inputAgentKey) {
+                        // Actualizar solo la meta para este agente específico
+                        agentGoalsMap.set(inputAgentKey, goalValue);
+                        
+                        // DEBUG: Ver el mapa después del cambio
+                        console.log('DEBUG - Mapa después del cambio:', new Map(agentGoalsMap));
+                    }
+                });
+            });
+            
+        } catch (error) {
+            console.error('Error al cargar agentes:', error);
+            agentsListContainer.innerHTML = '<div class="text-center text-red-500 dark:text-red-400 py-3">Error al cargar agentes</div>';
+        }
+    }
+
+    // Función para actualizar el listado de agentes en el DOM
+    function updateTopAgentsList(agents) {
+        const container = document.querySelector('.agents-list');
+        if (!container) return;
+        
+        // Limpiar listado actual
+        container.innerHTML = '';
+        
+        // Si no hay datos, mostrar mensaje
+        if (!agents || agents.length === 0) {
+            const noDataElement = document.createElement('div');
+            noDataElement.className = 'text-center text-gray-500 dark:text-gray-400 py-4';
+            noDataElement.innerText = 'No hay datos disponibles para el período seleccionado.';
+            container.appendChild(noDataElement);
+            return;
+        }
+        
+        // Obtener el período actual y fechas para el cálculo de metas ajustadas
+        const currentPeriod = document.getElementById('agentsPeriodSelector').value;
+        let startDate = null;
+        let endDate = null;
+        
+        if (currentPeriod === 'custom') {
+            startDate = document.getElementById('agentsStartDate').value;
+            endDate = document.getElementById('agentsEndDate').value;
+        }
+        
+        // Calcular el total de primas para determinar el orden/ranking
+        const totalPremium = agents.reduce((sum, agent) => sum + agent.total_premium, 0);
+        
+        // Agregar cada agente al listado
+        agents.forEach((agent, index) => {
+            // Crear la misma clave usada en la configuración de metas
+            const agentName = agent.name || `Agente ${index + 1}`;
+            const agentKey = `agent_${agentName.toLowerCase().replace(/\s+/g, '_')}`;
+            
+            // Buscar la meta base para este agente
+            const baseGoal = agentGoalsMap.has(agentKey) ? agentGoalsMap.get(agentKey) : 0;
+            
+            // Calcular la meta ajustada según el período
+            const adjustedGoal = getAdjustedGoal(baseGoal, currentPeriod, startDate, endDate);
+            
+            // Calcular el porcentaje de progreso hacia la meta ajustada
+            let percentage = 0;
+            if (adjustedGoal > 0) {
+                percentage = Math.min(100, Math.round((agent.total_premium / adjustedGoal) * 100));
+            }
+            
+            const agentElement = document.createElement('div');
+            agentElement.className = 'flex flex-col space-y-2';
+            
+            // Determinar el tipo de icono de ranking basado en la posición (índice)
+            let rankingIcon = '';
+            if (index === 0) {
+                // Medalla de oro para el primer lugar
+                rankingIcon = '<span class="material-symbols-rounded text-amber-500 dark:text-amber-400">emoji_events</span>';
+            } else if (index === 1) {
+                // Medalla de plata para el segundo lugar
+                rankingIcon = '<span class="material-symbols-rounded text-gray-400 dark:text-gray-300">emoji_events</span>';
+            } else if (index === 2) {
+                // Medalla de bronce para el tercer lugar
+                rankingIcon = '<span class="material-symbols-rounded text-amber-700 dark:text-amber-600">emoji_events</span>';
+            } else {
+                // Número de posición para los demás
+                rankingIcon = `<span class="text-secondary-600 dark:text-secondary-400 font-medium">${index + 1}</span>`;
+            }
+            
+            // Parte superior con ranking, nombre y monto
+            const topRow = document.createElement('div');
+            topRow.className = 'flex items-center justify-between';
+            
+            // Crear el contenido con el ranking dinámico
+            topRow.innerHTML = `
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 bg-secondary-100 dark:bg-secondary-900 rounded-lg flex items-center justify-center">
+                        ${rankingIcon}
+                    </div>
+                    <div>
+                        <p class="font-medium text-gray-900 dark:text-gray-100">${agentName}</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">${agent.policy_count} pólizas</p>
+                    </div>
+                </div>
+                <p class="font-medium text-secondary-600 dark:text-secondary-400">
+                    $${parseFloat(agent.total_premium).toLocaleString('es-EC', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                </p>
+            `;
+            
+            // Barra de progreso
+            const progressBar = document.createElement('div');
+            progressBar.className = 'relative h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden mt-1';
+            progressBar.setAttribute('aria-valuenow', percentage);
+            progressBar.setAttribute('aria-valuemin', '0');
+            progressBar.setAttribute('aria-valuemax', '100');
+            progressBar.setAttribute('role', 'progressbar');
+            progressBar.setAttribute('data-agent-key', agentKey);
+            
+            // Determinar color de la barra según el porcentaje de cumplimiento
+            let barColorClass = '';
+            if (percentage < 50) {
+                barColorClass = 'bg-gradient-to-r from-red-500 to-red-400'; // Menos del 50% - Rojo
+            } else if (percentage < 80) {
+                barColorClass = 'bg-gradient-to-r from-yellow-500 to-yellow-400'; // Entre 50% y 80% - Amarillo
+            } else {
+                barColorClass = 'bg-gradient-to-r from-green-500 to-green-400'; // Más del 80% - Verde
+            }
+            
+            // Barra interna con gradiente
+            const progressValue = document.createElement('div');
+            progressValue.className = `absolute top-0 left-0 h-full ${barColorClass} rounded-full transition-all duration-500 ease-out animate-progress`;
+            progressValue.style.width = '0%'; // Iniciar en 0 para la animación
+            progressValue.style.setProperty('--progress-width', `${percentage}%`);
+            
+            // Texto de porcentaje (solo se muestra si es mayor al 10%)
+            if (percentage > 10) {
+                const percentageText = document.createElement('span');
+                percentageText.className = 'absolute right-1 text-[10px] text-white font-medium';
+                percentageText.textContent = `${percentage}%`;
+                progressValue.appendChild(percentageText);
+            }
+            
+            // Agregar al contenedor principal
+            progressBar.appendChild(progressValue);
+            
+            // Añadir información de meta y progreso
+            const progressInfo = document.createElement('div');
+            progressInfo.className = 'flex justify-between text-xs mt-1';
+            
+            // Si hay una meta establecida, mostrar progreso hacia la meta
+            if (baseGoal > 0) {
+                // Determinar texto de explicación según el período
+                let periodText = '';
+                if (currentPeriod === 'month1') {
+                    periodText = 'mensual';
+                } else if (currentPeriod === 'month3') {
+                    periodText = 'trimestral';
+                } else if (currentPeriod === 'month6') {
+                    periodText = 'semestral';
+                } else if (currentPeriod === 'year1') {
+                    periodText = 'anual';
+                } else if (currentPeriod === 'custom') {
+                    periodText = 'para el período seleccionado';
+                } else {
+                    periodText = 'total';
+                }
+                
+                // Mostrar meta ajustada y meta base
+                const multiplier = adjustedGoal / baseGoal;
+                let multiplierText = '';
+                
+                if (multiplier > 1) {
+                    multiplierText = ` (${multiplier}× meta mensual de $${parseFloat(baseGoal).toLocaleString('es-EC', {minimumFractionDigits: 2, maximumFractionDigits: 2})})`;
+                }
+                
+                progressInfo.innerHTML = `
+                    <span class="text-gray-500 dark:text-gray-400">Meta ${periodText}: $${parseFloat(adjustedGoal).toLocaleString('es-EC', {minimumFractionDigits: 2, maximumFractionDigits: 2})}${multiplierText}</span>
+                    <span class="text-gray-500 dark:text-gray-400">${percentage}% completado</span>
+                `;
+            } else {
+                // Si no hay meta, mostrar mensaje para configurar
+                progressInfo.innerHTML = `
+                    <span class="text-gray-500 dark:text-gray-400 italic">Meta no establecida</span>
+                    <button class="text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 text-xs" 
+                            onclick="document.getElementById('agentsGoalsConfig').click()">
+                        Configurar meta
+                    </button>
+                `;
+            }
+            
+            // Animar la barra después de añadirla al DOM
+            setTimeout(() => {
+                progressValue.style.width = `${percentage}%`;
+            }, 50);
+            
+            // Agregar elementos al contenedor del agente
+            agentElement.appendChild(topRow);
+            agentElement.appendChild(progressBar);
+            agentElement.appendChild(progressInfo);
+            
+            // Agregar separador entre agentes
+            const separator = document.createElement('div');
+            separator.className = 'border-b border-gray-200 dark:border-gray-700 my-2';
+            
+            // Añadir al contenedor principal
+            container.appendChild(agentElement);
+            if (index < agents.length - 1) {
+                container.appendChild(separator);
+            }
+        });
+    }
+    
+    // Añadir manejador para actualizar metas dinámicas cuando cambia el período
+    document.getElementById('agentsPeriodSelector').addEventListener('change', function(e) {
+        const period = e.target.value;
+        
+        // Si se selecciona personalizado, mostrar selectores de fecha
+        if (period === 'custom') {
+            document.getElementById('agentsDateRangeContainer').classList.remove('hidden');
+        } else {
+            document.getElementById('agentsDateRangeContainer').classList.add('hidden');
+            // Actualizar listado con el período seleccionado
+            updateTopAgentsWithPeriod(period);
+        }
+    });
+
+    // Guardar las metas en localStorage
+    function saveAgentGoalsToStorage() {
+        try {
+            // DEBUG: Ver el mapa antes de guardar
+            console.log('DEBUG - Mapa antes de guardar:', new Map(agentGoalsMap));
+            
+            // Convertir el mapa a un objeto para almacenarlo
+            const goalsObject = Object.fromEntries(agentGoalsMap);
+            
+            // DEBUG: Ver el objeto convertido
+            console.log('DEBUG - Objeto para localStorage:', goalsObject);
+            
+            localStorage.setItem('agentGoals', JSON.stringify(goalsObject));
+            
+            // DEBUG: Verificar lo que se guardó
+            console.log('DEBUG - Guardado en localStorage:', localStorage.getItem('agentGoals'));
+        } catch (error) {
+            console.error('Error al guardar metas en localStorage:', error);
+        }
+    }
+    
+    // Cargar las metas desde localStorage
+    function loadAgentGoalsFromStorage() {
+        try {
+            const storedGoals = localStorage.getItem('agentGoals');
+            
+            // DEBUG: Ver lo que se recuperó de localStorage
+            console.log('DEBUG - Recuperado de localStorage:', storedGoals);
+            
+            if (storedGoals) {
+                const goalsObject = JSON.parse(storedGoals);
+                
+                // DEBUG: Ver el objeto parseado
+                console.log('DEBUG - Objeto parseado de localStorage:', goalsObject);
+                
+                // Convertir el objeto a un mapa
+                agentGoalsMap = new Map(Object.entries(goalsObject));
+                
+                // DEBUG: Ver el mapa resultante
+                console.log('DEBUG - Mapa cargado de localStorage:', new Map(agentGoalsMap));
+            }
+        } catch (error) {
+            console.error('Error al cargar metas desde localStorage:', error);
+            // Si hay error, inicializar un mapa vacío
+            agentGoalsMap = new Map();
+        }
+    }
+    
+    // Actualizar la visualización de agentes con las metas actualizadas
+    function updateTopAgentsVisualization() {
+        // Obtener el período actual
+        const period = document.getElementById('agentsPeriodSelector').value;
+        
+        if (period === 'custom') {
+            const startDate = document.getElementById('agentsStartDate').value;
+            const endDate = document.getElementById('agentsEndDate').value;
+            if (startDate && endDate) {
+                updateTopAgentsWithDateRange(startDate, endDate);
+            }
+        } else {
+            updateTopAgentsWithPeriod(period);
+        }
+    }
+
+    // Función para establecer fechas por defecto
+    function setDefaultDates(prefixId) {
+        const today = new Date();
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(today.getDate() - 30);
+        
+        // Formatear fechas para los inputs (YYYY-MM-DD)
+        const formatDate = (date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
+        
+        // Establecer fechas por defecto
+        document.getElementById(`${prefixId}StartDate`).value = formatDate(thirtyDaysAgo);
+        document.getElementById(`${prefixId}EndDate`).value = formatDate(today);
+    }
+
+    // Función para actualizar el listado de agentes con un período predefinido
+    async function updateTopAgentsWithPeriod(period) {
+        try {
+            // Mostrar indicador de carga
+            const agentsContainer = document.querySelector('.agents-list');
+            if (!agentsContainer) return;
+            
+            agentsContainer.style.opacity = '0.5';
+            
+            // Construir URL con parámetros
+            let url = `{{ url_for('reports.top_agents_api') }}?period=${period}`;
+            
+            // Realizar la petición a la API
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                throw new Error('Error al obtener datos');
+            }
+            
+            // Procesar respuesta
+            const data = await response.json();
+            
+            // Actualizar el listado con los nuevos datos
+            updateTopAgentsList(data);
+            
+            // Restaurar opacidad
+            agentsContainer.style.opacity = '1';
+            
+        } catch (error) {
+            console.error('Error al actualizar el listado:', error);
+            alert('No se pudieron cargar los datos. Por favor, intente nuevamente.');
+        }
+    }
+
+    // Función para actualizar el listado de agentes con rango personalizado
+    async function updateTopAgentsWithDateRange(startDate, endDate) {
+        try {
+            // Mostrar indicador de carga
+            const agentsContainer = document.querySelector('.agents-list');
+            if (!agentsContainer) return;
+            
+            agentsContainer.style.opacity = '0.5';
+            
+            // Construir URL con parámetros
+            let url = `{{ url_for('reports.top_agents_api') }}?start_date=${startDate}&end_date=${endDate}`;
+            
+            // Realizar la petición a la API
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                throw new Error('Error al obtener datos');
+            }
+            
+            // Procesar respuesta
+            const data = await response.json();
+            
+            // Actualizar el listado con los nuevos datos
+            updateTopAgentsList(data);
+            
+            // Restaurar opacidad
+            agentsContainer.style.opacity = '1';
+            
+        } catch (error) {
+            console.error('Error al actualizar el listado:', error);
+            alert('No se pudieron cargar los datos. Por favor, intente nuevamente.');
+        }
+    }
 </script>
-{% endblock %}
 {% endblock %}
