@@ -176,7 +176,11 @@ def create_policy():
     
     if form.validate_on_submit():
         try:
-            # Crear la póliza sin usar populate_obj
+            # Convertir los valores de los select a enumeraciones
+            emision_status_enum = EmisionStatus[form.emision_status.data]
+            payment_status_enum = PaymentStatus[form.payment_status.data]
+            
+            # Crear la póliza con los datos ya convertidos
             policy = Policy(
                 policy_number=form.policy_number.data,
                 start_date=form.start_date.data,
@@ -185,8 +189,9 @@ def create_policy():
                 product_id=form.product_id.data,
                 client_id=form.client_id.data,
                 agent_id=form.agent_id.data,
-                emision_status=form.emision_status.data,
-                payment_status=form.payment_status.data
+                emision_status=emision_status_enum,
+                payment_status=payment_status_enum,
+                solicitation_date=form.solicitation_date.data
             )
             
             if current_user.role == UserRole.AGENTE:
@@ -226,7 +231,20 @@ def edit_policy(id):
     
     if form.validate_on_submit():
         try:
-            form.populate_obj(policy)
+            # En lugar de usar populate_obj, actualizar manualmente cada campo
+            policy.policy_number = form.policy_number.data
+            policy.start_date = form.start_date.data
+            policy.end_date = form.end_date.data
+            policy.premium = form.premium.data
+            policy.client_id = form.client_id.data
+            policy.product_id = form.product_id.data
+            policy.agent_id = form.agent_id.data
+            policy.solicitation_date = form.solicitation_date.data
+            
+            # Convertir los valores de los select a enumeraciones
+            policy.emision_status = EmisionStatus[form.emision_status.data]
+            policy.payment_status = PaymentStatus[form.payment_status.data]
+            
             db.session.commit()
             flash('Póliza actualizada exitosamente', 'success')
             return redirect(get_return_url(url_for('policies.list_policies')))
