@@ -82,7 +82,10 @@ def list_policies():
         'premium': Policy.premium,
         'start_date': Policy.start_date,
         'end_date': Policy.end_date,
-        'agent': User.name
+        'agent': User.name,
+        'emision_status': Policy.emision_status,
+        'payment_status': Policy.payment_status,
+        'solicitation_date': Policy.solicitation_date
     }
     
     # Aplicar joins para filtrado y ordenamiento
