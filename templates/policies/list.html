@@ -27,7 +27,31 @@
                     </div>
 
                     <div class="flex-1">
-                        <div class="relative">
+                        <div class="relative" x-data="{ 
+                            searchOpen: false, 
+                            searchResults: [],
+                            searchText: '{{ client_name }}',
+                            selectedId: '{{ client_id }}',
+                            searchClient() {
+                                if (this.searchText.length < 2) {
+                                    this.searchResults = [];
+                                    this.searchOpen = false;
+                                    return;
+                                }
+                                
+                                fetch(`/policies/search_clients?query=${encodeURIComponent(this.searchText)}`)
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        this.searchResults = data;
+                                        this.searchOpen = data.length > 0;
+                                    });
+                            },
+                            selectClient(id, name) {
+                                this.searchText = name;
+                                this.selectedId = id;
+                                this.searchOpen = false;
+                            }
+                        }">
                             <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <span class="material-symbols-outlined text-gray-400 dark:text-gray-500">person</span>
                             </span>
@@ -35,45 +59,134 @@
                                    id="client_name" 
                                    name="client_name" 
                                    class="form-input h-10 pl-10 w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150" 
-                                   value="{{ request.args.get('client_name', '') }}"
+                                   x-model="searchText"
+                                   @input="searchClient"
+                                   @focus="searchClient"
+                                   @click.outside="searchOpen = false"
                                    placeholder="Nombre del cliente">
+                            <input type="hidden" name="client_id" x-model="selectedId">
+                            
+                            <!-- Dropdown de resultados de búsqueda -->
+                            <div x-show="searchOpen" 
+                                 class="absolute z-50 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                                <template x-for="client in searchResults" :key="client.id">
+                                    <div @click="selectClient(client.id, client.name)"
+                                         class="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-gray-800 dark:text-gray-200"
+                                         x-text="client.name">
+                                    </div>
+                                </template>
+                            </div>
                         </div>
                     </div>
 
                     <div class="flex-1">
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                <span class="material-symbols-outlined text-gray-400 dark:text-gray-500">inventory_2</span>
-                            </span>
-                            <input type="text" 
-                                   id="product_name" 
-                                   name="product_name" 
-                                   class="form-input h-10 pl-10 w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150" 
-                                   value="{{ request.args.get('product_name', '') }}"
-                                   placeholder="Nombre del producto">
+                        <div x-data="{
+                            useDropdown: true,
+                            searchText: '{{ product_name }}',
+                            selectedId: '{{ product_id }}',
+                            searchResults: [],
+                            searchOpen: false,
+                            searchProduct() {
+                                if (this.searchText.length < 2) {
+                                    this.searchResults = [];
+                                    this.searchOpen = false;
+                                    return;
+                                }
+                                
+                                fetch(`/policies/search_products?query=${encodeURIComponent(this.searchText)}`)
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        this.searchResults = data;
+                                        this.searchOpen = data.length > 0;
+                                    });
+                            },
+                            selectProduct(id, name) {
+                                this.searchText = name;
+                                this.selectedId = id;
+                                this.searchOpen = false;
+                            }
+                        }">
+                            <!-- Selector de productos (dropdown) -->
+                            <div class="relative" x-show="useDropdown">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <span class="material-symbols-outlined text-gray-400 dark:text-gray-500">inventory_2</span>
+                                </span>
+                                <select id="product_id" 
+                                        name="product_id" 
+                                        class="form-select h-10 pl-10 w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150">
+                                    <option value="">Todos los productos</option>
+                                    {% for product in products %}
+                                    <option value="{{ product.id }}" {% if request.args.get('product_id') == product.id|string %}selected{% endif %}>
+                                        {{ product.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                <button type="button" 
+                                        @click="useDropdown = !useDropdown" 
+                                        class="absolute inset-y-0 right-0 pr-3 flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300">
+                                    <span class="material-symbols-outlined text-sm" x-text="useDropdown ? '' : 'list'"></span>
+                                </button>
+                            </div>
+                            
+                            <!-- Campo de búsqueda de productos -->
+                            <div class="relative" x-show="!useDropdown">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <span class="material-symbols-outlined text-gray-400 dark:text-gray-500">inventory_2</span>
+                                </span>
+                                <input type="text" 
+                                       id="product_name" 
+                                       name="product_name" 
+                                       class="form-input h-10 pl-10 w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150" 
+                                       x-model="searchText"
+                                       @input="searchProduct"
+                                       @focus="searchProduct"
+                                       @click.outside="searchOpen = false"
+                                       placeholder="Nombre del producto">
+                                <input type="hidden" name="product_id" x-model="selectedId" x-show="!useDropdown">
+                                <button type="button" 
+                                        @click="useDropdown = !useDropdown" 
+                                        class="absolute inset-y-0 right-0 pr-3 flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300">
+                                    <span class="material-symbols-outlined text-sm">list</span>
+                                </button>
+                                
+                                <!-- Dropdown de resultados de búsqueda de productos -->
+                                <div x-show="searchOpen" 
+                                     class="absolute z-50 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                                    <template x-for="product in searchResults" :key="product.id">
+                                        <div @click="selectProduct(product.id, product.name)"
+                                             class="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer text-gray-800 dark:text-gray-200"
+                                             x-text="product.name">
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
                         </div>
                     </div>
-
-                    <div class="flex items-center">
-                        <button type="submit" 
-                                class="btn-primary h-10 w-10 flex items-center justify-center rounded-lg">
-                            <span class="material-symbols-outlined">search</span>
-                        </button>
-                        
-                        {% if current_user.role in [UserRole.ADMIN, UserRole.DIGITADOR] %}
-                        <div class="flex items-center space-x-2 ml-4">
-                            <a href="{{ url_for('policies.create_policy') }}" 
-                               class="bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white h-10 w-10 flex items-center justify-center rounded-lg transition-colors"
-                               title="Nueva Póliza">
-                                <span class="material-symbols-outlined">add</span>
-                            </a>
-                            <a href="{{ url_for('policies.bulk_upload_policies') }}" 
-                               class="btn-secondary h-10 w-10 flex items-center justify-center rounded-lg"
-                               title="Carga Masiva">
-                                <span class="material-symbols-outlined">upload_file</span>
-                            </a>
+                    
+                    <!-- Botón de limpiar filtros -->
+                    <div class="flex-1">
+                        <!-- Botón de búsqueda -->
+                        <div class="flex items-center justify-end h-10">
+                            <button type="submit" 
+                                    class="btn-primary h-10 w-10 flex items-center justify-center rounded-lg">
+                                <span class="material-symbols-outlined">search</span>
+                            </button>
+                            
+                            {% if current_user.role in [UserRole.ADMIN, UserRole.DIGITADOR] %}
+                            <div class="flex items-center space-x-2 ml-4">
+                                <a href="{{ url_for('policies.create_policy') }}" 
+                                   class="bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 text-white h-10 w-10 flex items-center justify-center rounded-lg transition-colors"
+                                   title="Nueva Póliza">
+                                    <span class="material-symbols-outlined">add</span>
+                                </a>
+                                <a href="{{ url_for('policies.bulk_upload_policies') }}" 
+                                   class="btn-secondary h-10 w-10 flex items-center justify-center rounded-lg"
+                                   title="Carga Masiva">
+                                    <span class="material-symbols-outlined">upload_file</span>
+                                </a>
+                            </div>
+                            {% endif %}
                         </div>
-                        {% endif %}
                     </div>
                 </div>
                 
@@ -212,6 +325,15 @@
                     <div class="flex-1">
                         <!-- Espacio en blanco para mantener la alineación -->
                     </div>
+                </div>
+
+                <!-- Botones de acción adicionales (limpiar filtros) -->
+                <div class="flex justify-end pt-2">
+                    <a href="{{ url_for('policies.list_policies') }}"
+                       class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 flex items-center text-sm">
+                        <span class="material-symbols-outlined text-sm mr-1">filter_alt_off</span>
+                        Limpiar filtros
+                    </a>
                 </div>
             </form>
         </div>

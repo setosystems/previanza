@@ -14,6 +14,7 @@ import sqlalchemy
 import sqlalchemy.exc  # Agregar esta línea
 from utils.url_helpers import get_return_url
 from datetime import datetime, date
+from sqlalchemy import or_
 
 bp = Blueprint('policies', __name__, url_prefix='/policies')
 
@@ -30,7 +31,7 @@ def list_policies():
     # Si hay parámetros en la solicitud, actualizar la sesión
     if request.args:
         # Limpiar la sesión si se hace una nueva búsqueda (cuando hay parámetros pero no hay page)
-        if ('policy_number' in request.args or 'client_id' in request.args) and 'page' not in request.args:
+        if ('policy_number' in request.args or 'client_name' in request.args or 'product_name' in request.args) and 'page' not in request.args:
             if session_key in session:
                 session.pop(session_key)
                 
@@ -38,8 +39,11 @@ def list_policies():
         session[session_key] = {
             'policy_number': request.args.get('policy_number', ''),
             'client_id': request.args.get('client_id', ''),
+            'client_name': request.args.get('client_name', ''),
             'product_id': request.args.get('product_id', ''),
+            'product_name': request.args.get('product_name', ''),
             'agent_id': request.args.get('agent_id', ''),
+            'agent_name': request.args.get('agent_name', ''),
             'status': request.args.get('status', ''),
             'payment_status': request.args.get('payment_status', ''),
             'emision_status': request.args.get('emision_status', ''),
@@ -57,8 +61,11 @@ def list_policies():
     params = session.get(session_key, {})
     policy_number = params.get('policy_number', request.args.get('policy_number', ''))
     client_id = params.get('client_id', request.args.get('client_id', ''))
+    client_name = params.get('client_name', request.args.get('client_name', ''))
     product_id = params.get('product_id', request.args.get('product_id', ''))
+    product_name = params.get('product_name', request.args.get('product_name', ''))
     agent_id = params.get('agent_id', request.args.get('agent_id', ''))
+    agent_name = params.get('agent_name', request.args.get('agent_name', ''))
     status = params.get('status', request.args.get('status', ''))
     payment_status = params.get('payment_status', request.args.get('payment_status', ''))
     emision_status = params.get('emision_status', request.args.get('emision_status', ''))
@@ -78,26 +85,42 @@ def list_policies():
         'agent': User.name
     }
     
+    # Aplicar joins para filtrado y ordenamiento
     query = Policy.query
+    
+    # Siempre aplicamos los joins aquí para poder filtrar por relaciones
+    query = query.join(Client, Policy.client_id == Client.id)
+    query = query.join(Product, Policy.product_id == Product.id)
+    query = query.join(User, Policy.agent_id == User.id)
+    
+    # Aplicar filtros
     if policy_number:
         query = query.filter(Policy.policy_number.ilike(f'%{policy_number}%'))
+    
+    # Filtrado de cliente (por ID o por nombre)
     if client_id:
         query = query.filter(Policy.client_id == client_id)
+    elif client_name:
+        query = query.filter(Client.name.ilike(f'%{client_name}%'))
+    
+    # Filtrado de producto (por ID o por nombre)
     if product_id:
         query = query.filter(Policy.product_id == product_id)
+    elif product_name:
+        query = query.filter(Product.name.ilike(f'%{product_name}%'))
+    
+    # Filtrado de agente (por ID o por nombre)
     if agent_id:
         query = query.filter(Policy.agent_id == agent_id)
+    elif agent_name:
+        query = query.filter(User.name.ilike(f'%{agent_name}%'))
+    
     if status:
         query = query.filter(Policy.status == status)
     if payment_status:
         query = query.filter(Policy.payment_status == payment_status)
     if emision_status:
         query = query.filter(Policy.emision_status == emision_status)
-    
-    # Aplicar joins para ordenamiento
-    query = query.join(Client, Policy.client_id == Client.id)
-    query = query.join(Product, Policy.product_id == Product.id)
-    query = query.join(User, Policy.agent_id == User.id)
     
     # Aplicar ordenamiento
     if sort_by in sort_columns:
@@ -132,7 +155,12 @@ def list_policies():
                           sort_order=sort_order,
                           EmisionStatus=EmisionStatus,
                           PaymentStatus=PaymentStatus,
-                          client_id=client_id)
+                          client_id=client_id,
+                          client_name=client_name,
+                          product_id=product_id,
+                          product_name=product_name,
+                          agent_id=agent_id,
+                          agent_name=agent_name)
 
 @bp.route('/create', methods=['GET', 'POST'])
 @login_required
@@ -524,4 +552,12 @@ def recalculate_commission(id):
         flash(f'Error al recalcular comisiones: {str(e)}', 'error')
     
     return redirect(get_return_url(url_for('policies.policy_detail', id=id)))
+
+@bp.route('/search_products')
+@login_required
+@admin_or_digitador_or_agent_required
+def search_products():
+    query = request.args.get('query', '')
+    products = Product.query.filter(Product.name.ilike(f'%{query}%')).limit(10).all()
+    return jsonify([{'id': p.id, 'name': p.name} for p in products])
 
