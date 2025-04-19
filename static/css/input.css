@@ -5,7 +5,33 @@
 @layer components {
   /* Layout Components */
   .container-fluid {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+    @apply max-w-7xl mx-auto px-4 sm:px-4 lg:px-4;
+  }
+
+  /* Nuevo contenedor principal para todas las páginas - más adaptable */
+  .main-container {
+    @apply space-y-6 pt-4 w-full transition-all duration-300;
+  }
+
+  .main-content-section {
+    @apply mx-4 transition-all duration-300;
+  }
+
+  /* Clase especial para transiciones del sidebar */
+  .sidebar-transition {
+    @apply transition-all duration-300 ease-in-out scale-[0.99] opacity-95;
+    animation: sidebar-adjust 300ms ease-in-out forwards;
+  }
+
+  @keyframes sidebar-adjust {
+    0% {
+      transform: scale(0.99);
+      opacity: 0.95;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
   }
 
   .section {
@@ -202,5 +228,19 @@
 
   .flex-between {
     @apply flex items-center justify-between;
+  }
+
+  /* Estilos para el manejo del sidebar */
+  html[data-sidebar-collapsed="true"] .flex-1.flex.flex-col {
+    margin-left: 4rem !important;
+  }
+
+  html[data-sidebar-collapsed="false"] .flex-1.flex.flex-col {
+    margin-left: 16rem !important;
+  }
+
+  /* Asegurar que la transición se aplique */
+  .flex-1.flex.flex-col {
+    transition: margin-left 0.3s ease-in-out !important;
   }
 } 

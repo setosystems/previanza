@@ -1,7 +1,6 @@
 <aside class="bg-primary-800 dark:bg-gray-800 flex flex-col z-40 shadow-xl transition-all duration-300 ease-in-out fixed 
-            m-2 rounded-2xl h-[calc(100vh-1rem)] sticky top-2 border border-primary-700/50 dark:border-gray-700" 
-       :class="{ 'w-64': !sidebarCollapsed, 'w-16': sidebarCollapsed }"
-       x-data="{ sidebarCollapsed: localStorage.getItem('sidebarCollapsed') === 'true' }">
+            m-2 rounded-2xl h-[calc(100vh-1rem)] top-2 border border-primary-700/50 dark:border-gray-700" 
+       :class="{ 'w-64': !sidebarCollapsed, 'w-16': sidebarCollapsed }">
     <!-- Logo y Marca -->
     <div class="p-4 border-b border-primary-700/50 dark:border-gray-700 flex items-center justify-between shrink-0">
         <div class="flex items-center transition-all duration-300"
@@ -16,7 +15,7 @@
         <button class="text-primary-300 hover:text-white p-2 rounded-lg transition-all duration-300" 
                 type="button" 
                 id="collapse-trigger"
-                @click="sidebarCollapsed = !sidebarCollapsed; localStorage.setItem('sidebarCollapsed', sidebarCollapsed)"
+                @click="$dispatch('sidebar-toggle')"
                 aria-label="Toggle sidebar"
                 :class="{ 'ml-0': sidebarCollapsed, 'ml-auto': !sidebarCollapsed }">
             <i class="uil uil-bars text-lg"></i>

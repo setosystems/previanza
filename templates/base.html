@@ -3,12 +3,17 @@
       x-data="{ 
           darkMode: localStorage.theme === 'dark',
           mobileMenuOpen: false,
-          sidebarCollapsed: localStorage.getItem('sidebarCollapsed') === 'true'
+          sidebarCollapsed: localStorage.getItem('sidebarCollapsed') === 'true',
+          toggleSidebar() {
+              this.sidebarCollapsed = !this.sidebarCollapsed;
+              localStorage.setItem('sidebarCollapsed', this.sidebarCollapsed.toString());
+          }
       }" 
       :class="{ 
           'dark': darkMode,
           'overflow-hidden': mobileMenuOpen
-      }">
+      }"
+      @sidebar-toggle.window="toggleSidebar()">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -96,7 +101,7 @@
         {% endif %}
         
         <!-- Main Content -->
-        <div class="flex-1 flex flex-col min-h-screen"
+        <div class="flex-1 flex flex-col min-h-screen transition-all duration-300"
              :class="{ 
                  {% if not hide_nav %}
                  'lg:ml-64': !sidebarCollapsed && !mobileMenuOpen,
@@ -112,7 +117,7 @@
             <main class="flex-1 overflow-auto bg-gray-50 dark:bg-gray-900 pb-6">
                     {% with messages = get_flashed_messages(with_categories=true) %}
                         {% if messages %}
-                           <div class="max-w-screen-2xl mx-auto px-6">
+                           <div class="max-w-screen-2xl mx-auto px-4">
                             {% for category, message in messages %}
                                 <div class="mb-4 p-4 rounded-lg {% if category == 'error' %}bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-200{% else %}bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-200{% endif %}">
                                     {{ message }}
@@ -215,5 +220,34 @@
     // Mantener el JavaScript existente
     </script>
     {% endblock %}
+    
+    <script>
+        // Manejar transiciones fluidas del sidebar
+        document.addEventListener('DOMContentLoaded', function() {
+            // Revisar inicialmente el estado del sidebar
+            const initialCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+            document.documentElement.setAttribute('data-sidebar-collapsed', initialCollapsed);
+            
+            // Escuchar el evento sidebar-toggle para manejar las transiciones
+            window.addEventListener('sidebar-toggle', function() {
+                const collapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+                document.documentElement.setAttribute('data-sidebar-collapsed', collapsed);
+                
+                // Aplicar transiciones a los elementos del contenido
+                const contentSections = document.querySelectorAll('.main-content-section');
+                contentSections.forEach(section => {
+                    section.classList.add('sidebar-transition');
+                    setTimeout(() => section.classList.remove('sidebar-transition'), 300);
+                });
+                
+                // Forzar un reflow para asegurar que los cambios se apliquen
+                const mainContent = document.querySelector('.flex-1.flex.flex-col');
+                if (mainContent) {
+                    mainContent.style.transition = 'all 0.3s ease-in-out';
+                    mainContent.style.marginLeft = collapsed ? '4rem' : '16rem';
+                }
+            });
+        });
+    </script>
 </body>
 </html>
