@@ -230,17 +230,24 @@
     @apply flex items-center justify-between;
   }
 
-  /* Estilos para el manejo del sidebar */
+  /* Estilos para el manejo del sidebar - CORREGIDO */
   html[data-sidebar-collapsed="true"] .flex-1.flex.flex-col {
-    margin-left: 4rem !important;
+    margin-left: 0 !important;
   }
 
-  html[data-sidebar-collapsed="false"] .flex-1.flex.flex-col {
-    margin-left: 16rem !important;
+  @media (min-width: 1024px) {
+    html[data-sidebar-collapsed="true"] .flex-1.flex.flex-col {
+      margin-left: 4rem !important;
+    }
+    
+    html[data-sidebar-collapsed="false"] .flex-1.flex.flex-col {
+      margin-left: 16rem !important;
+    }
   }
 
   /* Asegurar que la transición se aplique */
   .flex-1.flex.flex-col {
     transition: margin-left 0.3s ease-in-out !important;
+    margin-left: 0 !important; /* Por defecto sin margen en móviles */
   }
 } 
