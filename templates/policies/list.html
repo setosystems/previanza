@@ -184,6 +184,26 @@
                                    title="Carga Masiva">
                                     <span class="material-symbols-outlined">upload_file</span>
                                 </a>
+                                <a href="{{ url_for('policies.export_config', 
+                                           policy_number=request.args.get('policy_number', ''), 
+                                           client_id=request.args.get('client_id', ''),
+                                           client_name=request.args.get('client_name', ''),
+                                           product_id=request.args.get('product_id', ''),
+                                           product_name=request.args.get('product_name', ''),
+                                           agent_id=request.args.get('agent_id', ''),
+                                           agent_name=request.args.get('agent_name', ''),
+                                           emision_status=request.args.get('emision_status', ''),
+                                           payment_status=request.args.get('payment_status', ''),
+                                           start_date_from=request.args.get('start_date_from', ''),
+                                           start_date_to=request.args.get('start_date_to', ''),
+                                           end_date_from=request.args.get('end_date_from', ''),
+                                           end_date_to=request.args.get('end_date_to', ''),
+                                           solicitation_date_from=request.args.get('solicitation_date_from', ''),
+                                           solicitation_date_to=request.args.get('solicitation_date_to', '')) }}" 
+                                   class="btn-secondary h-10 w-10 flex items-center justify-center rounded-lg"
+                                   title="Exportar Pólizas">
+                                    <span class="material-symbols-outlined">download</span>
+                                </a>
                             </div>
                             {% endif %}
                         </div>

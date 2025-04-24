@@ -3,6 +3,7 @@ import click
 from flask import Flask, render_template, redirect, url_for, send_from_directory, flash, jsonify, session
 from flask_login import LoginManager, current_user
 from flask_migrate import Migrate
+from werkzeug.middleware.proxy_fix import ProxyFix
 from config import Config, basedir
 from models import DocumentType, db, User, UserRole, Policy, Commission, Client, Product, SMTPConfig
 from utils.security import decrypt_value
@@ -24,6 +25,9 @@ load_dotenv()  # Cargar variables de entorno desde .env
 def create_app():
     app = Flask(__name__, static_folder='static')
     app.config.from_object(Config)
+    
+    # Configurar ProxyFix para manejar correctamente las redirecciones detrás de un proxy
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
     
     # Configurar sesiones persistentes basadas en cookies
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)

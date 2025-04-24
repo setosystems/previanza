@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% set breadcrumbs = [
+    ('index', 'Inicio'),
+    ('policies.list_policies', 'Pólizas'),
+    ('policies.bulk_upload_policies', 'Carga Masiva'),
+    (None, 'Mapeo de Columnas')
+] %}
+
+{% block content %}
+<div class="space-y-6 px-6 pt-4">
+    <!-- Encabezado -->
+    <div class="card-container">
+        <div class="p-4">
+            <div class="flex items-center">
+                <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 mr-2">grid_view</span>
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Mapeo de Columnas</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Asocia las columnas de tu archivo con los campos del sistema</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Instrucciones -->
+    <div class="card-container p-4">
+        <div class="bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 p-4 rounded-lg">
+            <h4 class="text-lg font-medium mb-2 flex items-center">
+                <span class="material-symbols-outlined mr-2">info</span>
+                Instrucciones
+            </h4>
+            <p class="mb-2">Para cada campo del sistema, selecciona la columna correspondiente de tu archivo Excel.</p>
+            <ul class="list-disc list-inside space-y-1 ml-2">
+                <li>Los campos marcados con * son obligatorios.</li>
+                <li>Si una columna no existe en tu archivo, selecciona "No mapear".</li>
+                <li>Una vez configurado el mapeo, haz clic en "Procesar archivo" para comenzar la importación.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Vista previa del archivo -->
+    <div class="card-container">
+        <div class="border-b border-gray-200 dark:border-gray-700 p-4">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
+                <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 mr-2">table_view</span>
+                Vista previa del archivo
+            </h3>
+        </div>
+        <div class="p-4 overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="bg-gray-50 dark:bg-gray-700">
+                    <tr>
+                        {% for header in headers %}
+                        <th class="table-header text-gray-600 dark:text-gray-300 text-left">
+                            {{ header or 'Columna ' ~ loop.index }}
+                        </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700">
+                    {% if sample_data %}
+                    <tr>
+                        {% for cell in sample_data %}
+                        <td class="table-cell text-gray-900 dark:text-gray-100">
+                            {{ cell }}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="{{ headers|length }}" class="table-cell text-gray-500 dark:text-gray-400 text-center">
+                            No hay datos disponibles en el archivo
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Formulario de mapeo -->
+    <div class="card-container">
+        <div class="border-b border-gray-200 dark:border-gray-700 p-4">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
+                <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 mr-2">settings</span>
+                Configuración de mapeo
+            </h3>
+        </div>
+        <div class="p-4">
+            <form method="POST" action="{{ form_action }}" enctype="multipart/form-data" class="space-y-6">
+                <input type="hidden" name="column_mapping" value="true">
+                
+                <!-- Campos del sistema -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {% for field in system_fields %}
+                    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                        <label class="block mb-2">
+                            <span class="text-gray-700 dark:text-gray-300">
+                                {{ field.name }}
+                                {% if field.required %}
+                                <span class="text-red-500">*</span>
+                                {% endif %}
+                            </span>
+                            <span class="block text-xs text-gray-500 dark:text-gray-400">
+                                Tipo: {{ field.type }}
+                            </span>
+                        </label>
+                        <select name="field_{{ field.id }}" 
+                                class="form-select w-full text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 
+                                       dark:bg-gray-700 rounded-lg focus:ring-primary-500 focus:border-primary-500"
+                                {% if field.required %}required{% endif %}>
+                            <option value="-1">No mapear</option>
+                            {% for header in headers %}
+                            <option value="{{ loop.index0 }}" 
+                                    {% if loop.index0 == 0 and field.id == 'policy_number' or 
+                                       loop.index0 == 1 and field.id == 'start_date' or 
+                                       loop.index0 == 2 and field.id == 'end_date' or 
+                                       loop.index0 == 3 and field.id == 'premium' or 
+                                       loop.index0 == 4 and field.id == 'client_document_number' or 
+                                       loop.index0 == 5 and field.id == 'product_name' or 
+                                       loop.index0 == 6 and field.id == 'agent_document_number' or 
+                                       loop.index0 == 7 and field.id == 'emision_status' or
+                                       loop.index0 == 8 and field.id == 'payment_status' or
+                                       loop.index0 == 9 and field.id == 'solicitation_date'
+                                    %}selected{% endif %}>
+                                {{ header or 'Columna ' ~ (loop.index) }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="flex justify-end space-x-4">
+                    <a href="{{ url_for('policies.bulk_upload_policies') }}" class="btn-secondary">
+                        <span class="material-symbols-outlined mr-2">arrow_back</span>Cancelar
+                    </a>
+                    <button type="submit" class="btn-primary">
+                        <span class="material-symbols-outlined mr-2">check</span>Procesar archivo
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 

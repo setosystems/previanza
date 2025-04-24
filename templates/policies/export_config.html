@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+
+{% set breadcrumbs = [
+    ('index', 'Inicio'),
+    ('policies.list_policies', 'Pólizas'),
+    (None, 'Configuración de Exportación')
+] %}
+
+{% block content %}
+<div class="space-y-6 px-6 pt-4">
+    <!-- Encabezado -->
+    <div class="card-container">
+        <div class="p-4">
+            <div class="flex items-center">
+                <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 mr-2">download</span>
+                <div>
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Configuración de Exportación</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Selecciona las columnas que deseas incluir en el archivo de exportación</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Instrucciones -->
+    <div class="card-container p-4">
+        <div class="bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 p-4 rounded-lg">
+            <h4 class="text-lg font-medium mb-2 flex items-center">
+                <span class="material-symbols-outlined mr-2">info</span>
+                Instrucciones
+            </h4>
+            <p class="mb-2">Personaliza la exportación seleccionando las columnas que deseas incluir en el archivo Excel.</p>
+            <ul class="list-disc list-inside space-y-1 ml-2">
+                <li>Selecciona al menos una columna para exportar.</li>
+                <li>Los filtros aplicados en la lista de pólizas se mantendrán en la exportación.</li>
+                <li>Se aplicarán los mismos filtros que tenías en la pantalla anterior.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Formulario de configuración -->
+    <div class="card-container">
+        <div class="border-b border-gray-200 dark:border-gray-700 p-4">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
+                <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 mr-2">settings</span>
+                Selección de columnas
+            </h3>
+        </div>
+        <div class="p-4">
+            <form method="GET" action="{{ url_for('policies.export_policies_for_update') }}" class="space-y-6">
+                <!-- Pasar todos los filtros actuales como campos ocultos -->
+                {% for key, value in request.args.items() %}
+                    {% if key != 'columns' %}
+                        <input type="hidden" name="{{ key }}" value="{{ value }}">
+                    {% endif %}
+                {% endfor %}
+                
+                <!-- Grupos de columnas para seleccionar -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Información básica de póliza -->
+                    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                        <h4 class="font-medium text-gray-900 dark:text-gray-100 mb-3 pb-2 border-b border-gray-200 dark:border-gray-700">
+                            Información de Póliza
+                        </h4>
+                        <div class="space-y-3">
+                            <label class="flex items-center">
+                                <input type="checkbox" name="columns" value="policy_number" class="form-checkbox" checked>
+                                <span class="ml-2 text-gray-700 dark:text-gray-300">Número de Póliza</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="columns" value="start_date" class="form-checkbox" checked>
+                                <span class="ml-2 text-gray-700 dark:text-gray-300">Fecha de Inicio</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="columns" value="end_date" class="form-checkbox" checked>
+                                <span class="ml-2 text-gray-700 dark:text-gray-300">Fecha de Fin</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="columns" value="premium" class="form-checkbox" checked>
+                                <span class="ml-2 text-gray-700 dark:text-gray-300">Prima</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="columns" value="solicitation_date" class="form-checkbox" checked>
+                                <span class="ml-2 text-gray-700 dark:text-gray-300">Fecha de Solicitud</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Información del cliente -->
+                    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                        <h4 class="font-medium text-gray-900 dark:text-gray-100 mb-3 pb-2 border-b border-gray-200 dark:border-gray-700">
+                            Información del Cliente
+                        </h4>
+                        <div class="space-y-3">
+                            <label class="flex items-center">
+                                <input type="checkbox" name="columns" value="client_name" class="form-checkbox" checked>
+                                <span class="ml-2 text-gray-700 dark:text-gray-300">Nombre del Cliente</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="columns" value="client_document_number" class="form-checkbox" checked>
+                                <span class="ml-2 text-gray-700 dark:text-gray-300">Número de Documento</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="columns" value="client_email" class="form-checkbox">
+                                <span class="ml-2 text-gray-700 dark:text-gray-300">Email</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="columns" value="client_phone" class="form-checkbox">
+                                <span class="ml-2 text-gray-700 dark:text-gray-300">Teléfono</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="columns" value="client_address" class="form-checkbox">
+                                <span class="ml-2 text-gray-700 dark:text-gray-300">Dirección</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Información del producto -->
+                    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                        <h4 class="font-medium text-gray-900 dark:text-gray-100 mb-3 pb-2 border-b border-gray-200 dark:border-gray-700">
+                            Información del Producto
+                        </h4>
+                        <div class="space-y-3">
+                            <label class="flex items-center">
+                                <input type="checkbox" name="columns" value="product_name" class="form-checkbox" checked>
+                                <span class="ml-2 text-gray-700 dark:text-gray-300">Nombre del Producto</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="columns" value="product_description" class="form-checkbox">
+                                <span class="ml-2 text-gray-700 dark:text-gray-300">Descripción</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="columns" value="product_aseguradora" class="form-checkbox">
+                                <span class="ml-2 text-gray-700 dark:text-gray-300">Aseguradora</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Información del agente -->
+                    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                        <h4 class="font-medium text-gray-900 dark:text-gray-100 mb-3 pb-2 border-b border-gray-200 dark:border-gray-700">
+                            Información del Agente
+                        </h4>
+                        <div class="space-y-3">
+                            <label class="flex items-center">
+                                <input type="checkbox" name="columns" value="agent_name" class="form-checkbox" checked>
+                                <span class="ml-2 text-gray-700 dark:text-gray-300">Nombre del Agente</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="columns" value="agent_document_number" class="form-checkbox" checked>
+                                <span class="ml-2 text-gray-700 dark:text-gray-300">Número de Documento</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="columns" value="agent_email" class="form-checkbox">
+                                <span class="ml-2 text-gray-700 dark:text-gray-300">Email</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="columns" value="agent_phone" class="form-checkbox">
+                                <span class="ml-2 text-gray-700 dark:text-gray-300">Teléfono</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Estados -->
+                    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                        <h4 class="font-medium text-gray-900 dark:text-gray-100 mb-3 pb-2 border-b border-gray-200 dark:border-gray-700">
+                            Estados
+                        </h4>
+                        <div class="space-y-3">
+                            <label class="flex items-center">
+                                <input type="checkbox" name="columns" value="emision_status" class="form-checkbox" checked>
+                                <span class="ml-2 text-gray-700 dark:text-gray-300">Estado de Emisión</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="columns" value="payment_status" class="form-checkbox" checked>
+                                <span class="ml-2 text-gray-700 dark:text-gray-300">Estado de Pago</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end space-x-4">
+                    <a href="{{ url_for('policies.list_policies',
+                                       policy_number=request.args.get('policy_number', ''), 
+                                       client_id=request.args.get('client_id', ''),
+                                       client_name=request.args.get('client_name', ''),
+                                       product_id=request.args.get('product_id', ''),
+                                       product_name=request.args.get('product_name', ''),
+                                       agent_id=request.args.get('agent_id', ''),
+                                       agent_name=request.args.get('agent_name', ''),
+                                       emision_status=request.args.get('emision_status', ''),
+                                       payment_status=request.args.get('payment_status', ''),
+                                       start_date_from=request.args.get('start_date_from', ''),
+                                       start_date_to=request.args.get('start_date_to', ''),
+                                       end_date_from=request.args.get('end_date_from', ''),
+                                       end_date_to=request.args.get('end_date_to', ''),
+                                       solicitation_date_from=request.args.get('solicitation_date_from', ''),
+                                       solicitation_date_to=request.args.get('solicitation_date_to', '')) }}" 
+                       class="btn-secondary">
+                        <span class="material-symbols-outlined mr-2">arrow_back</span>Cancelar
+                    </a>
+                    <button type="submit" class="btn-primary">
+                        <span class="material-symbols-outlined mr-2">download</span>Exportar Pólizas
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 
