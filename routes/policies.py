@@ -229,6 +229,11 @@ def edit_policy(id):
         if policy.agent:
             form.agent.data = policy.agent.name
             form.agent_id.data = policy.agent_id
+        # Establecer correctamente los valores de los estados
+        if policy.emision_status:
+            form.emision_status.data = policy.emision_status.name
+        if policy.payment_status:
+            form.payment_status.data = policy.payment_status.name
     
     if form.validate_on_submit():
         try:
