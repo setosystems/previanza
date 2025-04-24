@@ -322,7 +322,7 @@ class EmisionStatus(enum.Enum):
     PENDIENTE = "Pendiente"
     EMITIDA = "Emitida"
     CADUCADA = "Caducada"
-    ANULADA = "Negada"
+    ANULADA = "Anulada"
     REENVIADA = "Reenviada"
     REQUERIMIENTO = "Req"
     OTROS = "Otros"
