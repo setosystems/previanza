@@ -606,6 +606,9 @@
                                 'Emitida': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
                                 'Pendiente': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
                                 'Anulada': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+                                'Caducada': 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
+                                'Reenviada': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+                                'Req': 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
                                 'Otros': 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
                             } %}
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ status_classes[policy.emision_status.value] }}">
@@ -680,8 +683,16 @@
                                     bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
                                 {% elif policy.emision_status.name == 'PENDIENTE' %}
                                     bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
-                                {% else %}
+                                {% elif policy.emision_status.name == 'ANULADA' %}
                                     bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
+                                {% elif policy.emision_status.name == 'CADUCADA' %}
+                                    bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200
+                                {% elif policy.emision_status.name == 'REENVIADA' %}
+                                    bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200
+                                {% elif policy.emision_status.name == 'REQUERIMIENTO' %}
+                                    bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200
+                                {% else %}
+                                    bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200
                                 {% endif %}">
                                 {{ policy.emision_status.value }}
                             </span>

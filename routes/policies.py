@@ -305,8 +305,8 @@ def bulk_upload_policies():
                 # Guardar la ruta del archivo en la sesión para usarla en el siguiente paso
                 session['temp_file_path'] = file_path
                 
-                # Leer encabezados del archivo
-                workbook = openpyxl.load_workbook(file_path)
+                # Leer encabezados del archivo - CARGAR CON DATOS EN LUGAR DE FÓRMULAS
+                workbook = openpyxl.load_workbook(file_path, data_only=True)
                 sheet = workbook.active
                 
                 # Obtener los encabezados (primera fila)
@@ -381,7 +381,8 @@ def process_file_with_mapping(file, form_data):
     error_count = 0
         
     try:
-        workbook = openpyxl.load_workbook(file_path)
+        # Cargar el workbook con valores calculados en lugar de fórmulas
+        workbook = openpyxl.load_workbook(file_path, data_only=True)
         sheet = workbook.active
         
         # Procesar cada fila, empezando desde la segunda (la primera son los encabezados)
@@ -474,12 +475,9 @@ def process_file_with_mapping(file, form_data):
                 try:
                     # Mapeo para valores que existen en el modelo pero no en la base de datos
                     emision_status_map = {
-                        'REQ': 'PENDIENTE',            # Mapear REQ a PENDIENTE
-                        'REENVIADA': 'PENDIENTE',      # Mapear REENVIADA a PENDIENTE
-                        'req': 'PENDIENTE',            # Versión en minúsculas
-                        'reenviada': 'PENDIENTE',      # Versión en minúsculas
-                        'Req': 'PENDIENTE',            # Versión mixta
-                        'Reenviada': 'PENDIENTE',      # Versión mixta
+                        'REQ': 'REQUERIMIENTO',       # Mapear REQ a REQUERIMIENTO
+                        'req': 'REQUERIMIENTO',        # Versión en minúsculas
+                        'Req': 'REQUERIMIENTO',        # Versión mixta
                     }
                     
                     # Normalizar a mayúsculas
