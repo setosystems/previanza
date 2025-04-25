@@ -87,7 +87,9 @@
                                        name="birthdate_from" 
                                        class="form-input h-10 pl-10 w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150" 
                                        value="{{ birthdate_from }}"
-                                       placeholder="Fecha desde">
+                                       placeholder="Fecha desde"
+                                       pattern="\d{4}-\d{2}-\d{2}"
+                                       title="Formato de fecha: YYYY-MM-DD">
                             </div>
                             <span class="text-gray-600 dark:text-gray-300">-</span>
                             <div class="relative flex-1">
@@ -99,7 +101,9 @@
                                        name="birthdate_to" 
                                        class="form-input h-10 pl-10 w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150" 
                                        value="{{ birthdate_to }}"
-                                       placeholder="Fecha hasta">
+                                       placeholder="Fecha hasta"
+                                       pattern="\d{4}-\d{2}-\d{2}"
+                                       title="Formato de fecha: YYYY-MM-DD">
                             </div>
                             <label for="birthdate_from" class="text-sm text-gray-600 dark:text-gray-300 whitespace-nowrap">Rango Fecha Nacimiento</label>
                         </div>
@@ -191,7 +195,26 @@
                             {% endif %}
                         </a>
                     </th>
-                    <th class="table-header text-gray-600 dark:text-gray-300">Estado</th>
+                    <th class="table-header text-gray-600 dark:text-gray-300">
+                        <a href="{{ url_for('clients.list_clients', 
+                                sort_by='is_active', 
+                                sort_order='asc' if sort_by != 'is_active' or sort_order == 'desc' else 'desc', 
+                                name=request.args.get('name', ''), 
+                                email=request.args.get('email', ''), 
+                                document=request.args.get('document', ''),
+                                birthdate_from=request.args.get('birthdate_from', ''),
+                                birthdate_to=request.args.get('birthdate_to', ''),
+                                document_type=request.args.get('document_type', ''), 
+                                page=request.args.get('page', 1), 
+                                per_page=request.args.get('per_page', 10)) }}" class="flex items-center justify-between hover:text-primary-600 dark:hover:text-primary-400">
+                            Estado
+                            {% if sort_by == 'is_active' %}
+                                <span class="material-symbols-outlined text-xs ml-1">{{ 'arrow_upward' if sort_order == 'asc' else 'arrow_downward' }}</span>
+                            {% else %}
+                                <span class="material-symbols-outlined text-xs ml-1">sort</span>
+                            {% endif %}
+                        </a>
+                    </th>
                     <th class="table-header text-gray-600 dark:text-gray-300">Acciones</th>
                 </tr>
             </thead>

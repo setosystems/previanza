@@ -284,6 +284,7 @@ class Client(db.Model):
     document_type = db.Column(Enum(DocumentType))
     document_number = db.Column(String(20))
     birthdate = db.Column(Date)
+    is_active = db.Column(Boolean, default=True)
     policies = relationship('Policy', back_populates='client')
 
     __table_args__ = (
