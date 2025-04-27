@@ -48,6 +48,12 @@ def list_policies():
             'status': request.args.get('status', ''),
             'payment_status': request.args.get('payment_status', ''),
             'emision_status': request.args.get('emision_status', ''),
+            'start_date_from': request.args.get('start_date_from', ''),
+            'start_date_to': request.args.get('start_date_to', ''),
+            'end_date_from': request.args.get('end_date_from', ''),
+            'end_date_to': request.args.get('end_date_to', ''),
+            'solicitation_date_from': request.args.get('solicitation_date_from', ''),
+            'solicitation_date_to': request.args.get('solicitation_date_to', ''),
             'sort_by': request.args.get('sort_by', 'start_date'),
             'sort_order': request.args.get('sort_order', 'desc'),
             'page': request.args.get('page', 1, type=int),
@@ -70,6 +76,14 @@ def list_policies():
     status = params.get('status', request.args.get('status', ''))
     payment_status = params.get('payment_status', request.args.get('payment_status', ''))
     emision_status = params.get('emision_status', request.args.get('emision_status', ''))
+    
+    # Parámetros de filtro de fechas
+    start_date_from = params.get('start_date_from', request.args.get('start_date_from', ''))
+    start_date_to = params.get('start_date_to', request.args.get('start_date_to', ''))
+    end_date_from = params.get('end_date_from', request.args.get('end_date_from', ''))
+    end_date_to = params.get('end_date_to', request.args.get('end_date_to', ''))
+    solicitation_date_from = params.get('solicitation_date_from', request.args.get('solicitation_date_from', ''))
+    solicitation_date_to = params.get('solicitation_date_to', request.args.get('solicitation_date_to', ''))
     
     # Parámetros de ordenamiento
     sort_by = params.get('sort_by', request.args.get('sort_by', 'start_date'))
@@ -126,6 +140,49 @@ def list_policies():
     if emision_status:
         query = query.filter(Policy.emision_status == emision_status)
     
+    # Filtrado por fechas
+    if start_date_from:
+        try:
+            start_from = parser.parse(start_date_from).date()
+            query = query.filter(Policy.start_date >= start_from)
+        except:
+            pass
+    
+    if start_date_to:
+        try:
+            start_to = parser.parse(start_date_to).date()
+            query = query.filter(Policy.start_date <= start_to)
+        except:
+            pass
+    
+    if end_date_from:
+        try:
+            end_from = parser.parse(end_date_from).date()
+            query = query.filter(Policy.end_date >= end_from)
+        except:
+            pass
+    
+    if end_date_to:
+        try:
+            end_to = parser.parse(end_date_to).date()
+            query = query.filter(Policy.end_date <= end_to)
+        except:
+            pass
+    
+    if solicitation_date_from:
+        try:
+            sol_from = parser.parse(solicitation_date_from).date()
+            query = query.filter(Policy.solicitation_date >= sol_from)
+        except:
+            pass
+    
+    if solicitation_date_to:
+        try:
+            sol_to = parser.parse(solicitation_date_to).date()
+            query = query.filter(Policy.solicitation_date <= sol_to)
+        except:
+            pass
+    
     # Aplicar ordenamiento
     if sort_by in sort_columns:
         if sort_order == 'desc':
@@ -164,7 +221,13 @@ def list_policies():
                           product_id=product_id,
                           product_name=product_name,
                           agent_id=agent_id,
-                          agent_name=agent_name)
+                          agent_name=agent_name,
+                          start_date_from=start_date_from,
+                          start_date_to=start_date_to,
+                          end_date_from=end_date_from,
+                          end_date_to=end_date_to,
+                          solicitation_date_from=solicitation_date_from,
+                          solicitation_date_to=solicitation_date_to)
 
 @bp.route('/create', methods=['GET', 'POST'])
 @login_required
