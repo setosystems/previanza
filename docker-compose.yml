@@ -11,6 +11,7 @@ services:
       - FLASK_APP=app.py
       - FLASK_ENV=development
       - FLASK_DEBUG=1
+      - FLASK_APP_WORKER_ID=1
       - DATABASE_URL=postgresql://admin:admin@db/previanza
       - UPLOAD_FOLDER=/app/static/uploads
       - PRODUCT_IMAGES_FOLDER=/app/static/img/products
@@ -71,6 +72,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./backups:/backups
     ports:
       - "5436:5432"
     networks:
