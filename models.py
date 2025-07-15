@@ -350,10 +350,55 @@ class Policy(db.Model):
     emision_status = db.Column(Enum(EmisionStatus), nullable=False, default=EmisionStatus.PENDIENTE)
     payment_status = db.Column(Enum(PaymentStatus), nullable=False, default=PaymentStatus.PENDIENTE)
     solicitation_date = db.Column(Date, nullable=True)
+    
+    # === CAMPOS SDP INTEGRADOS ===
+    # Información financiera detallada
+    net_premium = db.Column(Numeric(10, 2), nullable=True)          # Prima neta
+    savings_amount = db.Column(Numeric(10, 2), nullable=True)       # Ahorro
+    payment_method = db.Column(String(100), nullable=True)          # Forma de pago
+    payment_frequency = db.Column(String(20), nullable=True)        # Frecuencia de pago
+    
+    # Información de fechas SDP
+    document_sent_date = db.Column(Date, nullable=True)             # Fecha envío documento
+    last_collection_date = db.Column(Date, nullable=True)          # Última fecha cobro
+    
+    # Información bancaria
+    financial_entity = db.Column(String(100), nullable=True)       # Entidad financiera
+    account_type = db.Column(String(50), nullable=True)            # Tipo cuenta
+    
+    # Información de cuotas
+    total_installments = db.Column(Integer, nullable=True)         # Número total de cuotas
+    paid_installments = db.Column(Integer, default=0)              # Cuotas pagadas
+    
+    # Metadatos adicionales SDP
+    cause_description = db.Column(String(255), nullable=True)      # Causal
+    commission_status_sdp = db.Column(String(50), nullable=True)   # Estado comisión SDP
+    
     client = relationship('Client', back_populates='policies')
     product = relationship('Product', back_populates='policies')
     agent = relationship('User', back_populates='policies')
     commissions = relationship('Commission', back_populates='policy', cascade='all, delete-orphan')
+    installments = relationship('PolicyInstallment', back_populates='policy', cascade='all, delete-orphan')
+
+class PolicyInstallment(db.Model):
+    """
+    Modelo para las cuotas individuales de las pólizas.
+    Maneja cada cuota de pago por separado con su estado individual.
+    """
+    id = db.Column(Integer, primary_key=True)
+    policy_id = db.Column(Integer, ForeignKey('policy.id'), nullable=False)
+    installment_number = db.Column(Integer, nullable=False)         # Número de cuota (1, 2, 3...)
+    amount = db.Column(Numeric(10, 2), nullable=False)             # Monto de la cuota
+    due_date = db.Column(Date, nullable=True)                      # Fecha vencimiento
+    payment_date = db.Column(Date, nullable=True)                  # Fecha de pago real
+    payment_status = db.Column(Enum(PaymentStatus), nullable=False, default=PaymentStatus.PENDIENTE)
+    collection_date = db.Column(Date, nullable=True)               # Fecha aplicación cobro SDP
+    
+    # Relación
+    policy = relationship('Policy', back_populates='installments')
+    
+    # Constraint: Una sola cuota por número en cada póliza
+    __table_args__ = (db.UniqueConstraint('policy_id', 'installment_number'),)
 
 class Commission(db.Model):
     """

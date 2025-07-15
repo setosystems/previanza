@@ -5,7 +5,7 @@ from flask_login import LoginManager, current_user
 from flask_migrate import Migrate
 from werkzeug.middleware.proxy_fix import ProxyFix
 from config import Config, basedir
-from models import DocumentType, db, User, UserRole, Policy, Commission, Client, Product, SMTPConfig
+from models import DocumentType, db, User, UserRole, Policy, PolicyInstallment, Commission, Client, Product, SMTPConfig
 from utils.security import decrypt_value
 from sqlalchemy.exc import OperationalError
 import time

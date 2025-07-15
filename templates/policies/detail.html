@@ -147,6 +147,173 @@
             </div>
         </div>
 
+        <!-- Información SDP y Cuotas -->
+        <div class="card-container md:col-span-2">
+            <div class="border-b border-gray-200 dark:border-gray-700 p-4">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
+                    <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 mr-2">credit_card</span>
+                    Información SDP
+                </h3>
+            </div>
+            <div class="p-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Información Financiera -->
+                    <div class="space-y-4">
+                        <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700 pb-2">
+                            Información Financiera
+                        </h4>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Prima Neta</p>
+                            <p class="text-gray-900 dark:text-gray-100">${{ "{:,.2f}".format(policy.net_premium) if policy.net_premium else 'No especificada' }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Ahorro</p>
+                            <p class="text-gray-900 dark:text-gray-100">${{ "{:,.2f}".format(policy.savings_amount) if policy.savings_amount else 'No especificado' }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Forma de Pago</p>
+                            <p class="text-gray-900 dark:text-gray-100">{{ policy.payment_method or 'No especificada' }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Frecuencia</p>
+                            <p class="text-gray-900 dark:text-gray-100">{{ policy.payment_frequency or 'No especificada' }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Información Bancaria -->
+                    <div class="space-y-4">
+                        <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700 pb-2">
+                            Información Bancaria
+                        </h4>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Entidad Financiera</p>
+                            <p class="text-gray-900 dark:text-gray-100">{{ policy.financial_entity or 'No especificada' }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Tipo de Cuenta</p>
+                            <p class="text-gray-900 dark:text-gray-100">{{ policy.account_type or 'No especificado' }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Fechas SDP -->
+                    <div class="space-y-4">
+                        <h4 class="text-sm font-medium text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700 pb-2">
+                            Fechas SDP
+                        </h4>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Envío Documento</p>
+                            <p class="text-gray-900 dark:text-gray-100">{{ policy.document_sent_date.strftime('%d/%m/%Y') if policy.document_sent_date else 'No especificada' }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Último Cobro</p>
+                            <p class="text-gray-900 dark:text-gray-100">{{ policy.last_collection_date.strftime('%d/%m/%Y') if policy.last_collection_date else 'No especificada' }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Estado Comisión SDP</p>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                {% if policy.commission_status_sdp == 'LIQUIDADO' %}
+                                    bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+                                {% elif policy.commission_status_sdp == 'PENDIENTE' %}
+                                    bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
+                                {% else %}
+                                    bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200
+                                {% endif %}">
+                                {{ policy.commission_status_sdp or 'No especificado' }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cuotas de Pago -->
+        <div class="card-container md:col-span-2">
+            <div class="border-b border-gray-200 dark:border-gray-700 p-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
+                        <span class="material-symbols-outlined text-primary-600 dark:text-primary-400 mr-2">receipt_long</span>
+                        Cuotas de Pago
+                    </h3>
+                    <div class="text-sm text-gray-500 dark:text-gray-400">
+                        {{ policy.paid_installments }}/{{ policy.total_installments or 1 }} cuotas pagadas
+                    </div>
+                </div>
+            </div>
+            <div class="p-4">
+                {% if policy.installments %}
+                <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead class="bg-gray-50 dark:bg-gray-800">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Cuota #</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Monto</th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Estado</th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Fecha Vencimiento</th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Fecha Pago</th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Fecha Cobro SDP</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                            {% for installment in policy.installments|sort(attribute='installment_number') %}
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
+                                    Cuota {{ installment.installment_number }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900 dark:text-gray-100">
+                                    ${{ "{:,.2f}".format(installment.amount) }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                        {% if installment.payment_status.name == 'PAGADO' %}
+                                            bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+                                        {% elif installment.payment_status.name == 'PENDIENTE' %}
+                                            bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
+                                        {% else %}
+                                            bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
+                                        {% endif %}">
+                                        {{ installment.payment_status.value }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900 dark:text-gray-100">
+                                    {{ installment.due_date.strftime('%d/%m/%Y') if installment.due_date else '-' }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900 dark:text-gray-100">
+                                    {{ installment.payment_date.strftime('%d/%m/%Y') if installment.payment_date else '-' }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-900 dark:text-gray-100">
+                                    {{ installment.collection_date.strftime('%d/%m/%Y') if installment.collection_date else '-' }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot class="bg-gray-50 dark:bg-gray-800">
+                            <tr>
+                                <td class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Total</td>
+                                <td class="px-6 py-3 text-right text-sm font-medium text-gray-900 dark:text-gray-100">
+                                    ${{ "{:,.2f}".format(policy.installments|sum(attribute='amount')) }}
+                                </td>
+                                <td colspan="4" class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300">
+                                    {% set paid_installments = policy.installments|selectattr('payment_status.name', 'equalto', 'PAGADO')|list|length %}
+                                    {{ paid_installments }}/{{ policy.installments|length }} cuotas pagadas
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-8">
+                    <div class="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="material-symbols-outlined text-gray-400 dark:text-gray-500">receipt_long_off</span>
+                    </div>
+                    <p class="text-gray-500 dark:text-gray-400">No hay cuotas registradas para esta póliza.</p>
+                    <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">
+                        Las cuotas se generan automáticamente al importar datos desde SDP.
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
         <!-- Comisiones -->
         <div class="card-container md:col-span-2">
             <div class="border-b border-gray-200 dark:border-gray-700 p-4">

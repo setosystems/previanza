@@ -467,6 +467,18 @@
                             </a>
                         </th>
                         <th class="table-header text-gray-600 dark:text-gray-300 text-center">
+                            <div class="flex flex-col items-center">
+                                <span class="text-xs font-medium">Cuotas</span>
+                                <span class="text-xs text-gray-500 dark:text-gray-400">(Pagadas/Total)</span>
+                            </div>
+                        </th>
+                        <th class="table-header text-gray-600 dark:text-gray-300 text-center">
+                            <div class="flex flex-col items-center">
+                                <span class="text-xs font-medium">Forma</span>
+                                <span class="text-xs text-gray-500 dark:text-gray-400">de Pago</span>
+                            </div>
+                        </th>
+                        <th class="table-header text-gray-600 dark:text-gray-300 text-center">
                             <a href="{{ url_for('policies.list_policies', 
                                 sort_by='emision_status', 
                                 sort_order='asc' if sort_by != 'emision_status' or sort_order == 'desc' else 'desc', 
@@ -602,6 +614,23 @@
                         <td class="table-cell text-gray-700 dark:text-gray-300">{{ policy.product.name }}</td>
                         <td class="table-cell text-gray-700 dark:text-gray-300 text-right">${{ "%.2f"|format(policy.premium) }}</td>
                         <td class="table-cell text-center">
+                            <div class="flex flex-col items-center">
+                                <span class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                    {{ policy.paid_installments }}/{{ policy.total_installments or 1 }}
+                                </span>
+                                <span class="text-xs text-gray-500 dark:text-gray-400">cuotas</span>
+                            </div>
+                        </td>
+                        <td class="table-cell text-gray-700 dark:text-gray-300 text-center text-xs">
+                            {% if policy.payment_method %}
+                                <div class="truncate max-w-24" title="{{ policy.payment_method }}">
+                                    {{ policy.payment_method }}
+                                </div>
+                            {% else %}
+                                <span class="text-gray-400">-</span>
+                            {% endif %}
+                        </td>
+                        <td class="table-cell text-center">
                             {% set status_classes = {
                                 'Emitida': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
                                 'Pendiente': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
@@ -730,6 +759,22 @@
                                 {{ policy.start_date.strftime('%d/%m/%Y') }} - {{ policy.end_date.strftime('%d/%m/%Y') }}
                             </span>
                         </div>
+                        <!-- Cuotas SDP -->
+                        <div class="flex items-center text-sm">
+                            <span class="material-symbols-outlined text-gray-400 w-5 h-5 mr-2">payments</span>
+                            <span class="text-gray-700 dark:text-gray-200">
+                                Cuotas: <span class="font-medium">{{ policy.paid_installments }}/{{ policy.total_installments or 1 }}</span>
+                            </span>
+                        </div>
+                        <!-- Forma de Pago SDP -->
+                        {% if policy.payment_method %}
+                        <div class="flex items-center text-sm">
+                            <span class="material-symbols-outlined text-gray-400 w-5 h-5 mr-2">credit_card</span>
+                            <span class="text-gray-700 dark:text-gray-200 truncate" title="{{ policy.payment_method }}">
+                                {{ policy.payment_method }}
+                            </span>
+                        </div>
+                        {% endif %}
                     </div>
 
                     <!-- Prima y Acciones -->
