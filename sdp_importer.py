@@ -220,7 +220,7 @@ class SDPImporter:
         policy.premium = self.parse_decimal(base_record.get('Prima Total')) or Decimal('0')
         policy.emision_status = self.map_emission_status(base_record.get('Estado Poliza'))
         policy.payment_status = self.map_payment_status(base_record.get('Estado Cobro'))
-        
+
         # Campos SDP específicos
         policy.net_premium = self.parse_decimal(base_record.get('Prima Neta'))
         policy.savings_amount = self.parse_decimal(base_record.get('Ahorro'))
@@ -233,6 +233,7 @@ class SDPImporter:
         policy.total_installments = len(records)  # Total de cuotas = registros agrupados
         policy.cause_description = self.normalize_string(base_record.get('Causal'))
         policy.commission_status_sdp = self.normalize_string(base_record.get('Estado comisión'))
+        policy.estado_poliza_sdp = self.normalize_string(base_record.get('Estado Poliza'))  # Estado SDP original
         
         # Contar cuotas pagadas
         paid_count = sum(1 for r in records if self.map_payment_status(r.get('Estado Cobro')) == PaymentStatus.PAGADO)
@@ -260,11 +261,16 @@ class SDPImporter:
             # Actualizar datos de la cuota
             installment.amount = self.parse_decimal(record.get('Prima Total')) or Decimal('0')
             installment.payment_status = self.map_payment_status(record.get('Estado Cobro'))
-            installment.collection_date = self.timestamp_to_date(record.get('Fecha aplicación cobro'))
+            
+            # Mapear fechas correctamente desde JSON SDP
+            installment.due_date = self.timestamp_to_date(record.get('Vigencia desde'))  # Fecha vencimiento
+            installment.collection_date = self.timestamp_to_date(record.get('Fecha aplicación cobro'))  # Fecha cobro SDP
             
             # Si está pagada, agregar fecha de pago
-            if installment.payment_status == PaymentStatus.PAGADO:
-                installment.payment_date = installment.collection_date or date.today()
+            if installment.payment_status == PaymentStatus.PAGADO and installment.collection_date:
+                installment.payment_date = installment.collection_date
+            elif installment.payment_status == PaymentStatus.PAGADO:
+                installment.payment_date = date.today()
     
     def import_from_file(self, file_path: str, limit: Optional[int] = None):
         """Importar datos desde archivo JSON SDP."""

@@ -138,7 +138,8 @@ def list_policies():
     if payment_status:
         query = query.filter(Policy.payment_status == payment_status)
     if emision_status:
-        query = query.filter(Policy.emision_status == emision_status)
+        # Filtrar solo por estados SDP
+        query = query.filter(Policy.estado_poliza_sdp == emision_status)
     
     # Filtrado por fechas
     if start_date_from:
@@ -779,7 +780,8 @@ def export_policies_for_update():
         query = query.filter(User.name.ilike(f'%{agent_name}%'))
     
     if emision_status:
-        query = query.filter(Policy.emision_status == emision_status)
+        # Filtrar solo por estados SDP
+        query = query.filter(Policy.estado_poliza_sdp == emision_status)
     
     if payment_status:
         query = query.filter(Policy.payment_status == payment_status)

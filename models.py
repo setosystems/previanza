@@ -373,6 +373,7 @@ class Policy(db.Model):
     # Metadatos adicionales SDP
     cause_description = db.Column(String(255), nullable=True)      # Causal
     commission_status_sdp = db.Column(String(50), nullable=True)   # Estado comisión SDP
+    estado_poliza_sdp = db.Column(String(50), nullable=True)       # Estado póliza SDP original
     
     client = relationship('Client', back_populates='policies')
     product = relationship('Product', back_populates='policies')

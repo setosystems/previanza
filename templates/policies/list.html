@@ -313,11 +313,14 @@
                                     name="emision_status" 
                                     class="form-select h-10 pl-10 w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500 transition-colors duration-150">
                                 <option value="">Todos</option>
-                                {% for status in EmisionStatus %}
-                                <option value="{{ status.name }}" {% if request.args.get('emision_status') == status.name %}selected{% endif %}>
-                                    {{ status.value }}
-                                </option>
-                                {% endfor %}
+                                <!-- Estados SDP -->
+                                <option value="VIGENTE" {% if request.args.get('emision_status') == 'VIGENTE' %}selected{% endif %}>VIGENTE</option>
+                                <option value="RENOVADA" {% if request.args.get('emision_status') == 'RENOVADA' %}selected{% endif %}>RENOVADA</option>
+                                <option value="CANCELADA" {% if request.args.get('emision_status') == 'CANCELADA' %}selected{% endif %}>CANCELADA</option>
+                                <option value="ANULADA" {% if request.args.get('emision_status') == 'ANULADA' %}selected{% endif %}>ANULADA</option>
+                                <option value="CADUCADA" {% if request.args.get('emision_status') == 'CADUCADA' %}selected{% endif %}>CADUCADA</option>
+                                <option value="REQUERIMIENTO" {% if request.args.get('emision_status') == 'REQUERIMIENTO' %}selected{% endif %}>REQUERIMIENTO</option>
+                                <option value="PENDIENTE" {% if request.args.get('emision_status') == 'PENDIENTE' %}selected{% endif %}>PENDIENTE</option>
                             </select>
                         </div>
                     </div>
@@ -503,6 +506,7 @@
                                 {% endif %}
                             </a>
                         </th>
+                        <th class="table-header text-gray-600 dark:text-gray-300 text-center">Causal</th>
                         <th class="table-header text-gray-600 dark:text-gray-300 text-center">
                             <a href="{{ url_for('policies.list_policies', 
                                 sort_by='payment_status', 
@@ -612,7 +616,15 @@
                         <td class="table-cell text-gray-900 dark:text-gray-100">{{ policy.policy_number }}</td>
                         <td class="table-cell text-gray-700 dark:text-gray-300">{{ policy.client.name }}</td>
                         <td class="table-cell text-gray-700 dark:text-gray-300">{{ policy.product.name }}</td>
-                        <td class="table-cell text-gray-700 dark:text-gray-300 text-right">${{ "%.2f"|format(policy.premium) }}</td>
+                        <td class="table-cell text-gray-700 dark:text-gray-300 text-right">
+                            {% if policy.net_premium is not none and policy.savings_amount is not none %}
+                                ${{ "{:,.2f}".format(policy.net_premium + policy.savings_amount) }}
+                            {% elif policy.net_premium is not none %}
+                                ${{ "{:,.2f}".format(policy.net_premium) }}
+                            {% else %}
+                                ${{ "{:,.2f}".format(policy.premium) }}
+                            {% endif %}
+                        </td>
                         <td class="table-cell text-center">
                             <div class="flex flex-col items-center">
                                 <span class="text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -638,10 +650,32 @@
                                 'Caducada': 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
                                 'Reenviada': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
                                 'Req': 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
-                                'Otros': 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+                                'Otros': 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200',
+                                'VIGENTE': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+                                'RENOVADA': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+                                'EMITIDA': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+                                'CANCELADA': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+                                'ANULADA': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+                                'CADUCADA': 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
+                                'REQUERIMIENTO': 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
                             } %}
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ status_classes[policy.emision_status.value] }}">
-                                {{ policy.emision_status.value }}
+                            {% set display_status = policy.estado_poliza_sdp or policy.emision_status.value %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ status_classes[display_status] }}">
+                                {{ display_status }}
+                            </span>
+                        </td>
+                        <td class="table-cell text-center">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                {% if policy.cause_description == 'PROCESOOK' %}
+                                    bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+                                {% elif policy.cause_description and 'INSUFICIENCIA' in policy.cause_description %}
+                                    bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
+                                {% elif policy.cause_description %}
+                                    bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
+                                {% else %}
+                                    bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200
+                                {% endif %}">
+                                {{ policy.cause_description or 'No especificada' }}
                             </span>
                         </td>
                         <td class="table-cell text-center">
@@ -707,23 +741,40 @@
                         </div>
                         <div class="flex flex-col items-end gap-2">
                             <!-- Estado de Emisión -->
+                            {% set display_status = policy.estado_poliza_sdp or policy.emision_status.value %}
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                {% if policy.emision_status.name == 'EMITIDA' %}
-                                    bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
-                                {% elif policy.emision_status.name == 'PENDIENTE' %}
-                                    bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
-                                {% elif policy.emision_status.name == 'ANULADA' %}
-                                    bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
-                                {% elif policy.emision_status.name == 'CADUCADA' %}
-                                    bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200
-                                {% elif policy.emision_status.name == 'REENVIADA' %}
-                                    bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200
-                                {% elif policy.emision_status.name == 'REQUERIMIENTO' %}
-                                    bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200
+                                {% if policy.estado_poliza_sdp %}
+                                    {% if policy.estado_poliza_sdp in ['VIGENTE', 'EMITIDA', 'RENOVADA'] %}
+                                        bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+                                    {% elif policy.estado_poliza_sdp in ['CANCELADA', 'ANULADA'] %}
+                                        bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
+                                    {% elif policy.estado_poliza_sdp == 'PENDIENTE' %}
+                                        bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
+                                    {% elif policy.estado_poliza_sdp == 'CADUCADA' %}
+                                        bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200
+                                    {% elif policy.estado_poliza_sdp == 'REQUERIMIENTO' %}
+                                        bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200
+                                    {% else %}
+                                        bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200
+                                    {% endif %}
                                 {% else %}
-                                    bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200
+                                    {% if policy.emision_status.name == 'EMITIDA' %}
+                                        bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+                                    {% elif policy.emision_status.name == 'PENDIENTE' %}
+                                        bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
+                                    {% elif policy.emision_status.name == 'ANULADA' %}
+                                        bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
+                                    {% elif policy.emision_status.name == 'CADUCADA' %}
+                                        bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200
+                                    {% elif policy.emision_status.name == 'REENVIADA' %}
+                                        bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200
+                                    {% elif policy.emision_status.name == 'REQUERIMIENTO' %}
+                                        bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200
+                                    {% else %}
+                                        bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200
+                                    {% endif %}
                                 {% endif %}">
-                                {{ policy.emision_status.value }}
+                                {{ display_status }}
                             </span>
                             <!-- Estado de Pago -->
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
@@ -735,6 +786,19 @@
                                     bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
                                 {% endif %}">
                                 {{ policy.payment_status.value }}
+                            </span>
+                            <!-- Causal -->
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                {% if policy.cause_description == 'PROCESOOK' %}
+                                    bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+                                {% elif policy.cause_description and 'INSUFICIENCIA' in policy.cause_description %}
+                                    bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
+                                {% elif policy.cause_description %}
+                                    bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
+                                {% else %}
+                                    bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200
+                                {% endif %}">
+                                {{ policy.cause_description or 'No especificada' }}
                             </span>
                         </div>
                     </div>
@@ -780,7 +844,13 @@
                     <!-- Prima y Acciones -->
                     <div class="flex justify-between items-center mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
                         <div class="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                            ${{ "{:,.2f}".format(policy.premium) }}
+                            {% if policy.net_premium is not none and policy.savings_amount is not none %}
+                                ${{ "{:,.2f}".format(policy.net_premium + policy.savings_amount) }}
+                            {% elif policy.net_premium is not none %}
+                                ${{ "{:,.2f}".format(policy.net_premium) }}
+                            {% else %}
+                                ${{ "{:,.2f}".format(policy.premium) }}
+                            {% endif %}
                         </div>
                         <div class="flex space-x-2">
                             <a href="{{ url_for('policies.policy_detail', id=policy.id) }}" 
