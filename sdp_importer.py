@@ -52,7 +52,7 @@ class SDPImporter:
             
         logger.info(f"✅ Inicializado - Agente ID: {self.sdp_agent.id}, Producto ID: {self.sdp_product.id}")
     
-    def timestamp_to_date(self, timestamp: int) -> Optional[date]:
+    def timestamp_to_date(self, timestamp: Optional[int]) -> Optional[date]:
         """Convertir timestamp de milisegundos a fecha."""
         try:
             if timestamp and timestamp > 0:
@@ -81,7 +81,7 @@ class SDPImporter:
             pass
         return None
     
-    def map_emission_status(self, sdp_status: str) -> EmisionStatus:
+    def map_emission_status(self, sdp_status: Optional[str]) -> EmisionStatus:
         """Mapear estado de póliza SDP a EmisionStatus de Previanza."""
         if not sdp_status:
             return EmisionStatus.PENDIENTE
@@ -99,12 +99,16 @@ class SDPImporter:
         
         return status_map.get(sdp_status.upper(), EmisionStatus.OTROS)
     
-    def map_payment_status(self, sdp_status: str) -> PaymentStatus:
+    def map_payment_status(self, sdp_status: Optional[str]) -> PaymentStatus:
         """Mapear estado de cobro SDP a PaymentStatus de Previanza."""
         if not sdp_status:
             return PaymentStatus.PENDIENTE
             
         status_map = {
+            # Estados SDP específicos
+            'SI': PaymentStatus.PAGADO,
+            'NO': PaymentStatus.PENDIENTE,
+            # Estados estándar
             'PAGADO': PaymentStatus.PAGADO,
             'COBRADO': PaymentStatus.PAGADO,
             'FACTURADO': PaymentStatus.FACTURADO,
