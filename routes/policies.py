@@ -100,7 +100,12 @@ def list_policies():
         'agent': User.name,
         'emision_status': Policy.emision_status,
         'payment_status': Policy.payment_status,
-        'solicitation_date': Policy.solicitation_date
+        'payment_method': Policy.payment_method,
+        'solicitation_date': Policy.solicitation_date,
+        'total_installments': Policy.total_installments,
+        'paid_installments': Policy.paid_installments,
+        'installment_completion': (Policy.paid_installments * 100.0 / Policy.total_installments),
+        'pending_installments': (Policy.total_installments - Policy.paid_installments)
     }
     
     # Aplicar joins para filtrado y ordenamiento

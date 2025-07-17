@@ -15,6 +15,7 @@ from dotenv import load_dotenv
 from datetime import datetime, timedelta
 from sqlalchemy.sql import func
 from sqlalchemy.sql import text
+from sqlalchemy import case
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -85,10 +86,16 @@ def create_app():
             return redirect(url_for('auth.login'))
         
         try:
-            # Obtener fechas para filtrado
-            end_date = datetime.now()
-            start_date = end_date - timedelta(days=30)
-            previous_start = start_date - timedelta(days=30)
+            # Obtener fechas para filtrado de los últimos 30 días (igual que la API)
+            today = datetime.now()
+            end_date = today
+            start_date = end_date - timedelta(days=30)  # Últimos 30 días desde hoy
+                
+            # Para comparación con mes anterior
+            if start_date.month == 1:
+                previous_start = start_date.replace(year=start_date.year-1, month=12, day=1)
+            else:
+                previous_start = start_date.replace(month=start_date.month-1, day=1)
 
             # Definir variables con valores predeterminados antes de cualquier consulta
             total_policies = 0
@@ -105,7 +112,21 @@ def create_app():
 
             # Estadísticas generales
             total_policies = Policy.query.count() or 0
-            total_premium_raw = db.session.query(func.sum(Policy.premium)).scalar() or 0
+            
+            # Calcular prima total usando el nuevo cálculo SDP
+            # Prima SDP = Prima Neta + Ahorros (si ambos existen), sino Prima Neta, sino Prima original
+            total_premium_raw = db.session.query(
+                func.sum(
+                    case(
+                        (
+                            db.and_(Policy.net_premium.isnot(None), Policy.savings_amount.isnot(None)),
+                            Policy.net_premium + Policy.savings_amount
+                        ),
+                        (Policy.net_premium.isnot(None), Policy.net_premium),
+                        else_=Policy.premium
+                    )
+                )
+            ).scalar() or 0
             total_premium = float(total_premium_raw)
             
             total_commissions_raw = db.session.query(func.sum(Commission.amount)).scalar() or 0
@@ -113,10 +134,10 @@ def create_app():
             
             # Cálculo de crecimiento de pólizas
             current_period_policies = Policy.query.filter(
-                Policy.solicitation_date.between(start_date, end_date)
+                Policy.start_date.between(start_date.date(), end_date.date())
             ).count()
             previous_period_policies = Policy.query.filter(
-                Policy.solicitation_date.between(previous_start, start_date)
+                Policy.start_date.between(previous_start.date(), start_date.date())
             ).count()
             
             # Asegurar que policy_growth siempre tenga un valor, incluso si previous_period_policies es 0
@@ -134,7 +155,7 @@ def create_app():
             new_clients = Client.query.filter(
                 Client.id.in_(
                     db.session.query(Policy.client_id).filter(
-                        Policy.solicitation_date.between(start_date, end_date)
+                        Policy.start_date.between(start_date.date(), end_date.date())
                     )
                 )
             ).count()
@@ -143,10 +164,10 @@ def create_app():
             today = datetime.now()
             week_start = today - timedelta(days=today.weekday())
             daily_counts = db.session.query(
-                func.date_trunc('day', Policy.solicitation_date).label('day'),
+                func.date_trunc('day', Policy.start_date).label('day'),
                 func.count(Policy.id).label('count')
             ).filter(
-                Policy.solicitation_date >= week_start
+                Policy.start_date >= week_start.date()
                 # Sin filtrar por estado para mostrar todas las pólizas
             ).group_by('day').all()
 
@@ -175,10 +196,19 @@ def create_app():
 
             # Ventas diarias
             daily_sales = db.session.query(
-                func.date_trunc('day', Policy.solicitation_date).label('date'),
-                func.sum(Policy.premium).label('total')
+                func.date_trunc('day', Policy.start_date).label('date'),
+                func.sum(
+                    case(
+                        (
+                            db.and_(Policy.net_premium.isnot(None), Policy.savings_amount.isnot(None)),
+                            Policy.net_premium + Policy.savings_amount
+                        ),
+                        (Policy.net_premium.isnot(None), Policy.net_premium),
+                        else_=Policy.premium
+                    )
+                ).label('total')
             ).filter(
-                Policy.solicitation_date.between(start_date, end_date)
+                Policy.start_date.between(start_date.date(), end_date.date())
             ).group_by('date').order_by('date').all()
 
             sales_data = {
@@ -193,15 +223,33 @@ def create_app():
                 Product.description,
                 Product.image_url,
                 func.count(Policy.id).label('policy_count'),
-                func.sum(Policy.premium).label('total_premium')
+                func.sum(
+                    case(
+                        (
+                            db.and_(Policy.net_premium.isnot(None), Policy.savings_amount.isnot(None)),
+                            Policy.net_premium + Policy.savings_amount
+                        ),
+                        (Policy.net_premium.isnot(None), Policy.net_premium),
+                        else_=Policy.premium
+                    )
+                ).label('total_premium')
             ).outerjoin(
                 Policy, 
                 db.and_(
                     Policy.product_id == Product.id,
-                    Policy.solicitation_date.between(start_date, end_date)
+                    Policy.start_date.between(start_date.date(), end_date.date())
                 )
             ).group_by(Product.id, Product.name, Product.description, Product.image_url)\
-            .order_by(func.sum(Policy.premium).desc())\
+            .order_by(func.sum(
+                case(
+                    (
+                        db.and_(Policy.net_premium.isnot(None), Policy.savings_amount.isnot(None)),
+                        Policy.net_premium + Policy.savings_amount
+                    ),
+                    (Policy.net_premium.isnot(None), Policy.net_premium),
+                    else_=Policy.premium
+                )
+            ).desc())\
             .all()
             
             # Convertir objetos Row a diccionarios para evitar problemas de serialización JSON
@@ -230,9 +278,27 @@ def create_app():
             top_clients = db.session.query(
                 Client.name,
                 func.count(Policy.id).label('policy_count'),
-                func.sum(Policy.premium).label('total_premium')
+                func.sum(
+                    case(
+                        (
+                            db.and_(Policy.net_premium.isnot(None), Policy.savings_amount.isnot(None)),
+                            Policy.net_premium + Policy.savings_amount
+                        ),
+                        (Policy.net_premium.isnot(None), Policy.net_premium),
+                        else_=Policy.premium
+                    )
+                ).label('total_premium')
             ).join(Policy).group_by(Client.id, Client.name)\
-            .order_by(func.sum(Policy.premium).desc())\
+            .order_by(func.sum(
+                case(
+                    (
+                        db.and_(Policy.net_premium.isnot(None), Policy.savings_amount.isnot(None)),
+                        Policy.net_premium + Policy.savings_amount
+                    ),
+                    (Policy.net_premium.isnot(None), Policy.net_premium),
+                    else_=Policy.premium
+                )
+            ).desc())\
             .limit(5).all()
             
             # Convertir a diccionarios
@@ -248,11 +314,29 @@ def create_app():
             top_agents = db.session.query(
                 User.name,
                 func.count(Policy.id).label('policy_count'),
-                func.sum(Policy.premium).label('total_premium')
+                func.sum(
+                    case(
+                        (
+                            db.and_(Policy.net_premium.isnot(None), Policy.savings_amount.isnot(None)),
+                            Policy.net_premium + Policy.savings_amount
+                        ),
+                        (Policy.net_premium.isnot(None), Policy.net_premium),
+                        else_=Policy.premium
+                    )
+                ).label('total_premium')
             ).join(Policy, User.id == Policy.agent_id)\
             .filter(User.role == UserRole.AGENTE)\
             .group_by(User.id, User.name)\
-            .order_by(func.sum(Policy.premium).desc())\
+            .order_by(func.sum(
+                case(
+                    (
+                        db.and_(Policy.net_premium.isnot(None), Policy.savings_amount.isnot(None)),
+                        Policy.net_premium + Policy.savings_amount
+                    ),
+                    (Policy.net_premium.isnot(None), Policy.net_premium),
+                    else_=Policy.premium
+                )
+            ).desc())\
             .limit(5).all()
             
             # Convertir a diccionarios
@@ -263,6 +347,57 @@ def create_app():
                     'policy_count': a.policy_count or 0,
                     'total_premium': float(a.total_premium) if a.total_premium else 0
                 })
+
+            # === NUEVAS MÉTRICAS SDP ===
+            
+            # Estadísticas de Estados SDP
+            sdp_status_stats = db.session.query(
+                Policy.estado_poliza_sdp,
+                func.count(Policy.id).label('count'),
+                func.sum(
+                    case(
+                        (
+                            db.and_(Policy.net_premium.isnot(None), Policy.savings_amount.isnot(None)),
+                            Policy.net_premium + Policy.savings_amount
+                        ),
+                        (Policy.net_premium.isnot(None), Policy.net_premium),
+                        else_=Policy.premium
+                    )
+                ).label('total_premium')
+            ).filter(Policy.estado_poliza_sdp.isnot(None))\
+            .group_by(Policy.estado_poliza_sdp)\
+            .order_by(func.count(Policy.id).desc()).all()
+            
+            # Convertir a diccionarios
+            sdp_status_list = []
+            for status in sdp_status_stats:
+                sdp_status_list.append({
+                    'status': status.estado_poliza_sdp,
+                    'count': status.count,
+                    'total_premium': float(status.total_premium) if status.total_premium else 0
+                })
+            
+            # Top Causales SDP (obtener todas, no limitar)
+            top_causales = db.session.query(
+                Policy.cause_description,
+                func.count(Policy.id).label('count')
+            ).filter(Policy.cause_description.isnot(None))\
+            .group_by(Policy.cause_description)\
+            .order_by(func.count(Policy.id).desc())\
+            .all()
+            
+            # Convertir a diccionarios
+            top_causales_list = []
+            for causa in top_causales:
+                top_causales_list.append({
+                    'causa': causa.cause_description,
+                    'count': causa.count
+                })
+            
+            # Estadísticas de cobertura SDP
+            policies_with_sdp = Policy.query.filter(Policy.estado_poliza_sdp.isnot(None)).count()
+            policies_without_sdp = total_policies - policies_with_sdp
+            sdp_coverage_percentage = (policies_with_sdp / total_policies * 100) if total_policies > 0 else 0
 
             return render_template('index.html',
                 total_policies=total_policies,
@@ -275,7 +410,13 @@ def create_app():
                 daily_sales=sales_data,
                 products_performance=products_performance_list,
                 top_clients=top_clients_list,
-                top_agents=top_agents_list
+                top_agents=top_agents_list,
+                # Nuevas métricas SDP
+                sdp_status_stats=sdp_status_list,
+                top_causales=top_causales_list,
+                policies_with_sdp=policies_with_sdp,
+                policies_without_sdp=policies_without_sdp,
+                sdp_coverage_percentage=sdp_coverage_percentage
             )
 
         except Exception as e:

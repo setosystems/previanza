@@ -94,6 +94,78 @@
         </div>
     </div>
 
+    <!-- Estados y Causales Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 main-content-section transition-all duration-300">
+        <!-- Pólizas -->
+        <div class="card-container">
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Pólizas</h3>
+            </div>
+            <div class="p-4">
+                <div class="space-y-3">
+                    {% for status in sdp_status_stats %}
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                {% if status.status in ['VIGENTE', 'RENOVADA'] %}
+                                    bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+                                {% elif status.status in ['CANCELADA', 'ANULADA'] %}
+                                    bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
+                                {% elif status.status == 'PENDIENTE' %}
+                                    bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
+                                {% else %}
+                                    bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200
+                                {% endif %}">
+                                {{ status.status }}
+                            </span>
+                            <span class="text-sm text-gray-600 dark:text-gray-400">{{ status.count }} pólizas</span>
+                        </div>
+                        <span class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                            ${{ "{:,.0f}".format(status.total_premium) }}
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Causales -->
+        <div class="card-container">
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Causales</h3>
+                    {% if top_causales|length > 5 %}
+                    <button id="toggleCausales" class="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 flex items-center space-x-1">
+                        <span id="toggleCausalesText">Ver más</span>
+                        <span class="material-symbols-outlined text-sm" id="toggleCausalesIcon">expand_more</span>
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="p-4">
+                <div class="space-y-3" id="causalesList">
+                    {% for causa in top_causales %}
+                    <div class="flex items-center justify-between causa-item {{ 'hidden' if loop.index > 5 else '' }}" data-index="{{ loop.index }}">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-6 h-6 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
+                                <span class="text-primary-600 dark:text-primary-400 text-xs font-medium">{{ loop.index }}</span>
+                            </div>
+                            <span class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate" title="{{ causa.causa }}">
+                                {% if causa.causa|length > 25 %}
+                                    {{ causa.causa[:25] }}...
+                                {% else %}
+                                    {{ causa.causa }}
+                                {% endif %}
+                            </span>
+                        </div>
+                        <span class="text-sm text-gray-600 dark:text-gray-400">{{ causa.count }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Charts Section -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 main-content-section transition-all duration-300">
         <!-- Sales Chart -->
@@ -252,10 +324,10 @@
                     <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Top Clientes</h3>
                     <div class="flex space-x-2">
                         <select id="clientsPeriodSelector" class="text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 py-1 px-2">
-                            <option value="month1" selected>Último mes</option>
+                            <option value="month1">Último mes</option>
                             <option value="month3">3 meses</option>
                             <option value="month6">6 meses</option>
-                            <option value="year1">1 año</option>
+                            <option value="year1" selected>1 año</option>
                             <option value="custom">Personalizado</option>
                             <option value="all">Todo</option>
                         </select>
@@ -420,6 +492,8 @@
         </div>
     </div>
 </div>
+
+
 
 <!-- Modal para configuración de metas -->
 <div id="goalsConfigModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
@@ -1279,9 +1353,9 @@
         const diffTime = Math.abs(endDateObj - startDateObj);
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         
-        // Validar que el rango no sea mayor a 30 días
-        if (diffDays > 30) {
-            alert('El rango de fechas no puede ser mayor a 30 días.');
+        // Validar que el rango no sea mayor a 31 días (para permitir meses completos)
+        if (diffDays > 31) {
+            alert('El rango de fechas no puede ser mayor a 31 días.');
             return;
         }
         
@@ -1312,9 +1386,9 @@
         const diffTime = Math.abs(endDateObj - startDateObj);
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         
-        // Validar que el rango no sea mayor a 30 días
-        if (diffDays > 30) {
-            alert('El rango de fechas no puede ser mayor a 30 días.');
+        // Validar que el rango no sea mayor a 31 días (para permitir meses completos)
+        if (diffDays > 31) {
+            alert('El rango de fechas no puede ser mayor a 31 días.');
             return;
         }
         
@@ -1371,11 +1445,15 @@
         }
     }
 
-    // Configurar fechas por defecto para los selectores de rango
+    // Configurar fechas por defecto para los selectores de rango (mes actual completo)
     function setDefaultDateRange() {
         const today = new Date();
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(today.getDate() - 30);
+        
+        // Primer día del mes actual
+        const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+        
+        // Último día del mes actual
+        const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
         
         // Formatear fechas para los inputs (YYYY-MM-DD)
         const formatDate = (date) => {
@@ -1386,16 +1464,21 @@
         };
         
         // Establecer fechas por defecto para el gráfico de ventas
-        document.getElementById('salesStartDate').value = formatDate(thirtyDaysAgo);
-        document.getElementById('salesEndDate').value = formatDate(today);
+        document.getElementById('salesStartDate').value = formatDate(firstDayOfMonth);
+        document.getElementById('salesEndDate').value = formatDate(lastDayOfMonth);
         
         // Establecer fechas por defecto para el gráfico de actividad
-        document.getElementById('activityStartDate').value = formatDate(thirtyDaysAgo);
-        document.getElementById('activityEndDate').value = formatDate(today);
+        document.getElementById('activityStartDate').value = formatDate(firstDayOfMonth);
+        document.getElementById('activityEndDate').value = formatDate(lastDayOfMonth);
+        
+        // Aplicar automáticamente el filtro de ventas con las fechas del mes actual
+        updateSalesChartWithDateRange(formatDate(firstDayOfMonth), formatDate(lastDayOfMonth));
+        
+        // Aplicar automáticamente el filtro de actividad con las fechas del mes actual
+        updateActivityChartWithDateRange(formatDate(firstDayOfMonth), formatDate(lastDayOfMonth));
     }
     
-    // Llamar a la función para establecer fechas por defecto
-    setDefaultDateRange();
+    // La función setDefaultDateRange() se llamará desde DOMContentLoaded para asegurar que todo esté cargado
     
     // Mostrar/ocultar los controles apropiados según el período seleccionado
     function toggleDateControls(chartType, period) {
@@ -1480,18 +1563,8 @@
         // Inicializar el gráfico de productos
         createProductsChart();
         
-        // Inicializar el gráfico de actividad con rango de fechas predeterminado (últimos 30 días)
-        const today = new Date();
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(today.getDate() - 30);
-        
-        // Formatear fechas para la API
-        const formatDate = (date) => {
-            return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
-        };
-        
-        // Actualizar gráfico con rango de fechas por defecto
-        updateActivityChartWithDateRange(formatDate(thirtyDaysAgo), formatDate(today));
+        // Configurar fechas por defecto y aplicar filtros automáticamente con fechas del mes actual
+        setDefaultDateRange();
         
         // Añadir manejadores de eventos para los checkboxes de categorías
         document.querySelectorAll('.activity-filter').forEach(checkbox => {
@@ -2762,7 +2835,38 @@
         setDefaultDates('clients');
         
         // Inicializar listados con período predeterminado
-        updateTopClientsWithPeriod('month1');
+        updateTopClientsWithPeriod('year1');
+        
+        // Funcionalidad de toggle para sección de Causales
+        const toggleCausalesBtn = document.getElementById('toggleCausales');
+        if (toggleCausalesBtn) {
+            toggleCausalesBtn.addEventListener('click', function() {
+                const causalesItems = document.querySelectorAll('.causa-item');
+                const toggleText = document.getElementById('toggleCausalesText');
+                const toggleIcon = document.getElementById('toggleCausalesIcon');
+                
+                let isExpanded = toggleText.textContent === 'Ver menos';
+                
+                causalesItems.forEach((item, index) => {
+                    if (index >= 5) { // Mostrar/ocultar elementos después del índice 5
+                        if (isExpanded) {
+                            item.classList.add('hidden');
+                        } else {
+                            item.classList.remove('hidden');
+                        }
+                    }
+                });
+                
+                // Actualizar texto e ícono
+                if (isExpanded) {
+                    toggleText.textContent = 'Ver más';
+                    toggleIcon.textContent = 'expand_more';
+                } else {
+                    toggleText.textContent = 'Ver menos';
+                    toggleIcon.textContent = 'expand_less';
+                }
+            });
+        }
     });
 </script>
 {% endblock %}

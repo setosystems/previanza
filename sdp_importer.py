@@ -258,8 +258,19 @@ class SDPImporter:
                 db.session.add(installment)
                 self.stats['installments_created'] += 1
             
-            # Actualizar datos de la cuota
-            installment.amount = self.parse_decimal(record.get('Prima Total')) or Decimal('0')
+            # Actualizar datos de la cuota usando fórmula SDP: Prima Total + Ahorro
+            prima_total = self.parse_decimal(record.get('Prima Total'))
+            savings_amount = self.parse_decimal(record.get('Ahorro'))
+            
+            # Calcular monto usando la fórmula SDP
+            if prima_total is not None and savings_amount is not None:
+                installment.amount = prima_total + savings_amount
+            elif prima_total is not None:
+                installment.amount = prima_total
+            else:
+                # Fallback por seguridad
+                installment.amount = Decimal('0')
+            
             installment.payment_status = self.map_payment_status(record.get('Estado Cobro'))
             
             # Mapear fechas correctamente desde JSON SDP

@@ -21,7 +21,7 @@ import os
 import logging
 import time
 
-bp = Blueprint('reports', __name__, url_prefix='/reports')
+bp = Blueprint('reports', __name__)
 
 @bp.route('/dashboard')
 @login_required
@@ -144,10 +144,10 @@ def get_weekly_activity():
     week_start = today - timedelta(days=today.weekday())
     
     daily_counts = db.session.query(
-        func.date_trunc('day', Policy.solicitation_date).label('day'),
+        func.date_trunc('day', Policy.start_date).label('day'),
         func.count(Policy.id).label('count')
     ).filter(
-        Policy.solicitation_date >= week_start
+        Policy.start_date >= week_start.date()
         # Sin filtro de estado para incluir todas las pólizas
     ).group_by('day').all()
     
@@ -178,18 +178,27 @@ def get_weekly_activity():
 
 def get_daily_sales(start_date, end_date):
     """Obtener ventas diarias (solo pólizas emitidas) para un rango de fechas específico"""
-    # Consulta para obtener los datos reales
+    # Consulta para obtener los datos reales con cálculo SDP
     daily_sales = db.session.query(
-        func.date_trunc('day', Policy.solicitation_date).label('date'),
-        func.sum(Policy.premium).label('total')
+        func.date_trunc('day', Policy.start_date).label('date'),
+        func.sum(
+            case(
+                (
+                    db.and_(Policy.net_premium.isnot(None), Policy.savings_amount.isnot(None)),
+                    Policy.net_premium + Policy.savings_amount
+                ),
+                (Policy.net_premium.isnot(None), Policy.net_premium),
+                else_=Policy.premium
+            )
+        ).label('total')
     ).filter(
-        Policy.solicitation_date.between(start_date, end_date),
+        Policy.start_date.between(start_date, end_date),
         Policy.emision_status == 'EMITIDA'  # Filtrar solo pólizas emitidas
     ).group_by('date').order_by('date').all()
     
     # Crear un diccionario con todos los días del rango
     date_dict = {}
-    current_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+    current_date = start_date
     while current_date <= end_date:
         date_str = current_date.strftime('%d/%m')
         date_dict[date_str] = 0
@@ -217,10 +226,10 @@ def get_daily_sales(start_date, end_date):
 
 def get_completed_policies(start_date, end_date):
     completed = db.session.query(
-        func.date_trunc('day', Policy.solicitation_date).label('date'),
+        func.date_trunc('day', Policy.start_date).label('date'),
         func.count(Policy.id).label('count')
     ).filter(
-        Policy.solicitation_date.between(start_date, end_date),
+        Policy.start_date.between(start_date, end_date),
         Policy.emision_status == 'EMITIDA'
     ).group_by('date').order_by('date').all()
     
@@ -267,13 +276,13 @@ def sales_report():
 
         # Construir la consulta base
         query = db.session.query(
-            func.date_trunc('day', Policy.solicitation_date).label('date'),
+            func.date_trunc('day', Policy.start_date).label('date'),
             func.sum(Policy.premium).label('total_sales'),
             func.count(Policy.id).label('policy_count')
         )
 
         # Aplicar filtros
-        query = query.filter(Policy.solicitation_date.between(start_date, end_date))
+        query = query.filter(Policy.start_date.between(start_date, end_date))
 
         # Si es agente, filtrar solo sus pólizas
         if current_user.role == UserRole.AGENTE:
@@ -281,7 +290,7 @@ def sales_report():
 
         # Agrupar y ordenar
         sales = query.group_by(
-            func.date_trunc('day', Policy.solicitation_date)
+            func.date_trunc('day', Policy.start_date)
         ).order_by('date').all()
 
         # Calcular totales
@@ -959,7 +968,6 @@ def update_multiple_commission_status():
     return redirect(url_for('reports.agent_commission_details', agent_id=agent_id))
 
 @bp.route('/api/sales_data')
-@login_required
 def sales_data_api():
     """
     API para obtener datos de ventas filtrados por período.
@@ -981,10 +989,8 @@ def sales_data_api():
         if start_date and end_date and period == 'daily':
             try:
                 logging.info(f"Procesando rango personalizado: {start_date} a {end_date}")
-                start_date_obj = datetime.strptime(start_date, '%Y-%m-%d')
-                end_date_obj = datetime.strptime(end_date, '%Y-%m-%d')
-                # Ajustar end_date para incluir todo el día
-                end_date_obj = end_date_obj.replace(hour=23, minute=59, second=59)
+                start_date_obj = datetime.strptime(start_date, '%Y-%m-%d').date()
+                end_date_obj = datetime.strptime(end_date, '%Y-%m-%d').date()
                 
                 result = get_daily_sales(start_date_obj, end_date_obj)
                 logging.info(f"Resultado rango personalizado: {len(result['dates'])} días")
@@ -996,9 +1002,18 @@ def sales_data_api():
         # Si no hay fechas personalizadas, seguir con la lógica existente
         year = int(year)
         if period == 'daily':
-            # Datos diarios de los últimos 30 días
-            end_date = datetime.now()
-            start_date = end_date - timedelta(days=30)
+            # Datos diarios del mes actual completo
+            today = datetime.now().date()
+            start_date = today.replace(day=1)  # Primer día del mes actual
+            
+            # Calcular el último día del mes actual
+            if today.month == 12:
+                # Si estamos en diciembre, el siguiente mes es enero del próximo año
+                end_date = today.replace(year=today.year+1, month=1, day=1) - timedelta(days=1)
+            else:
+                # Para otros meses, ir al primer día del siguiente mes y restar un día
+                end_date = today.replace(month=today.month+1, day=1) - timedelta(days=1)
+                
             return jsonify(get_daily_sales(start_date, end_date))
             
         elif period == 'weekly':
@@ -1028,13 +1043,22 @@ def sales_data_api():
 
 def get_weekly_sales(start_date, end_date):
     """Obtener ventas agrupadas por semana"""
-    # Consulta SQL para agrupar por semana
+    # Consulta SQL para agrupar por semana con datos SDP
     weekly_sales = db.session.query(
-        func.date_trunc('week', Policy.solicitation_date).label('week_start'),
-        func.sum(Policy.premium).label('total')
+        func.date_trunc('week', Policy.start_date).label('week_start'),
+        func.sum(
+            case(
+                (
+                    db.and_(Policy.net_premium.isnot(None), Policy.savings_amount.isnot(None)),
+                    Policy.net_premium + Policy.savings_amount
+                ),
+                (Policy.net_premium.isnot(None), Policy.net_premium),
+                else_=Policy.premium
+            )
+        ).label('total')
     ).filter(
-        Policy.solicitation_date.between(start_date, end_date),
-        Policy.emision_status == 'EMITIDA'  # Filtrar solo pólizas emitidas
+        Policy.start_date.between(start_date, end_date),
+        Policy.estado_poliza_sdp.in_(['VIGENTE', 'RENOVADA'])  # Filtrar estados SDP válidos
     ).group_by('week_start').order_by('week_start').all()
     
     # Formatear datos para la respuesta
@@ -1050,16 +1074,25 @@ def get_monthly_sales(year):
     except (TypeError, ValueError):
         year = datetime.now().year
         
-    # Fechas de inicio y fin del año
-    start_date = datetime(year, 1, 1)
-    end_date = datetime(year, 12, 31, 23, 59, 59)
+    # Fechas de inicio y fin del año (convertir a date para coincidir con start_date)
+    start_date = datetime(year, 1, 1).date()
+    end_date = datetime(year, 12, 31).date()
     
-    # Consulta SQL para agrupar por mes
+    # Consulta SQL para agrupar por mes con cálculo SDP
     monthly_sales = db.session.query(
-        func.date_trunc('month', Policy.solicitation_date).label('month_start'),
-        func.sum(Policy.premium).label('total')
+        func.date_trunc('month', Policy.start_date).label('month_start'),
+        func.sum(
+            case(
+                (
+                    db.and_(Policy.net_premium.isnot(None), Policy.savings_amount.isnot(None)),
+                    Policy.net_premium + Policy.savings_amount
+                ),
+                (Policy.net_premium.isnot(None), Policy.net_premium),
+                else_=Policy.premium
+            )
+        ).label('total')
     ).filter(
-        Policy.solicitation_date.between(start_date, end_date),
+        Policy.start_date.between(start_date, end_date),
         Policy.emision_status == 'EMITIDA'  # Filtrar solo pólizas emitidas
     ).group_by('month_start').order_by('month_start').all()
     
@@ -1089,15 +1122,24 @@ def get_yearly_sales(start_year, end_year):
     yearly_sales = []
     
     for year in range(start_year, end_year + 1):
-        # Fechas de inicio y fin del año
-        start_date = datetime(year, 1, 1)
-        end_date = datetime(year, 12, 31, 23, 59, 59)
+        # Fechas de inicio y fin del año (convertir a date para coincidir con start_date)
+        start_date = datetime(year, 1, 1).date()
+        end_date = datetime(year, 12, 31).date()
         
-        # Consulta SQL para el año
+        # Consulta SQL para el año con cálculo SDP
         total = db.session.query(
-            func.sum(Policy.premium)
+            func.sum(
+                case(
+                    (
+                        db.and_(Policy.net_premium.isnot(None), Policy.savings_amount.isnot(None)),
+                        Policy.net_premium + Policy.savings_amount
+                    ),
+                    (Policy.net_premium.isnot(None), Policy.net_premium),
+                    else_=Policy.premium
+                )
+            )
         ).filter(
-            Policy.solicitation_date.between(start_date, end_date),
+            Policy.start_date.between(start_date, end_date),
             Policy.emision_status == 'EMITIDA'  # Filtrar solo pólizas emitidas
         ).scalar() or 0
         
@@ -1137,10 +1179,8 @@ def activity_data_api():
         if start_date and end_date and period == 'daily':
             try:
                 logging.info(f"Procesando rango personalizado: {start_date} a {end_date}")
-                start_date_obj = datetime.strptime(start_date, '%Y-%m-%d')
-                end_date_obj = datetime.strptime(end_date, '%Y-%m-%d')
-                # Ajustar end_date para incluir todo el día
-                end_date_obj = end_date_obj.replace(hour=23, minute=59, second=59)
+                start_date_obj = datetime.strptime(start_date, '%Y-%m-%d').date()
+                end_date_obj = datetime.strptime(end_date, '%Y-%m-%d').date()
                 
                 result = get_daily_activity_by_category(start_date_obj, end_date_obj, category)
                 logging.info(f"Resultado rango personalizado ({category}): {len(result['dates'])} días")
@@ -1151,9 +1191,18 @@ def activity_data_api():
         
         year = int(year)
         if period == 'daily':
-            # Datos diarios de los últimos 30 días
-            end_date = datetime.now()
-            start_date = end_date - timedelta(days=30)
+            # Datos diarios del mes actual completo
+            today = datetime.now().date()
+            start_date = today.replace(day=1)  # Primer día del mes actual
+            
+            # Calcular el último día del mes actual
+            if today.month == 12:
+                # Si estamos en diciembre, el siguiente mes es enero del próximo año
+                end_date = today.replace(year=today.year+1, month=1, day=1) - timedelta(days=1)
+            else:
+                # Para otros meses, ir al primer día del siguiente mes y restar un día
+                end_date = today.replace(month=today.month+1, day=1) - timedelta(days=1)
+                
             return jsonify(get_daily_activity_by_category(start_date, end_date, category))
             
         elif period == 'weekly':
@@ -1186,10 +1235,10 @@ def get_daily_activity_by_category(start_date, end_date, category='all'):
     
     # Consulta base
     query = db.session.query(
-        func.date_trunc('day', Policy.solicitation_date).label('date'),
+        func.date_trunc('day', Policy.start_date).label('date'),
         func.count(Policy.id).label('count')
     ).filter(
-        Policy.solicitation_date.between(start_date, end_date)
+        Policy.start_date.between(start_date, end_date)
     )
     
     # Aplicar filtros según categoría
@@ -1208,7 +1257,7 @@ def get_daily_activity_by_category(start_date, end_date, category='all'):
     
     # Crear un diccionario con todos los días del rango
     date_dict = {}
-    current_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
+    current_date = start_date
     while current_date <= end_date:
         date_str = current_date.strftime('%d/%m')
         date_dict[date_str] = 0
@@ -1239,10 +1288,10 @@ def get_weekly_activity_by_category(start_date, end_date, category='all'):
     
     # Consulta base
     query = db.session.query(
-        func.date_trunc('week', Policy.solicitation_date).label('week_start'),
+        func.date_trunc('week', Policy.start_date).label('week_start'),
         func.count(Policy.id).label('count')
     ).filter(
-        Policy.solicitation_date.between(start_date, end_date)
+        Policy.start_date.between(start_date, end_date)
     )
     
     # Aplicar filtros según categoría
@@ -1271,16 +1320,16 @@ def get_monthly_activity_by_category(year, category='all'):
     except (TypeError, ValueError):
         year = datetime.now().year
         
-    # Fechas de inicio y fin del año
-    start_date = datetime(year, 1, 1)
-    end_date = datetime(year, 12, 31, 23, 59, 59)
+    # Fechas de inicio y fin del año (convertir a date para coincidir con start_date)
+    start_date = datetime(year, 1, 1).date()
+    end_date = datetime(year, 12, 31).date()
     
     # Consulta base
     query = db.session.query(
-        func.date_trunc('month', Policy.solicitation_date).label('month_start'),
+        func.date_trunc('month', Policy.start_date).label('month_start'),
         func.count(Policy.id).label('count')
     ).filter(
-        Policy.solicitation_date.between(start_date, end_date)
+        Policy.start_date.between(start_date, end_date)
     )
     
     # Aplicar filtros según categoría
@@ -1323,15 +1372,15 @@ def get_yearly_activity_by_category(start_year, end_year, category='all'):
     yearly_activity = []
     
     for year in range(start_year, end_year + 1):
-        # Fechas de inicio y fin del año
-        start_date = datetime(year, 1, 1)
-        end_date = datetime(year, 12, 31, 23, 59, 59)
+        # Fechas de inicio y fin del año (convertir a date para coincidir con start_date)
+        start_date = datetime(year, 1, 1).date()
+        end_date = datetime(year, 12, 31).date()
         
         # Consulta base
         query = db.session.query(
             func.count(Policy.id)
         ).filter(
-            Policy.solicitation_date.between(start_date, end_date)
+            Policy.start_date.between(start_date, end_date)
         )
         
         # Aplicar filtros según categoría
@@ -1390,7 +1439,16 @@ def products_performance_api():
             Product.description,
             Product.image_url,
             func.count(Policy.id).label('policy_count'),
-            func.sum(Policy.premium).label('total_premium')
+            func.sum(
+                case(
+                    (
+                        db.and_(Policy.net_premium.isnot(None), Policy.savings_amount.isnot(None)),
+                        Policy.net_premium + Policy.savings_amount
+                    ),
+                    (Policy.net_premium.isnot(None), Policy.net_premium),
+                    else_=Policy.premium
+                )
+            ).label('total_premium')
         )
         
         # Aplicar filtro de fecha solo si no es 'all'
@@ -1399,7 +1457,7 @@ def products_performance_api():
                 Policy,
                 db.and_(
                     Policy.product_id == Product.id,
-                    Policy.solicitation_date.between(start_date, end_date)
+                    Policy.start_date.between(start_date, end_date)
                 )
             )
         else:
@@ -1413,7 +1471,16 @@ def products_performance_api():
         products = query.group_by(
             Product.id, Product.name, Product.description, Product.image_url
         ).order_by(
-            func.sum(Policy.premium).desc()
+            func.sum(
+                case(
+                    (
+                        db.and_(Policy.net_premium.isnot(None), Policy.savings_amount.isnot(None)),
+                        Policy.net_premium + Policy.savings_amount
+                    ),
+                    (Policy.net_premium.isnot(None), Policy.net_premium),
+                    else_=Policy.premium
+                )
+            ).desc()
         ).all()
         
         # Convertir a formato JSON
@@ -1439,7 +1506,6 @@ def products_performance_api():
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/api/top_agents')
-@login_required
 def top_agents_api():
     """
     API para obtener datos de top agentes filtrados por período o fechas.
@@ -1459,10 +1525,8 @@ def top_agents_api():
         if start_date and end_date:
             try:
                 logging.info(f"Procesando rango personalizado: {start_date} a {end_date}")
-                start_date_obj = datetime.strptime(start_date, '%Y-%m-%d')
-                end_date_obj = datetime.strptime(end_date, '%Y-%m-%d')
-                # Ajustar end_date para incluir todo el día
-                end_date_obj = end_date_obj.replace(hour=23, minute=59, second=59)
+                start_date_obj = datetime.strptime(start_date, '%Y-%m-%d').date()
+                end_date_obj = datetime.strptime(end_date, '%Y-%m-%d').date()
                 
                 return jsonify(get_top_agents(start_date_obj, end_date_obj))
             except ValueError as e:
@@ -1470,7 +1534,7 @@ def top_agents_api():
                 return jsonify({'error': 'Formato de fecha incorrecto'}), 400
         
         # Si no hay fechas personalizadas, usar período preestablecido
-        end_date = datetime.now()
+        end_date = datetime.now().date()
         
         if period == 'month1':
             start_date = end_date - timedelta(days=30)
@@ -1481,7 +1545,7 @@ def top_agents_api():
         elif period == 'year1':
             start_date = end_date - timedelta(days=365)
         else:  # all
-            start_date = datetime(2000, 1, 1)  # Fecha muy antigua para incluir todo
+            start_date = datetime(2000, 1, 1).date()  # Fecha muy antigua para incluir todo
         
         return jsonify(get_top_agents(start_date, end_date))
         
@@ -1491,18 +1555,36 @@ def top_agents_api():
 
 def get_top_agents(start_date, end_date):
     """Obtener top 5 agentes por prima generada en un rango de fechas"""
-    # Consulta para obtener top agentes
+    # Consulta para obtener top agentes con cálculo SDP de prima
     top_agents = db.session.query(
         User.name,
         func.count(Policy.id).label('policy_count'),
-        func.sum(Policy.premium).label('total_premium')
+        func.sum(
+            case(
+                (
+                    db.and_(Policy.net_premium.isnot(None), Policy.savings_amount.isnot(None)),
+                    Policy.net_premium + Policy.savings_amount
+                ),
+                (Policy.net_premium.isnot(None), Policy.net_premium),
+                else_=Policy.premium
+            )
+        ).label('total_premium')
     ).join(Policy, User.id == Policy.agent_id)\
     .filter(
         User.role == UserRole.AGENTE,
-        Policy.solicitation_date.between(start_date, end_date)
+        Policy.start_date.between(start_date, end_date)
     )\
     .group_by(User.id, User.name)\
-    .order_by(func.sum(Policy.premium).desc())\
+    .order_by(func.sum(
+        case(
+            (
+                db.and_(Policy.net_premium.isnot(None), Policy.savings_amount.isnot(None)),
+                Policy.net_premium + Policy.savings_amount
+            ),
+            (Policy.net_premium.isnot(None), Policy.net_premium),
+            else_=Policy.premium
+        )
+    ).desc())\
     .limit(5).all()
     
     # Convertir a formato JSON
@@ -1532,46 +1614,74 @@ def top_clients_api():
     logging.info(f"top_clients_api - Parámetros: period={period}, start_date={start_date}, end_date={end_date}")
     
     try:
-        # TEMPORAL: Devolver datos de ejemplo directamente sin intentar consultar la base de datos
-        # para asegurarnos de que funciona sin problemas de autenticación
-        example_data = [
-            {
-                'id': 1,
-                'name': 'CHICO PROAÑO ANDRÉS GABRIEL',
-                'created_at': datetime.now().strftime('%d/%m/%Y'),
-                'policy_count': 3,
-                'total_premium': 1836.0
-            },
-            {
-                'id': 2,
-                'name': 'INTRIGO MERA RAFAEL ANIBAL',
-                'created_at': datetime.now().strftime('%d/%m/%Y'),
-                'policy_count': 2,
-                'total_premium': 801.48
-            },
-            {
-                'id': 3,
-                'name': 'QUINTO CEDEÑO ROSA ELIZABETH',
-                'created_at': datetime.now().strftime('%d/%m/%Y'),
-                'policy_count': 1,
-                'total_premium': 668.0
-            },
-            {
-                'id': 4,
-                'name': 'MOSCOSO SALABARRIA JESSICA PRISCILA',
-                'created_at': datetime.now().strftime('%d/%m/%Y'),
-                'policy_count': 1,
-                'total_premium': 396.0
-            },
-            {
-                'id': 5,
-                'name': 'GUTIERREZ JIMENEZ ANGIE NOELLY',
-                'created_at': datetime.now().strftime('%d/%m/%Y'),
-                'policy_count': 1,
-                'total_premium': 348.0
-            }
-        ]
-        return jsonify(example_data)
+        # Determinar el rango de fechas basado en el período
+        if period == 'custom' and start_date and end_date:
+            # Convertir las fechas de string a date
+            start_dt = datetime.strptime(start_date, '%Y-%m-%d').date()
+            end_dt = datetime.strptime(end_date, '%Y-%m-%d').date()
+        elif period == 'month1':
+            end_dt = datetime.now().date()
+            start_dt = end_dt - timedelta(days=30)
+        elif period == 'month3':
+            end_dt = datetime.now().date()
+            start_dt = end_dt - timedelta(days=90)
+        elif period == 'month6':
+            end_dt = datetime.now().date()
+            start_dt = end_dt - timedelta(days=180)
+        elif period == 'year1':
+            end_dt = datetime.now().date()
+            start_dt = end_dt - timedelta(days=365)
+        else:  # 'all'
+            start_dt = None
+            end_dt = None
+
+        # Construir la consulta base
+        query = db.session.query(
+            Client.id,
+            Client.name,
+            func.count(Policy.id).label('policy_count'),
+            func.sum(
+                case(
+                    (
+                        db.and_(Policy.net_premium.isnot(None), Policy.savings_amount.isnot(None)),
+                        Policy.net_premium + Policy.savings_amount
+                    ),
+                    (Policy.net_premium.isnot(None), Policy.net_premium),
+                    else_=Policy.premium
+                )
+            ).label('total_premium')
+        ).join(Policy, Client.id == Policy.client_id)
+
+        # Aplicar filtros de fecha si es necesario (usar start_date que tiene datos)
+        if start_dt and end_dt:
+            query = query.filter(Policy.start_date.between(start_dt, end_dt))
+
+        # Agrupar, ordenar y limitar
+        top_clients = query.group_by(Client.id, Client.name)\
+            .order_by(func.sum(
+                case(
+                    (
+                        db.and_(Policy.net_premium.isnot(None), Policy.savings_amount.isnot(None)),
+                        Policy.net_premium + Policy.savings_amount
+                    ),
+                    (Policy.net_premium.isnot(None), Policy.net_premium),
+                    else_=Policy.premium
+                )
+            ).desc())\
+            .limit(5).all()
+
+        # Formatear los resultados
+        result = []
+        for client in top_clients:
+            result.append({
+                'id': client.id,
+                'name': client.name,
+                'policy_count': client.policy_count or 0,
+                'total_premium': float(client.total_premium) if client.total_premium else 0.0,
+                'created_at': datetime.now().strftime('%d/%m/%Y')  # Placeholder para fecha de creación
+            })
+
+        return jsonify(result)
         
     except Exception as e:
         logging.error(f"Error en top_clients_api: {str(e)}", exc_info=True)
