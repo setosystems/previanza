@@ -28,6 +28,44 @@
         </div>
     </div>
 
+    <!-- Selector de Período Global -->
+    <div class="card-container main-content-section transition-all duration-300">
+        <div class="p-4">
+            <div class="flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center space-x-4">
+                    <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">Período de análisis:</h3>
+                    
+                    <!-- Selector de período predefinido -->
+                    <select id="periodSelector" class="text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 py-2 px-3 focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                        <option value="last7">Últimos 7 días</option>
+                        <option value="last30" selected>Últimos 30 días</option>
+                        <option value="current_month">Mes actual</option>
+                        <option value="last_month">Mes anterior</option>
+                        <option value="current_year">Año actual</option>
+                        <option value="custom">Personalizado</option>
+                    </select>
+                </div>
+                
+                <!-- Selector de fechas personalizado (oculto por defecto) -->
+                <div id="customDateRange" class="hidden flex items-center space-x-2">
+                    <span class="text-sm text-gray-600 dark:text-gray-400">Desde:</span>
+                    <input type="date" id="globalStartDate" class="text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 py-1 px-2">
+                    <span class="text-sm text-gray-600 dark:text-gray-400">Hasta:</span>
+                    <input type="date" id="globalEndDate" class="text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 py-1 px-2">
+                    <button id="applyGlobalPeriod" class="btn-primary text-sm px-4 py-2 rounded-md">
+                        <span class="material-symbols-outlined text-sm mr-1">check</span>
+                        Aplicar
+                    </button>
+                </div>
+                
+                <!-- Indicador del período actual -->
+                <div class="text-sm text-gray-600 dark:text-gray-400">
+                    <span id="currentPeriodIndicator">Mostrando: últimos 30 días</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 main-content-section transition-all duration-300">
         <!-- Total Policies Card -->
@@ -79,16 +117,16 @@
             </div>
         </div>
 
-        <!-- Total Commissions Card -->
+        <!-- Nuevas Pólizas Card -->
         <div class="card-container p-6">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Comisiones Totales</p>
-                    <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mt-1">${{ total_commissions }}</p>
-                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Periodo actual</p>
+                    <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Nuevas Pólizas</p>
+                    <p class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mt-1">{{ new_policies }}</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Período actual</p>
                 </div>
-                <div class="w-12 h-12 rounded-full bg-purple-900/90 dark:bg-purple-900 flex items-center justify-center">
-                    <span class="material-symbols-outlined text-purple-200">receipt_long</span>
+                <div class="w-12 h-12 rounded-full bg-green-900/90 dark:bg-green-900 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-green-200">add_circle</span>
                 </div>
             </div>
         </div>
@@ -2869,4 +2907,147 @@
         }
     });
 </script>
+
+<script>
+// Selector de Período Global
+document.addEventListener('DOMContentLoaded', function() {
+    const periodSelector = document.getElementById('periodSelector');
+    const customDateRange = document.getElementById('customDateRange');
+    const globalStartDate = document.getElementById('globalStartDate');
+    const globalEndDate = document.getElementById('globalEndDate');
+    const applyGlobalPeriod = document.getElementById('applyGlobalPeriod');
+    const currentPeriodIndicator = document.getElementById('currentPeriodIndicator');
+
+    // Manejar cambio de período predefinido
+    periodSelector.addEventListener('change', function() {
+        const value = this.value;
+        
+        if (value === 'custom') {
+            customDateRange.classList.remove('hidden');
+            setCustomDatesToCurrentPeriod();
+        } else {
+            customDateRange.classList.add('hidden');
+            applyPredefinedPeriod(value);
+        }
+    });
+
+    // Aplicar período personalizado
+    applyGlobalPeriod.addEventListener('click', function() {
+        const startDate = globalStartDate.value;
+        const endDate = globalEndDate.value;
+        
+        if (startDate && endDate) {
+            if (new Date(startDate) <= new Date(endDate)) {
+                applyCustomPeriod(startDate, endDate);
+            } else {
+                alert('La fecha de inicio debe ser anterior a la fecha final');
+            }
+        } else {
+            alert('Por favor selecciona ambas fechas');
+        }
+    });
+
+    function setCustomDatesToCurrentPeriod() {
+        const today = new Date();
+        const thirtyDaysAgo = new Date(today);
+        thirtyDaysAgo.setDate(today.getDate() - 30);
+        
+        globalStartDate.value = thirtyDaysAgo.toISOString().split('T')[0];
+        globalEndDate.value = today.toISOString().split('T')[0];
+    }
+
+    function applyPredefinedPeriod(period) {
+        const today = new Date();
+        let startDate, endDate;
+        let periodText = '';
+
+        switch(period) {
+            case 'last7':
+                startDate = new Date(today);
+                startDate.setDate(today.getDate() - 7);
+                endDate = today;
+                periodText = 'últimos 7 días';
+                break;
+            case 'last30':
+                startDate = new Date(today);
+                startDate.setDate(today.getDate() - 30);
+                endDate = today;
+                periodText = 'últimos 30 días';
+                break;
+            case 'current_month':
+                startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+                endDate = today;
+                periodText = 'mes actual';
+                break;
+            case 'last_month':
+                startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+                endDate = new Date(today.getFullYear(), today.getMonth(), 0);
+                periodText = 'mes anterior';
+                break;
+            case 'current_year':
+                startDate = new Date(today.getFullYear(), 0, 1);
+                endDate = today;
+                periodText = 'año actual';
+                break;
+        }
+
+        updatePeriodIndicator(periodText);
+        reloadDashboardWithPeriod(startDate, endDate);
+    }
+
+    function applyCustomPeriod(startDate, endDate) {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        const periodText = `${start.toLocaleDateString('es-ES')} al ${end.toLocaleDateString('es-ES')}`;
+        
+        updatePeriodIndicator(periodText);
+        reloadDashboardWithPeriod(start, end);
+    }
+
+    function updatePeriodIndicator(text) {
+        currentPeriodIndicator.textContent = `Mostrando: ${text}`;
+    }
+
+    function reloadDashboardWithPeriod(startDate, endDate) {
+        const startDateStr = startDate.toISOString().split('T')[0];
+        const endDateStr = endDate.toISOString().split('T')[0];
+        
+        // Construir URL con parámetros de período
+        const url = new URL(window.location.href);
+        url.searchParams.set('period_start', startDateStr);
+        url.searchParams.set('period_end', endDateStr);
+        
+        // Recargar página con nuevos parámetros
+        window.location.href = url.toString();
+    }
+
+    // Detectar si hay parámetros de período en la URL al cargar
+    const urlParams = new URLSearchParams(window.location.search);
+    const periodStart = urlParams.get('period_start');
+    const periodEnd = urlParams.get('period_end');
+    
+    if (periodStart && periodEnd) {
+        const start = new Date(periodStart);
+        const end = new Date(periodEnd);
+        const periodText = `${start.toLocaleDateString('es-ES')} al ${end.toLocaleDateString('es-ES')}`;
+        updatePeriodIndicator(periodText);
+        
+        // Determinar si coincide con algún período predefinido
+        const today = new Date();
+        const daysDiff = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+        
+        if (daysDiff === 7) {
+            periodSelector.value = 'last7';
+        } else if (daysDiff === 30) {
+            periodSelector.value = 'last30';
+        } else {
+            periodSelector.value = 'custom';
+            customDateRange.classList.remove('hidden');
+            globalStartDate.value = periodStart;
+            globalEndDate.value = periodEnd;
+        }
+    }
+});
+</script>
+
 {% endblock %}

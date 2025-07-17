@@ -1,6 +1,6 @@
 import logging
 import click
-from flask import Flask, render_template, redirect, url_for, send_from_directory, flash, jsonify, session
+from flask import Flask, render_template, redirect, url_for, send_from_directory, flash, jsonify, session, request
 from flask_login import LoginManager, current_user
 from flask_migrate import Migrate
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -86,16 +86,35 @@ def create_app():
             return redirect(url_for('auth.login'))
         
         try:
-            # Obtener fechas para filtrado de los últimos 30 días (igual que la API)
+            # Obtener parámetros de período de la URL (si existen)
+            period_start = request.args.get('period_start')
+            period_end = request.args.get('period_end')
+            
+            # Configurar fechas del período
             today = datetime.now()
-            end_date = today
-            start_date = end_date - timedelta(days=30)  # Últimos 30 días desde hoy
-                
-            # Para comparación con mes anterior
-            if start_date.month == 1:
-                previous_start = start_date.replace(year=start_date.year-1, month=12, day=1)
+            if period_start and period_end:
+                # Usar período personalizado
+                try:
+                    start_date = datetime.strptime(period_start, '%Y-%m-%d')
+                    end_date = datetime.strptime(period_end, '%Y-%m-%d')
+                    # Asegurar que end_date incluya todo el día
+                    end_date = end_date.replace(hour=23, minute=59, second=59)
+
+                except ValueError:
+                    # Si hay error en las fechas, usar por defecto
+                    end_date = today
+                    start_date = end_date - timedelta(days=30)
+
             else:
-                previous_start = start_date.replace(month=start_date.month-1, day=1)
+                # Usar período por defecto (últimos 30 días)
+                end_date = today
+                start_date = end_date - timedelta(days=30)
+
+                
+            # Para comparación con período anterior (mismo rango de días)
+            period_days = (end_date - start_date).days
+            previous_end = start_date - timedelta(days=1)
+            previous_start = previous_end - timedelta(days=period_days)
 
             # Definir variables con valores predeterminados antes de cualquier consulta
             total_policies = 0
@@ -110,11 +129,13 @@ def create_app():
             top_clients_list = []
             top_agents_list = []
 
-            # Estadísticas generales
-            total_policies = Policy.query.count() or 0
+            # Estadísticas generales filtradas por período seleccionado
+            total_policies = Policy.query.filter(
+                Policy.start_date.between(start_date.date(), end_date.date())
+            ).count() or 0
+
             
-            # Calcular prima total usando el nuevo cálculo SDP
-            # Prima SDP = Prima Neta + Ahorros (si ambos existen), sino Prima Neta, sino Prima original
+            # Calcular prima total usando el nuevo cálculo SDP filtrado por período
             total_premium_raw = db.session.query(
                 func.sum(
                     case(
@@ -126,19 +147,20 @@ def create_app():
                         else_=Policy.premium
                     )
                 )
+            ).filter(
+                Policy.start_date.between(start_date.date(), end_date.date())
             ).scalar() or 0
             total_premium = float(total_premium_raw)
             
-            total_commissions_raw = db.session.query(func.sum(Commission.amount)).scalar() or 0
-            total_commissions = float(total_commissions_raw)
+            # Nuevas pólizas en el período seleccionado (igual a total_policies filtrado)
+            new_policies = total_policies
+
             
-            # Cálculo de crecimiento de pólizas
-            current_period_policies = Policy.query.filter(
-                Policy.start_date.between(start_date.date(), end_date.date())
-            ).count()
+            # Cálculo de crecimiento de pólizas comparando con período anterior
+            current_period_policies = total_policies
             previous_period_policies = Policy.query.filter(
-                Policy.start_date.between(previous_start.date(), start_date.date())
-            ).count()
+                Policy.start_date.between(previous_start.date(), previous_end.date())
+            ).count() or 0
             
             # Asegurar que policy_growth siempre tenga un valor, incluso si previous_period_policies es 0
             try:
@@ -150,15 +172,22 @@ def create_app():
                 logging.error(f"Error calculando policy_growth: {str(e)}")
                 policy_growth = 0
 
-            # Clientes activos y nuevos
-            active_clients = Client.query.count()
+            # Clientes activos y nuevos filtrados por período
+            active_clients = Client.query.filter(
+                Client.id.in_(
+                    db.session.query(Policy.client_id).filter(
+                        Policy.start_date.between(start_date.date(), end_date.date())
+                    )
+                )
+            ).count() or 0
+            
             new_clients = Client.query.filter(
                 Client.id.in_(
                     db.session.query(Policy.client_id).filter(
                         Policy.start_date.between(start_date.date(), end_date.date())
                     )
                 )
-            ).count()
+            ).count() or 0
 
             # Actividad semanal
             today = datetime.now()
@@ -402,7 +431,7 @@ def create_app():
             return render_template('index.html',
                 total_policies=total_policies,
                 total_premium=total_premium,
-                total_commissions=total_commissions,
+                new_policies=new_policies,
                 active_clients=active_clients,
                 new_clients=new_clients,
                 policy_growth=policy_growth,
@@ -428,7 +457,7 @@ def create_app():
                 error=True,
                 total_policies=0,
                 total_premium=0,
-                total_commissions=0,
+                new_policies=0,
                 active_clients=0,
                 new_clients=0,
                 policy_growth=0,
